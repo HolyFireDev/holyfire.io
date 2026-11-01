@@ -149,13 +149,35 @@ function render(){
 render();
 // golden freddy if u highlight anything
 var scaring=false;
-var SCARES=["img/goldenfreddy.png","img/scare2.jpg","img/scare3.png","img/scare4.webp","img/scare5.jpg"];
-function scare(){ if(scaring) return; scaring=true; var e=document.getElementById("scare"); document.getElementById("scareimg").src=SCARES[Math.floor(Math.random()*SCARES.length)]; e.style.display="flex"; try{ speechSynthesis.cancel(); }catch(x){}
-  setTimeout(function(){ e.style.display="none"; try{ window.getSelection().removeAllRanges(); }catch(x){} setTimeout(function(){scaring=false;},800); }, 1100); }
-function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0 && Math.random()<0.1) scare(); }
+var SCARES=["img/scare2.jpg","img/scare3.png","img/scare4.webp","img/scare5.jpg"];
+var AC=null; function ac(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); } if(AC.state==="suspended") AC.resume(); return AC; }
+function fart(){ try{ var c=ac(), t=c.currentTime, dur=0.9;
+  var o=c.createOscillator(); o.type="sawtooth"; o.frequency.setValueAtTime(95,t); o.frequency.exponentialRampToValueAtTime(45,t+dur);
+  var l=c.createOscillator(); l.type="square"; l.frequency.setValueAtTime(28,t); l.frequency.linearRampToValueAtTime(14,t+dur);
+  var lg=c.createGain(); lg.gain.value=60; l.connect(lg); lg.connect(o.frequency);
+  var f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.setValueAtTime(500,t); f.frequency.exponentialRampToValueAtTime(150,t+dur); f.Q.value=8;
+  var g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.9,t+0.03); g.gain.setValueAtTime(0.9,t+dur*0.6); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(f); f.connect(g); g.connect(c.destination); o.start(t); l.start(t); o.stop(t+dur); l.stop(t+dur); }catch(x){} }
+function scream(){ try{ var c=ac(), t=c.currentTime, dur=1.1;
+  var sh=c.createWaveShaper(); var k=400, n=44100, curve=new Float32Array(n); for(var i=0;i<n;i++){ var x=i*2/n-1; curve[i]=(3+k)*x*20*(Math.PI/180)/(Math.PI+k*Math.abs(x)); } sh.curve=curve;
+  var g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.7,t+0.02); g.gain.setValueAtTime(0.7,t+dur*0.7); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  for(var j=0;j<3;j++){ var o=c.createOscillator(); o.type="sawtooth"; var base=600+j*17; o.frequency.setValueAtTime(base,t); o.frequency.exponentialRampToValueAtTime(base*2.6,t+0.15); o.frequency.exponentialRampToValueAtTime(base*1.4,t+dur);
+    var v=c.createOscillator(); v.frequency.value=22+j*3; var vg=c.createGain(); vg.gain.value=120; v.connect(vg); vg.connect(o.frequency); v.start(t); v.stop(t+dur);
+    o.connect(sh); o.start(t); o.stop(t+dur); }
+  var nb=c.createBuffer(1,c.sampleRate*dur,c.sampleRate), d=nb.getChannelData(0); for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.5;
+  var ns=c.createBufferSource(); ns.buffer=nb; var nf=c.createBiquadFilter(); nf.type="bandpass"; nf.frequency.value=2200; nf.Q.value=0.7; ns.connect(nf); nf.connect(sh); ns.start(t);
+  sh.connect(g); g.connect(c.destination); }catch(x){} }
+function scare(src){ if(scaring) return; scaring=true; var e=document.getElementById("scare");
+  var freddy = !src; document.getElementById("scareimg").src = src || "img/goldenfreddy.png";
+  if(freddy){ if(Math.random()<0.5) fart(); else scream(); }
+  try{ speechSynthesis.cancel(); }catch(x){}
+  setTimeout(function(){ e.style.display="none"; try{ window.getSelection().removeAllRanges(); }catch(x){} setTimeout(function(){scaring=false;},800); }, 1100);
+  e.style.display="flex"; }
+function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0 && Math.random()<0.1) scare(SCARES[Math.floor(Math.random()*SCARES.length)]); }
 document.addEventListener("mouseup", function(){ setTimeout(checkSel,10); });
 document.addEventListener("keyup", function(e){ if(e.shiftKey || e.key==="a" && (e.ctrlKey||e.metaKey)) setTimeout(checkSel,10); });
 document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
+document.addEventListener("pointerdown", function(){ try{ac();}catch(x){} }, {once:true});
 // type 1987 anywhere = bite of 87
 var typed="";
 document.addEventListener("keydown", function(e){ if(e.key && e.key.length===1){ typed=(typed+e.key).slice(-4); if(typed==="1987"){ typed=""; scare(); } } });
