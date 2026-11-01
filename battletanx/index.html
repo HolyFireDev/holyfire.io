@@ -15,8 +15,8 @@
   input[type=password]{text-transform:none}
   #msg{min-height:1.2em}
   .drop.over{outline:1px dashed #fff}
-  #badge{position:absolute;left:8px;top:8px;z-index:50;background:#000;color:#fff;font:13px Arial,Helvetica,sans-serif;padding:6px 10px;border:1px solid #fff;display:none;pointer-events:auto}
-  #badge b{font-size:18px;letter-spacing:2px}
+  #badge{position:absolute;left:8px;top:8px;z-index:50;background:#000;color:#fff;font:16px Arial,Helvetica,sans-serif;padding:6px 10px;border:1px solid #fff;display:none;pointer-events:auto}
+  #badge b{font-size:28px;letter-spacing:3px}
   #badge span.x{cursor:pointer;margin-left:10px;text-decoration:underline}
   #guest{position:absolute;inset:0;display:none;background:#000;align-items:center;justify-content:center}
   #guest video{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
@@ -82,7 +82,7 @@ function run(rec,host){
   window.EJS_pathtodata="https://cdn.emulatorjs.org/stable/data/"; window.EJS_startOnLoaded=true; window.EJS_color="#ff9900"; window.EJS_backgroundColor="#000000"; window.EJS_volume=0.7;
   window.EJS_defaultOptions={"mupen64plus-169screensize":"640x480","mupen64plus-aspect":"4:3","mupen64plus-rdp-plugin":"gliden64","mupen64plus-rsp-plugin":"hle","mupen64plus-pak1":"memory","mupen64plus-pak2":"memory","mupen64plus-pak3":"memory","mupen64plus-pak4":"memory"};
   window.EJS_defaultControls=EJS_CONTROLS;
-  window.EJS_onGameStart=function(){ if(host) hostRoom(); };
+  if(host) hostRoom();
   var s=document.createElement("script"); s.src="https://cdn.emulatorjs.org/stable/data/loader.js"; s.onerror=function(){ show(title()+"<p>could not load the emulator. check your connection and reload.</p>"); }; document.body.appendChild(s); }
 
 /* ---------- HOST: stream the game out, take friends' inputs in ---------- */
@@ -94,13 +94,13 @@ function hostRoom(){
   net.peer.on("open",function(){ renderBadge(code); });
   net.peer.on("error",function(e){ setBadge("ROOM ERROR: "+e.type+" <span class='x' id='bx'>&times;</span>"); var x=document.getElementById("bx"); if(x) x.onclick=function(){ setBadge(""); }; });
   net.peer.on("connection",function(c){ var slot=-1; for(var i=1;i<4;i++){ if(!net.slots[i]){ slot=i; break; } } if(slot<0){ c.close(); return; } net.slots[slot]=c; net.conns.push(c);
-    c.on("open",function(){ c.send({t:"slot",slot:slot}); callOut(c.peer); renderBadge(code); });
+    c.on("open",function(){ c.send({t:"slot",slot:slot}); var tries=0, iv=setInterval(function(){ if(callOut(c.peer)||++tries>120) clearInterval(iv); },1000); renderBadge(code); });
     c.on("data",function(d){ if(d.t==="i"){ var e=window.EJS_emulator; if(e&&e.gameManager) try{ e.gameManager.simulateInput(slot,d.j,d.v); }catch(x){} } });
     c.on("close",function(){ delete net.slots[slot]; net.conns=net.conns.filter(function(x){ return x!==c; }); var e=window.EJS_emulator; if(e&&e.gameManager) for(var j=0;j<24;j++) try{ e.gameManager.simulateInput(slot,j,0); }catch(x){} renderBadge(code); }); });
 }
-function getStream(){ if(net.stream) return net.stream; var e=window.EJS_emulator; try{ var f=e.collectScreenRecordingMediaTracks?e.collectScreenRecordingMediaTracks.bind(e):e.gameManager.collectScreenRecordingMediaTracks.bind(e.gameManager); net.stream=f(e.canvas,30); }catch(x){ try{ net.stream=e.canvas.captureStream(30); }catch(y){ net.stream=null; } } return net.stream; }
-function callOut(peerId){ var st=getStream(); if(!st) return; try{ net.peer.call(peerId,st); }catch(e){} }
-function renderBadge(code){ var names=Object.keys(net.slots).map(function(s){ return "P"+(+s+1); }); setBadge("room <b>"+code+"</b> &nbsp; "+(names.length?names.join(" "):"waiting")+" <span class='x' id='bx'>hide</span>"); document.getElementById("bx").onclick=function(){ setBadge(""); }; }
+function getStream(){ if(net.stream) return net.stream; var e=window.EJS_emulator; if(!e||!e.started||!e.canvas) return null; try{ var f=e.collectScreenRecordingMediaTracks?e.collectScreenRecordingMediaTracks.bind(e):e.gameManager.collectScreenRecordingMediaTracks.bind(e.gameManager); net.stream=f(e.canvas,30); }catch(x){ try{ net.stream=e.canvas.captureStream(30); }catch(y){ net.stream=null; } } return net.stream; }
+function callOut(peerId){ var st=getStream(); if(!st) return false; try{ net.peer.call(peerId,st); return true; }catch(e){ return false; } }
+function renderBadge(code){ var names=Object.keys(net.slots).map(function(s){ return "P"+(+s+1); }); setBadge("room code <b>"+code+"</b> &nbsp; "+(names.length?names.join(" "):"no friends yet")+" <span class='x' id='bx'>hide</span>"); document.getElementById("bx").onclick=function(){ setBadge(""); }; }
 
 /* ---------- GUEST: show the host's stream, send our buttons ---------- */
 function guestJoin(code){
