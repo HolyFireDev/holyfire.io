@@ -28,6 +28,7 @@
 <div id="guest"><video id="gv" autoplay playsinline></video><div id="gstat"></div></div>
 <div id="badge"></div>
 <div id="ui"></div>
+<script src="coi-serviceworker.js"></script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 (function(){
@@ -57,8 +58,8 @@ var CONTROLS_TABLE="<p>keys: wasd stick, x = a, z = b, shift = z, enter = start,
 
 /* ---------- screens ---------- */
 function gate(){ var ok=false; try{ var qp=new URLSearchParams(location.search); if(qp.get("pw")===PASS) sessionStorage.setItem("btx","1"); ok=sessionStorage.getItem("btx")==="1"; }catch(e){} if(ok){ boot(); return; }
-  show(title()+"<p><input id='pw' type='password' style='width:8em'> <span class='press' id='go'>enter</span></p><p id='msg'></p>");
-  var inp=document.getElementById("pw"); function tryIt(){ if(inp.value===PASS){ try{ sessionStorage.setItem("btx","1"); }catch(e){} boot(); } else { document.getElementById("msg").textContent="wrong"; inp.value=""; } }
+  show(title()+"<p>password: <input id='pw' type='password' style='width:8em'> <span class='press' id='go'>enter</span></p><p id='msg'></p><p>(friends: enter the password first, then the room code on the next screen)</p>");
+  var inp=document.getElementById("pw"); function tryIt(){ if(inp.value===PASS){ try{ sessionStorage.setItem("btx","1"); }catch(e){} boot(); } else { document.getElementById("msg").textContent="wrong password"; inp.value=""; } }
   document.getElementById("go").onclick=tryIt; inp.onkeydown=function(e){ if(e.key==="Enter") tryIt(); }; inp.focus(); }
 function boot(){ var qp=new URLSearchParams(location.search), dev=qp.get("rom"), join=qp.get("join");
   if(join){ guestJoin(join.toUpperCase()); return; }
@@ -78,12 +79,12 @@ function ready(rec){
 function run(rec,host){
   hide();
   var blob=new Blob([rec.bytes],{type:"application/octet-stream"}), url=URL.createObjectURL(blob);
-  window.EJS_player="#game"; window.EJS_core="n64"; window.EJS_gameName=(rec.name||"BattleTanx").replace(/[^\w ]/g,""); window.EJS_gameUrl=url;
+  var qc=new URLSearchParams(location.search).get("core"); window.EJS_player="#game"; window.EJS_core=qc==="mupen"?"mupen64plus_next":"parallel_n64"; window.EJS_threads=(typeof SharedArrayBuffer!=="undefined"); window.EJS_disableDatabases=false; window.EJS_gameName=(rec.name||"BattleTanx").replace(/[^\w ]/g,""); window.EJS_gameUrl=url;
   window.EJS_pathtodata="https://cdn.emulatorjs.org/stable/data/"; window.EJS_startOnLoaded=true; window.EJS_color="#ff9900"; window.EJS_backgroundColor="#000000"; window.EJS_volume=0.7;
   window.EJS_defaultOptions={"mupen64plus-169screensize":"640x480","mupen64plus-aspect":"4:3","mupen64plus-rdp-plugin":"gliden64","mupen64plus-rsp-plugin":"hle","mupen64plus-pak1":"memory","mupen64plus-pak2":"memory","mupen64plus-pak3":"memory","mupen64plus-pak4":"memory"};
   window.EJS_defaultControls=EJS_CONTROLS;
   if(host) hostRoom();
-  var s=document.createElement("script"); s.src="https://cdn.emulatorjs.org/stable/data/loader.js"; s.onerror=function(){ show(title()+"<p>could not load the emulator. check your connection and reload.</p>"); }; document.body.appendChild(s); }
+  var s=document.createElement("script"); s.src="https://cdn.emulatorjs.org/stable/data/loader.js"; s.onerror=function(){ if(navigator.serviceWorker&&navigator.serviceWorker.controller){ navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); sessionStorage.setItem("coi-off","1"); location.reload(); }); return; } show(title()+"<p>could not load the emulator. check your connection and reload.</p>"); }; document.body.appendChild(s); }
 
 /* ---------- HOST: stream the game out, take friends' inputs in ---------- */
 var net={peer:null,conns:[],slots:{},stream:null};
