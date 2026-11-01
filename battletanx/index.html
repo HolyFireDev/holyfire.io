@@ -20,12 +20,13 @@
   #badge span.x{cursor:pointer;margin-left:10px;text-decoration:underline}
   #guest{position:absolute;inset:0;display:none;background:#000;align-items:center;justify-content:center}
   #guest video{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+  #gclick{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font:28px Arial,Helvetica,sans-serif;color:#fff;background:rgba(0,0,0,.6);cursor:pointer;text-decoration:underline}
   #gstat{position:absolute;left:0;right:0;bottom:0;text-align:center;font:12px Arial,Helvetica,sans-serif;color:#fff;padding:4px;background:#000}
 </style>
 </head>
 <body>
 <div id="game"></div>
-<div id="guest"><video id="gv" autoplay playsinline></video><div id="gstat"></div></div>
+<div id="guest"><video id="gv" autoplay playsinline muted></video><div id="gstat"></div><div id="gclick">click for sound</div></div>
 <div id="badge"></div>
 <div id="ui"></div>
 <script src="coi-serviceworker.js"></script>
@@ -95,12 +96,12 @@ function hostRoom(){
   net.peer.on("open",function(){ renderBadge(code); });
   net.peer.on("error",function(e){ setBadge("ROOM ERROR: "+e.type+" <span class='x' id='bx'>&times;</span>"); var x=document.getElementById("bx"); if(x) x.onclick=function(){ setBadge(""); }; });
   net.peer.on("connection",function(c){ var slot=-1; for(var i=1;i<4;i++){ if(!net.slots[i]){ slot=i; break; } } if(slot<0){ c.close(); return; } net.slots[slot]=c; net.conns.push(c);
-    c.on("open",function(){ c.send({t:"slot",slot:slot}); var tries=0, iv=setInterval(function(){ if(callOut(c.peer)||++tries>120) clearInterval(iv); },1000); renderBadge(code); });
+    c.on("open",function(){ c.send({t:"slot",slot:slot}); var tries=0, iv=setInterval(function(){ if(callOut(c.peer)||++tries>120) clearInterval(iv); },2000); renderBadge(code); });
     c.on("data",function(d){ if(d.t==="i"){ var e=window.EJS_emulator; if(e&&e.gameManager) try{ e.gameManager.simulateInput(slot,d.j,d.v); }catch(x){} } });
     c.on("close",function(){ delete net.slots[slot]; net.conns=net.conns.filter(function(x){ return x!==c; }); var e=window.EJS_emulator; if(e&&e.gameManager) for(var j=0;j<24;j++) try{ e.gameManager.simulateInput(slot,j,0); }catch(x){} renderBadge(code); }); });
 }
-function getStream(){ if(net.stream) return net.stream; var e=window.EJS_emulator; if(!e||!e.started||!e.canvas) return null; try{ var f=e.collectScreenRecordingMediaTracks?e.collectScreenRecordingMediaTracks.bind(e):e.gameManager.collectScreenRecordingMediaTracks.bind(e.gameManager); net.stream=f(e.canvas,30); }catch(x){ try{ net.stream=e.canvas.captureStream(30); }catch(y){ net.stream=null; } } return net.stream; }
-function callOut(peerId){ var st=getStream(); if(!st) return false; try{ net.peer.call(peerId,st); return true; }catch(e){ return false; } }
+function getStream(){ if(net.stream) return net.stream; var e=window.EJS_emulator; if(!e||!e.started||!e.canvas) return null; var st=null; try{ var f=e.collectScreenRecordingMediaTracks?e.collectScreenRecordingMediaTracks.bind(e):e.gameManager.collectScreenRecordingMediaTracks.bind(e.gameManager); st=f(e.canvas,30); }catch(x){ try{ st=e.canvas.captureStream(30); }catch(y){ st=null; } } if(st&&st.getAudioTracks().length) net.stream=st; return st; }
+function callOut(peerId){ var st=getStream(); if(!st) return false; try{ net.peer.call(peerId,st); return st.getAudioTracks().length>0; }catch(e){ return false; } }
 function renderBadge(code){ var names=Object.keys(net.slots).map(function(s){ return "P"+(+s+1); }); setBadge("room code <b>"+code+"</b> &nbsp; "+(names.length?names.join(" "):"no friends yet")+" <span class='x' id='bx'>hide</span>"); document.getElementById("bx").onclick=function(){ setBadge(""); }; }
 
 /* ---------- GUEST: show the host's stream, send our buttons ---------- */
@@ -109,7 +110,8 @@ function guestJoin(code){
   var peer=new Peer({debug:1}), conn=null, slot=-1;
   peer.on("error",function(e){ st.textContent="could not join ("+e.type+"). reload to retry."; });
   peer.on("open",function(){ conn=peer.connect("btx-"+code,{reliable:false}); conn.on("open",function(){ st.textContent="connected"; }); conn.on("data",function(d){ if(d.t==="slot"){ slot=d.slot; st.textContent="player "+(slot+1)+" in "+code; } }); conn.on("close",function(){ st.textContent="host left"; }); });
-  peer.on("call",function(call){ call.answer(); call.on("stream",function(s){ v.srcObject=s; v.muted=false; v.play().catch(function(){ v.muted=true; v.play(); st.textContent+=" (click for sound)"; v.onclick=function(){ v.muted=false; }; }); st.textContent="player "+(slot+1)+" in "+code; }); });
+  var gc=document.getElementById("gclick"); function unmute(){ v.muted=false; gc.style.display="none"; v.play().catch(function(){}); } gc.onclick=unmute; document.addEventListener("keydown",function(){ if(v.muted&&v.srcObject) unmute(); },{once:false});
+  peer.on("call",function(call){ call.answer(); call.on("stream",function(s){ v.srcObject=s; v.muted=true; v.play().catch(function(){}); gc.style.display="flex"; st.textContent="player "+(slot+1)+" in "+code+(s.getAudioTracks().length?"":" (no audio from host yet)"); }); });
   var down={}; function send(j,val){ if(conn&&conn.open) conn.send({t:"i",j:j,v:val}); }
   document.addEventListener("keydown",function(e){ var j=KEYMAP[e.keyCode]; if(j===undefined||e.repeat) return; e.preventDefault(); down[j]=1; send(j,STICK.indexOf(j)>=0?0x7fff:1); });
   document.addEventListener("keyup",function(e){ var j=KEYMAP[e.keyCode]; if(j===undefined) return; e.preventDefault(); down[j]=0; send(j,0); });
