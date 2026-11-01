@@ -178,8 +178,8 @@ document.addEventListener("mouseup", function(){ setTimeout(checkSel,10); });
 document.addEventListener("keyup", function(e){ if(e.shiftKey || e.key==="a" && (e.ctrlKey||e.metaKey)) setTimeout(checkSel,10); });
 document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
 document.addEventListener("pointerdown", function(){ try{ac();}catch(x){} }, {once:true});
-// type 64 = the background becomes a huge general scales
-function setBg(src){ document.body.style.background="#000 url("+src+") center / cover no-repeat fixed"; }
+// type 64 = every scattered picture becomes general scales
+function setBg(src){ document.querySelectorAll("#bg img, #pile img, #pile2 img").forEach(function(im){ im.src=src; }); }
 function scales(){ setBg("img/scare5.jpg"); }
 // type 1987 anywhere = bite of 87
 var typed="";
