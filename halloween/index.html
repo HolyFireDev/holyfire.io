@@ -60,11 +60,11 @@ blink { animation: b 1s step-start infinite; } @keyframes b { 50% { opacity: 0 }
   </div>
   <div id="custompanel" style="display:none">
     <font size="5" class="yellow">type ur choices (1 to 25, one per line):</font><br>
-    <textarea id="choices">Rowan: Dead Stream
-Evan: Carrie
-Josh: Maybe Invisible Man
-Zack: Saw 6
-Nay: 5 Nights at Freddy's</textarea><br>
+    <textarea id="choices">Dead Stream
+Carrie
+Maybe Invisible Man
+Saw 6
+5 Nights at Freddy's</textarea><br>
     <span id="count" style="color:white">5/25</span><br>
     <button id="applybtn">put on wheel</button>
   </div>
@@ -74,8 +74,19 @@ Nay: 5 Nights at Freddy's</textarea><br>
 
 <br>
 <div id="pile2"></div>
-<p><font color="gray" size="2">best viewed in internet explorer 6 at 800x600. you are visitor number <b>000666</b>. copyright 2003 spirit halloween (not really)</font></p>
+<p><font color="gray" size="2">best viewed in internet explorer 6 at 800x600. you are visitor number <b id="secret" style="cursor:default">000666</b>. copyright 2003 spirit halloween (not really)</font></p>
 
+<div id="dials" style="display:none;position:fixed;right:10px;bottom:10px;background:#111;color:#0f0;border:3px double #0f0;padding:10px;text-align:left;font-family:'Courier New';font-size:13px;z-index:999;width:260px">
+<b>~ secret dials ~</b> <a href="#" id="dialsclose" style="color:red;float:right">x</a><br>
+theme: <select id="d_theme"><option value="roll">roll (random)</option><option value="mixed">mixed</option><option value="witches">all witches</option><option value="saw">all saw</option><option value="one">all one image</option></select><br>
+amount x<span id="v_mult">1</span><br><input id="d_mult" type="range" min="0" max="5" step="0.1" value="1" style="width:100%"><br>
+min size <span id="v_min">60</span>px<br><input id="d_min" type="range" min="10" max="600" step="10" value="60" style="width:100%"><br>
+max size <span id="v_max">600</span>px<br><input id="d_max" type="range" min="50" max="1500" step="10" value="600" style="width:100%"><br>
+stretch % <span id="v_stretch">40</span><br><input id="d_stretch" type="range" min="0" max="100" value="40" style="width:100%"><br>
+on top % <span id="v_ontop">15</span><br><input id="d_ontop" type="range" min="0" max="100" value="15" style="width:100%"><br>
+spin seconds <span id="v_spin">100</span><br><input id="d_spin" type="range" min="1" max="300" value="100" style="width:100%"><br>
+<button id="d_reroll" style="font-size:13px">reroll</button>
+</div>
 <div id="overlay"><div>
   <b>THE WHEEL HAS SPOKEN:</b><br><br>
   <span id="winner" style="font-size:44px;color:red"></span><br><br>
@@ -84,33 +95,65 @@ Nay: 5 Nights at Freddy's</textarea><br>
 </div></div>
 
 <script>
+var SAW_IMGS=[], WITCH_IMGS=[];
+for(var i=1;i<=12;i++) SAW_IMGS.push("img/saw"+i+".jpg");
+for(var i=1;i<=8;i++) WITCH_IMGS.push("img/witch"+i+".jpg");
+var ALL_IMGS=SAW_IMGS.concat(WITCH_IMGS);
+var D={theme:"roll", mult:1, min:60, max:600, stretch:40, ontop:15, spin:100};
+var POOL=ALL_IMGS;
+function rollTheme(){
+  var t=D.theme;
+  if(t==="roll"){ var r=Math.random(); t = r<0.55?"mixed":(r<0.72?"witches":(r<0.87?"saw":"one")); }
+  if(t==="mixed") POOL=ALL_IMGS; else if(t==="witches") POOL=WITCH_IMGS; else if(t==="saw") POOL=SAW_IMGS;
+  else POOL=[ALL_IMGS[Math.floor(Math.random()*ALL_IMGS.length)]];
+  return t;
+}
+function pick(){ return POOL[Math.floor(Math.random()*POOL.length)]; }
+function styleImg(im){
+  var lo=Math.min(D.min,D.max), hi=Math.max(D.min,D.max);
+  var w=lo+Math.floor(Math.random()*(hi-lo+1)), ht=Math.round(lo*0.7)+Math.floor(Math.random()*(hi*0.8-lo*0.7+1));
+  im.style.width=w+"px"; im.style.height=ht+"px";
+  var r=Math.random()*100, rest=(100-D.stretch);
+  if(r<D.stretch){ im.style.objectFit="fill"; }
+  else if(r<D.stretch+rest*0.7){ im.style.objectFit="cover"; }
+  else { im.style.objectFit="none"; }
+  im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%";
+  return w;
+}
+var MULT=1;
+function howmany(base){ return Math.round(base*MULT*D.mult*(0.6+Math.random()*0.8)); }
 function pile(id, count, h){
-  var box=document.getElementById(id); box.style.height=h+"px";
+  var box=document.getElementById(id); box.innerHTML=""; box.style.height=h+"px";
   for(var i=0;i<count;i++){
-    var im=document.createElement("img"); im.src="img/saw"+(1+Math.floor(Math.random()*12))+".jpg";
-    var w=60+Math.floor(Math.random()*500), ht=40+Math.floor(Math.random()*400);
-    im.style.width=w+"px"; im.style.height=ht+"px";
-    var r=Math.random();
-    if(r<0.4){ im.style.objectFit="fill"; }                       // stretched
-    else if(r<0.8){ im.style.objectFit="cover"; im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%"; } // cropped
-    else { im.style.objectFit="none"; im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%"; }          // hard crop at native size
+    var im=document.createElement("img"); im.src=pick(); var w=styleImg(im);
     im.style.left=Math.floor(Math.random()*(window.innerWidth-w*0.5)-w*0.25)+"px";
     im.style.top=Math.floor(Math.random()*(h-60))+"px";
     im.style.zIndex=Math.floor(Math.random()*50);
     box.appendChild(im);
   }
 }
-// how many images this time? reroll every refresh. sometimes almost none, sometimes way too many
-var MOOD=Math.random(), MULT = MOOD<0.1 ? 0.1 : (MOOD<0.8 ? 0.3+Math.random()*1.4 : 2+Math.random()*2.5);
-function howmany(base){ return Math.max(1, Math.round(base*MULT*(0.6+Math.random()*0.8))); }
-pile("pile", howmany(45), 620); pile("pile2", howmany(25), 500);
-(function(){ var bg=document.getElementById("bg"), H=document.body.scrollHeight; bg.style.height=H+"px";
-  for(var i=0,N=howmany(60);i<N;i++){ var im=document.createElement("img"); im.src="img/saw"+(1+Math.floor(Math.random()*12))+".jpg";
-    var w=80+Math.floor(Math.random()*600), ht=50+Math.floor(Math.random()*450); im.style.width=w+"px"; im.style.height=ht+"px";
-    var r=Math.random(); im.style.objectFit = r<0.4?"fill":(r<0.8?"cover":"none"); im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%";
+function render(){
+  // how many images this time? sometimes almost none, sometimes way too many
+  var MOOD=Math.random(); MULT = MOOD<0.1 ? 0.1 : (MOOD<0.8 ? 0.3+Math.random()*1.4 : 2+Math.random()*2.5);
+  rollTheme();
+  pile("pile", howmany(45), 620); pile("pile2", howmany(25), 500);
+  var bg=document.getElementById("bg"); bg.innerHTML="";
+  var H=document.body.scrollHeight; bg.style.height=H+"px";
+  for(var i=0,N=howmany(60);i<N;i++){ var im=document.createElement("img"); im.src=pick(); var w=styleImg(im);
     im.style.left=Math.floor(Math.random()*window.innerWidth-w*0.3)+"px"; im.style.top=Math.floor(Math.random()*H)+"px";
-    if(Math.random()<0.15) im.className="ontop";
-    bg.appendChild(im); } })();
+    if(Math.random()*100<D.ontop) im.className="ontop";
+    bg.appendChild(im); }
+}
+render();
+// secret dials
+document.getElementById("secret").onclick=function(){ var d=document.getElementById("dials"); d.style.display=d.style.display==="none"?"block":"none"; };
+document.getElementById("dialsclose").onclick=function(e){ e.preventDefault(); document.getElementById("dials").style.display="none"; };
+function bindDial(id,key,label,fn){ var el=document.getElementById(id); el.oninput=function(){ D[key]=parseFloat(el.value); document.getElementById(label).textContent=el.value; if(fn) fn(); else render(); }; }
+bindDial("d_mult","mult","v_mult"); bindDial("d_min","min","v_min"); bindDial("d_max","max","v_max");
+bindDial("d_stretch","stretch","v_stretch"); bindDial("d_ontop","ontop","v_ontop");
+bindDial("d_spin","spin","v_spin",function(){ SPIN_MS=D.spin*1000; });
+document.getElementById("d_theme").onchange=function(){ D.theme=this.value; render(); };
+document.getElementById("d_reroll").onclick=render;
 function ph(img, name){ var d=document.createElement("span"); d.className="ph"; d.style.width=img.width+"px"; d.style.height=img.height+"px"; d.style.lineHeight=img.height+"px"; d.textContent="[ "+name+" ]"; img.parentNode.replaceChild(d,img); }
 
 var SAW=["Saw (2004)","Saw II","Saw III","Saw IV","Saw V","Saw VI","Saw 3D","Jigsaw","Spiral","Saw X"];
