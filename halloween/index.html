@@ -151,7 +151,7 @@ render();
 var scaring=false;
 function scare(){ if(scaring) return; scaring=true; var e=document.getElementById("scare"); e.style.display="flex"; try{ speechSynthesis.cancel(); }catch(x){}
   setTimeout(function(){ e.style.display="none"; try{ window.getSelection().removeAllRanges(); }catch(x){} setTimeout(function(){scaring=false;},800); }, 1100); }
-function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0) scare(); }
+function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0 && Math.random()<0.1) scare(); }
 document.addEventListener("mouseup", function(){ setTimeout(checkSel,10); });
 document.addEventListener("keyup", function(e){ if(e.shiftKey || e.key==="a" && (e.ctrlKey||e.metaKey)) setTimeout(checkSel,10); });
 document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
