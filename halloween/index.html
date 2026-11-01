@@ -1,0 +1,156 @@
+<html>
+<head>
+<title>saw wheel spirit halloween spin the wheel !!!!!</title>
+<style>
+body { background: #000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23000'/%3E%3Ctext x='8' y='52' font-size='40'%3E🎃%3C/text%3E%3C/svg%3E"); color: #ff6600; font-family: "Comic Sans MS", cursive; text-align: center; }
+h1 { color: red; font-size: 60px; font-family: Impact, "Comic Sans MS"; text-decoration: underline; }
+img, .ph { border: 4px ridge #888; background: #ccc; margin: 6px; vertical-align: middle; }
+.ph { display: inline-block; width: 200px; height: 150px; color: #000; font-family: Arial; font-size: 12px; line-height: 150px; }
+td { vertical-align: top; }
+#toggle { font-size: 70px; cursor: pointer; border: 3px dashed yellow; display: inline-block; padding: 4px 30px; background: #333; }
+#timer { color: lime; font-size: 48px; font-family: "Courier New"; }
+textarea { width: 300px; height: 250px; font-family: "Comic Sans MS"; }
+button { font-family: "Comic Sans MS"; font-size: 22px; background: #ff6600; border: 3px outset #fc0; cursor: pointer; }
+canvas { border: 5px solid red; background: #fff; }
+#wheelwrap { position: relative; display: inline-block; }
+#ptr { position: absolute; top: -10px; left: 50%; margin-left: -20px; font-size: 40px; }
+#overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,.85); }
+#overlay div { background: yellow; color: black; margin: 100px auto; width: 500px; padding: 20px; border: 8px groove purple; font-size: 30px; }
+.yellow { color: yellow; }
+blink { animation: b 1s step-start infinite; } @keyframes b { 50% { opacity: 0 } }
+</style>
+</head>
+<body>
+
+<h1>JIGSAW'S WHEEL OF DOOM</h1>
+<marquee behavior="alternate" scrollamount="20"><font size="6" color="lime">***** I WANT TO PLAY A GAME ***** SPIRIT HALLOWEEN ***** GAME OVER *****</font></marquee>
+<blink><font size="5" color="yellow">!!! UNDER CONSTRUCTION !!! 🚧</font></blink>
+<p><font color="white">welcome to my web site. the wheel spins for 100 seconds. deal with it.</font></p>
+
+<img src="img/billy.jpg" width="200" height="150" onerror="ph(this,'billy.jpg')">
+<img src="img/saw-cover.jpg" width="200" height="150" onerror="ph(this,'saw-cover.jpg')">
+<img src="img/spirit-logo.png" width="200" height="150" onerror="ph(this,'spirit-logo.png')">
+<img src="img/bathroom.jpg" width="200" height="150" onerror="ph(this,'bathroom.jpg')">
+<img src="img/beartrap.jpg" width="200" height="150" onerror="ph(this,'beartrap.jpg')">
+<br>
+<img src="img/reaper.jpg" width="200" height="150" onerror="ph(this,'reaper.jpg')">
+<img src="img/scarecrow.jpg" width="200" height="150" onerror="ph(this,'scarecrow.jpg')">
+<img src="img/freddy.jpg" width="200" height="150" onerror="ph(this,'freddy.jpg')">
+<img src="img/vampires.jpg" width="200" height="150" onerror="ph(this,'vampires.jpg')">
+<img src="img/ghostface.jpg" width="200" height="150" onerror="ph(this,'ghostface.jpg')">
+<img src="img/civic.jpg" width="200" height="150" onerror="ph(this,'civic.jpg')">
+
+<hr size="8" color="red">
+
+<p><font size="5" color="white">MODE: <span id="modename">SAW FILMS</span></font></p>
+<div id="toggle" title="click the pumpkin">🎃</div>
+<p><font color="white">^ click the pumpkin to switch ^</font></p>
+
+<div id="timer">&nbsp;</div>
+
+<table align="center" border="2" bordercolor="orange" cellpadding="10">
+<tr>
+<td>
+  <div id="wheelwrap">
+    <div id="ptr">🔻</div>
+    <canvas id="wheel" width="500" height="500"></canvas>
+  </div><br>
+  <button id="spinbtn">SPIN IT (100 sec)</button>
+</td>
+<td style="background:#222">
+  <div id="sawpanel">
+    <font size="5" class="yellow">saw movies:</font><br>
+    <ol id="filmlist" align="left" style="color:white"></ol>
+  </div>
+  <div id="custompanel" style="display:none">
+    <font size="5" class="yellow">type ur choices (1 to 25, one per line):</font><br>
+    <textarea id="choices">Rowan: Dead Stream
+Evan: Carrie
+Josh: Maybe Invisible Man
+Zack: Saw 6
+Nay: 5 Nights at Freddy's</textarea><br>
+    <span id="count" style="color:white">5/25</span><br>
+    <button id="applybtn">put on wheel</button>
+  </div>
+</td>
+</tr>
+</table>
+
+<br>
+<img src="img/civic.jpg" width="400" height="300" onerror="ph(this,'civic.jpg (the car)')">
+<img src="img/billy.jpg" width="200" height="300" onerror="ph(this,'billy.jpg again')">
+<br>
+<p><font color="gray" size="2">best viewed in internet explorer 6 at 800x600. you are visitor number <b>000666</b>. copyright 2003 spirit halloween (not really)</font></p>
+<p><font color="white">to show the real pictures put them in a folder called <b>img</b> next to this file with those file names</font></p>
+
+<div id="overlay"><div>
+  <b>THE WHEEL HAS SPOKEN:</b><br><br>
+  <span id="winner" style="font-size:44px;color:red"></span><br><br>
+  GAME OVER<br><br>
+  <button id="closebtn">ok</button>
+</div></div>
+
+<script>
+function ph(img, name){ var d=document.createElement("span"); d.className="ph"; d.style.width=img.width+"px"; d.style.height=img.height+"px"; d.style.lineHeight=img.height+"px"; d.textContent="[ "+name+" ]"; img.parentNode.replaceChild(d,img); }
+
+var SAW=["Saw (2004)","Saw II","Saw III","Saw IV","Saw V","Saw VI","Saw 3D","Jigsaw","Spiral","Saw X"];
+var COLORS=["red","orange","black","yellow","purple","green","white","darkred","gray","blue"];
+var items=SAW.slice(), mode="saw", angle=0, spinning=false, SPIN_MS=100000;
+var c=document.getElementById("wheel"), x=c.getContext("2d");
+SAW.forEach(function(f){var li=document.createElement("li");li.textContent=f;document.getElementById("filmlist").appendChild(li);});
+
+function draw(){
+  var n=items.length, s=2*Math.PI/n;
+  x.clearRect(0,0,500,500); x.save(); x.translate(250,250); x.rotate(angle);
+  for(var i=0;i<n;i++){
+    var a0=i*s-Math.PI/2;
+    x.beginPath(); x.moveTo(0,0); x.arc(0,0,245,a0,a0+s); x.closePath();
+    x.fillStyle=COLORS[i%COLORS.length]; x.fill(); x.strokeStyle="#000"; x.lineWidth=2; x.stroke();
+    x.save(); x.rotate(a0+s/2); x.textAlign="right"; x.font="bold 16px Comic Sans MS, Arial";
+    x.fillStyle="#000"; x.strokeStyle="#fff"; x.lineWidth=3;
+    var t=items[i].length>22?items[i].slice(0,20)+"..":items[i];
+    x.strokeText(t,235,6); x.fillText(t,235,6); x.restore();
+  }
+  x.restore();
+}
+// random time warp: the spin randomly speeds up and slows down
+(function(){ var orf=window.requestAnimationFrame.bind(window), warp=0, last=null, speed=1;
+  window.requestAnimationFrame=function(cb){ return orf(function(ts){
+    if(last!==null){ speed+=(Math.random()-.5)*0.15; speed=Math.max(0.15,Math.min(3.5,speed)); warp+=(ts-last)*(speed-1); }
+    last=ts; cb(ts+warp); }); }; })();
+function spin(){
+  if(spinning) return; spinning=true;
+  var start=angle%(2*Math.PI), target=start+(40+Math.random()*20)*2*Math.PI+Math.random()*2*Math.PI, t0=performance.now();
+  (function f(now){
+    var t=Math.min(1,(now-t0)/SPIN_MS);
+    angle=start+(target-start)*(1-Math.pow(1-t,4)); draw();
+    document.getElementById("timer").textContent=((SPIN_MS-(now-t0))/1000).toFixed(1)+" seconds left lol";
+    if(t<1) requestAnimationFrame(f); else done();
+  })(t0);
+}
+function done(){
+  spinning=false; document.getElementById("timer").textContent="GAME OVER";
+  var n=items.length, norm=((-angle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI), idx=Math.floor(norm/(2*Math.PI/n))%n;
+  document.getElementById("winner").textContent=items[idx];
+  document.getElementById("overlay").style.display="block";
+}
+document.getElementById("toggle").onclick=function(){
+  if(spinning) return;
+  mode = mode=="saw"?"custom":"saw";
+  this.textContent = mode=="saw"?"🎃":"🎃💀";
+  document.getElementById("modename").textContent = mode=="saw"?"SAW FILMS":"MY OWN CHOICES";
+  document.getElementById("sawpanel").style.display = mode=="saw"?"":"none";
+  document.getElementById("custompanel").style.display = mode=="saw"?"none":"";
+  if(mode=="saw") items=SAW.slice(); else apply();
+  draw();
+};
+var ta=document.getElementById("choices");
+function apply(){ var l=ta.value.split("\n").map(function(s){return s.trim()}).filter(Boolean); if(l.length>25){alert("max 25!!! using first 25");l=l.slice(0,25);} items=l.length?l:["type something"]; draw(); }
+ta.oninput=function(){ var n=ta.value.split("\n").filter(function(s){return s.trim()}).length; document.getElementById("count").textContent=n+"/25"; document.getElementById("count").style.color=(n<1||n>25)?"red":"white"; };
+document.getElementById("applybtn").onclick=apply;
+document.getElementById("spinbtn").onclick=function(){ if(mode=="custom") apply(); spin(); };
+document.getElementById("closebtn").onclick=function(){document.getElementById("overlay").style.display="none";};
+draw();
+</script>
+</body>
+</html>
