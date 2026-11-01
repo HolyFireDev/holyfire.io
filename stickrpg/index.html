@@ -21,6 +21,17 @@
   #msg{min-height:18px;color:#8f8;margin-top:6px;font-size:13px}
   #help{color:#888;font-size:12px;margin-top:6px}
   #help a{color:#aaa}
+  #pad{display:none;position:fixed;right:14px;bottom:18px;z-index:3;width:150px;height:150px;touch-action:none;user-select:none;-webkit-user-select:none}
+  #pad div{position:absolute;width:48px;height:48px;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.6);border-radius:8px;color:#fff;font-size:22px;line-height:48px;text-align:center}
+  #pad .u{left:51px;top:0}#pad .d{left:51px;top:102px}#pad .l{left:0;top:51px}#pad .r{left:102px;top:51px}
+  @media (pointer:coarse){ #pad{display:block} }
+  @media (max-width:820px){
+    #wrap{width:100%;margin:0}
+    canvas{width:100%;height:auto}
+    #help{padding:0 8px 8px}
+    #menu{left:4%;right:4%;width:auto;top:70px;padding:10px 12px;box-sizing:border-box;max-height:80vh;overflow:auto}
+    #hud{font-size:12px;gap:4px 10px}
+  }
 </style>
 </head>
 <body>
@@ -36,13 +47,17 @@
     <span>Job: <b id="h_job">none</b></span>
   </div>
   <canvas id="c" width="800" height="560"></canvas>
+  <div id="pad"><div class="u" data-k="ArrowUp">&#9650;</div><div class="d" data-k="ArrowDown">&#9660;</div><div class="l" data-k="ArrowLeft">&#9664;</div><div class="r" data-k="ArrowRight">&#9654;</div></div>
   <div id="menu"></div>
-  <div id="help">Arrow keys / WASD to walk. Walk into a door to enter. Esc closes a menu. Auto-saves in this browser. <a href="/">home</a></div>
+  <div id="help">Arrow keys / WASD to walk, or touch and hold the map to walk there. Walk into a door to enter. Esc closes a menu. Auto-saves in this browser. <a href="/">home</a></div>
 </div>
 <script>
 (function(){
 "use strict";
 var cv=document.getElementById("c"), cx=cv.getContext("2d"), W=cv.width, H=cv.height;
+function fit(){ if(window.innerWidth<820){ var cw=window.innerWidth, ch=Math.max(300,window.innerHeight-document.getElementById("hud").offsetHeight-6); cv.width=cw; cv.height=ch; cv.style.width=cw+"px"; cv.style.height=ch+"px"; }
+  else { cv.width=800; cv.height=560; cv.style.width=""; cv.style.height=""; } W=cv.width; H=cv.height; }
+fit(); window.addEventListener("resize",fit);
 var MAPW=1600, MAPH=1130;
 var menu=document.getElementById("menu");
 
@@ -57,7 +72,7 @@ load();
 /* ---------- world ---------- */
 var B=[
  {id:"home", name:"Your Apartment", x:80,  y:80,  w:220, h:250, col:"#6d4c41"},
- {id:"store",name:"Quik-Mart",      x:380, y:80,  w:260, h:250, col:"#1565c0"},
+ {id:"store",name:"Morshu's Shop",      x:380, y:80,  w:260, h:250, col:"#1565c0"},
  {id:"bank", name:"Bank",           x:720, y:80,  w:260, h:250, col:"#9e9e9e"},
  {id:"uni",  name:"University",     x:1060,y:80,  w:440, h:250, col:"#8d6e63"},
  {id:"gym",  name:"Gym",            x:80,  y:430, w:260, h:250, col:"#c62828"},
@@ -71,7 +86,7 @@ var B=[
 var ROADS=[{y:330,h:100},{y:680,h:100}];
 B.forEach(function(b){ b.door={x:b.x+b.w/2-22, y:b.y+b.h-4, w:44, h:16}; });
 
-var keys={}, thugs=[], paused=false, fight=null;
+var keys={}, thugs=[], paused=false, fight=null, tgt=null, cam={x:0,y:0};
 var JOBS={
   store:[{t:"Clerk",w:7,r:{}},{t:"Shift Manager",w:12,r:{int:8,cha:8}},{t:"Store Manager",w:22,r:{int:20,cha:18}}],
   office:[{t:"Intern",w:12,r:{int:10}},{t:"Analyst",w:26,r:{int:25,cha:10}},{t:"Manager",w:55,r:{int:40,cha:25}},{t:"CEO",w:140,r:{int:70,cha:50}}],
@@ -121,7 +136,7 @@ function open(title, html, buttons){
 }
 function close(){ pend=""; menu.style.display="none"; paused=false; S.y+=14; hud(); save(); }
 function enter(b){
-  if(b.id==="home") home(); else if(b.id==="store") store(); else if(b.id==="bank") bank(); else if(b.id==="uni") uni();
+  if(b.id==="home") home(); else if(b.id==="store") store(true); else if(b.id==="bank") bank(); else if(b.id==="uni") uni();
   else if(b.id==="gym") gym(); else if(b.id==="bar") bar(); else if(b.id==="office") office(); else if(b.id==="casino") casino();
   else if(b.id==="auto") auto(); else if(b.id==="pawn") pawn(); else if(b.id==="hosp") hosp();
 }
@@ -157,20 +172,29 @@ function homeShop(){
     ["Back",home]]);
 }
 function inv(back){
-  var l=[]; for(var k in S.items) if(S.items[k]) l.push(k==="car"?"Car":k==="skate"?"Skateboard":WEAPONS[k]?WEAPONS[k].n:k.charAt(0).toUpperCase()+k.slice(1));
+  var l=[]; for(var k in S.items) if(S.items[k]) l.push((k==="car"?"Car":k==="skate"?"Skateboard":WEAPONS[k]?WEAPONS[k].n:k.charAt(0).toUpperCase()+k.slice(1))+(S.items[k]>1?" x"+S.items[k]:""));
   open("Inventory",["<p>"+(l.length?l.join(", "):"Pocket lint.")+"</p><p>Weapon: "+weaponName()+" (+"+weaponDmg()+" damage)</p>"],[["Back",back]]);
 }
 function weaponDmg(){ var d=0; for(var k in WEAPONS) if(S.items[k]) d=Math.max(d,WEAPONS[k].d); return d; }
 function weaponName(){ var n="fists",d=0; for(var k in WEAPONS) if(S.items[k]&&WEAPONS[k].d>d){ d=WEAPONS[k].d; n=WEAPONS[k].n; } return n; }
 
-function store(){
-  function buy(n,p,fn){ return [n+" - $"+p,function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; fn(); store(); }, S.cash<p]; }
-  open("Quik-Mart",["<p>Fluorescent lights. A bored teenager at the register.</p>"],[
-    buy("Hot Dog (+20 HP)",4,function(){ S.hp=Math.min(S.maxhp,S.hp+20); msg("Delicious, probably."); }),
-    buy("Energy Drink (+40 HP)",9,function(){ S.hp=Math.min(S.maxhp,S.hp+40); msg("Your heart is racing."); }),
-    buy("Cigarettes (+1 CHA, -5 HP)",8,function(){ S.cha++; S.hp=Math.max(1,S.hp-5); msg("So cool. *cough*"); }),
+var MORSHU=["morshu1.jpg","morshu3.png","morshu4.webp","morshu5.jpg","morshu6.jpg","morshu7.jpg"], morshuAudio=null;
+function morshuPic(f){ return "<img src='img/"+(f||MORSHU[Math.floor(Math.random()*MORSHU.length)])+"' style='float:right;width:120px;height:120px;object-fit:cover;margin:0 0 6px 10px;border:2px solid #ffd54a'>"; }
+function morshuSay(){ try{ if(!morshuAudio){ morshuAudio=new Audio("img/morshu.mp3"); } morshuAudio.currentTime=0; morshuAudio.play().catch(function(){}); }catch(e){} }
+function morshuStop(){ try{ if(morshuAudio) morshuAudio.pause(); }catch(e){} }
+function store(first){
+  if(first) morshuSay();
+  function broke(){ open("Morshu's Shop",[morshuPic("morshu2.jpg"),"<p>\"Sorry Link, I can't give credit. Come back when you're a little... mmm... richer!\"</p>"],[["...",function(){ store(); }]]); }
+  function buy(n,p,fn){ return [n+" - $"+p,function(){ if(S.cash<p){ broke(); return; } S.cash-=p; fn(); msg("\"You want it? It's yours, my friend.\""); store(); }]; }
+  open("Morshu's Shop",[morshuPic(),"<p>\"Lamp oil, rope, bombs? You want it? It's yours, my friend, as long as you have enough rupees.\"</p>"],[
+    buy("Lamp Oil (+10 HP, tastes awful)",5,function(){ S.hp=Math.min(S.maxhp,S.hp+10); }),
+    buy("Rope (it's rope)",10,function(){ S.items.rope=(S.items.rope||0)+1; }),
+    buy("Bombs (throw one in a fight, 35 dmg)",30,function(){ S.items.bombs=(S.items.bombs||0)+1; }),
+    buy("Hot Dog (+20 HP)",4,function(){ S.hp=Math.min(S.maxhp,S.hp+20); }),
+    buy("Energy Drink (+40 HP)",9,function(){ S.hp=Math.min(S.maxhp,S.hp+40); }),
+    buy("Cigarettes (+1 CHA, -5 HP)",8,function(){ S.cha++; S.hp=Math.max(1,S.hp-5); }),
     buy("Lottery Ticket",5,function(){ var r=Math.random(); if(r<0.01){S.cash+=5000;msg("JACKPOT!!! $5000!");} else if(r<0.1){S.cash+=50;msg("Won $50!");} else msg("Not a winner."); }),
-    workBtn("store",store), ["Leave",close]]);
+    workBtn("store",store), ["Leave",function(){ morshuStop(); close(); }]]);
 }
 function bank(){
   function amt(){ var v=parseInt(prompt("How much?","100"),10); return isNaN(v)||v<=0?0:v; }
@@ -220,7 +244,7 @@ function pawn(){
 
 /* ---------- casino ---------- */
 var IMG="/halloween/img/";
-function pic(src){ return "<img src='"+IMG+src+"' style='float:right;width:110px;height:110px;object-fit:cover;margin:0 0 6px 10px;border:2px solid #ffd54a'>"; }
+function pic(src){ return "<img src='"+(src.indexOf("/")<0&&src.indexOf("kramer")===0?"img/":IMG)+src+"' style='float:right;width:110px;height:110px;object-fit:cover;margin:0 0 6px 10px;border:2px solid #ffd54a'>"; }
 var SLOTS={
   witch:{name:"Witch's Brew Slots",bet:10,img:"witch3.jpg",sym:["🧙","🎃","🔮","🦇","🐈"],jack:0,pay:[500,150,50,15],
     blurb:"A cackling machine covered in cobwebs. Three witches wins the cauldron.",win:"The witch cackles. ",lose:"The cauldron bubbles. Nothing."},
@@ -250,14 +274,14 @@ function card(){ return Math.floor(Math.random()*13)+1; }
 function handVal(h){ var v=0,a=0; h.forEach(function(c){ if(c===1){a++;v+=11;} else v+=Math.min(10,c); }); while(v>21&&a>0){v-=10;a--;} return v; }
 function cs(c){ return c===1?"A":c===11?"J":c===12?"Q":c===13?"K":c; }
 function bjTable(){
-  open("John Kramer's Blackjack",[pic("saw3.jpg"),"<p>Jigsaw deals from behind Billy. Blackjack pays 2x. Dealer stands on 17.</p><p>\"Hello. I want to play a game.\"</p>"],[
+  open("John Kramer's Blackjack",[pic("kramer.jpg"),"<p>John Kramer deals. He has been watching you. Blackjack pays 2x. Dealer stands on 17.</p><p>\"Hello. I want to play a game.\"</p>"],[
     ["Deal for $25",function(){ bj(25); },S.cash<25],["Deal for $100",function(){ bj(100); },S.cash<100],["Deal for $500",function(){ bj(500); },S.cash<500],["Back to the floor",casino]]);
 }
 function bj(bet){
   S.cash-=bet; bjs={p:[card(),card()],d:[card(),card()],over:false,bet:bet}; bjShow();
 }
 function bjShow(res){
-  var pv=handVal(bjs.p), dv=handVal(bjs.d), html=[pic("saw3.jpg"),"<p>Dealer: "+(bjs.over?bjs.d.map(cs).join(" ")+" ("+dv+")":cs(bjs.d[0])+" ?")+"</p><p>You: "+bjs.p.map(cs).join(" ")+" ("+pv+")</p>"];
+  var pv=handVal(bjs.p), dv=handVal(bjs.d), html=[pic("kramer.jpg"),"<p>Dealer: "+(bjs.over?bjs.d.map(cs).join(" ")+" ("+dv+")":cs(bjs.d[0])+" ?")+"</p><p>You: "+bjs.p.map(cs).join(" ")+" ("+pv+")</p>"];
   if(res) html.push("<p><b>"+res+"</b> Cash: $"+Math.floor(S.cash)+"</p>");
   if(bjs.over) open("John Kramer's Blackjack",html,[["Deal again ($"+bjs.bet+")",function(){ bj(bjs.bet); },S.cash<bjs.bet],["Back to the table",bjTable]]);
   else open("John Kramer's Blackjack",html,[["Hit",function(){ bjs.p.push(card()); if(handVal(bjs.p)>21){ bjs.over=true; bjShow("Bust. \"Game over.\""); } else bjShow(); }],
@@ -280,6 +304,12 @@ function fightShow(txt){
         open("You won!",["<p>The thug runs off. You find $"+loot+" he dropped.</p>"],[["Nice",close]]); hud(); return; }
       var h=4+S.day+Math.floor(Math.random()*8); S.hp-=h; s+="Thug hits you for "+h+".";
       if(S.hp<=0) return ko(); fightShow(s); }],
+    ["Throw a bomb ("+(S.items.bombs||0)+" left, 35 dmg)",function(){
+      S.items.bombs--; t.hp-=35; var s="KABOOM! 35 damage. ";
+      if(t.hp<=0){ var loot=20+Math.floor(Math.random()*40)+S.day*5; S.cash+=loot; thugs.splice(thugs.indexOf(t),1); fight=null;
+        open("You won!",["<p>The thug runs off, smoking. You find $"+loot+" he dropped.</p>"],[["Nice",close]]); hud(); return; }
+      var h=4+S.day+Math.floor(Math.random()*8); S.hp-=h; s+="Thug hits you for "+h+".";
+      if(S.hp<=0) return ko(); fightShow(s); }, !(S.items.bombs>0)],
     ["Run away (better with STR)",function(){
       if(Math.random()<0.4+S.str/100){ thugs.splice(thugs.indexOf(t),1); fight=null; open("Escaped",["<p>You got away.</p>"],[["Phew",close]]); }
       else { var h=4+S.day+Math.floor(Math.random()*8); S.hp-=h; if(S.hp<=0) return ko(); fightShow("He grabs you! Thug hits you for "+h+"."); } }]]);
@@ -299,6 +329,7 @@ function step(dt){
   var sp=speed(), dx=0, dy=0;
   if(keys.ArrowLeft||keys.a) dx-=1; if(keys.ArrowRight||keys.d) dx+=1; if(keys.ArrowUp||keys.w) dy-=1; if(keys.ArrowDown||keys.s) dy+=1;
   if(dx&&dy){ dx*=0.707; dy*=0.707; }
+  if(!dx&&!dy&&tgt){ var tx0=tgt.x-S.x, ty0=tgt.y-(S.y-16), td=Math.sqrt(tx0*tx0+ty0*ty0); if(td>4){ dx=tx0/td; dy=ty0/td; } }
   if(dx||dy) walk+=dt*0.02*sp;
   var nx=S.x+dx*sp, ny=S.y+dy*sp; // feet box 16x8 at bottom
   for(var i=0;i<B.length;i++){ var d=B[i].door; if(nx+8>d.x&&nx-8<d.x+d.w&&ny>d.y&&ny<d.y+d.h+8&&dy<0){ S.y=d.y+d.h+10; enter(B[i]); return; } }
@@ -329,7 +360,7 @@ function stick(x,y,col,ph,car){
   if(S.items.skate&&col==="#000"){ cx.fillStyle="#ff9800"; cx.fillRect(x-14,y+1,28,3); }
 }
 function draw(){
-  var camx=Math.max(0,Math.min(MAPW-W,S.x-W/2)), camy=Math.max(0,Math.min(MAPH-H,S.y-H/2));
+  var camx=Math.max(0,Math.min(MAPW-W,S.x-W/2)), camy=Math.max(0,Math.min(MAPH-H,S.y-H/2)); cam.x=camx; cam.y=camy;
   cx.save(); cx.translate(-camx,-camy);
   cx.fillStyle="#3a8a3e"; cx.fillRect(0,0,MAPW,MAPH);
   ROADS.forEach(function(r){ cx.fillStyle="#9e9e9e"; cx.fillRect(0,r.y-12,MAPW,r.h+24); cx.fillStyle="#444"; cx.fillRect(0,r.y,MAPW,r.h);
@@ -355,7 +386,15 @@ function loop(t){ var dt=Math.min(50,(t-lastT)||16); lastT=t; step(dt); draw(); 
 /* ---------- input ---------- */
 document.addEventListener("keydown",function(e){ keys[e.key]=true; if(e.key.length===1) keys[e.key.toLowerCase()]=true; if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].indexOf(e.key)>=0) e.preventDefault(); if(e.key==="Escape"&&paused&&!fight) close(); });
 document.addEventListener("keyup",function(e){ keys[e.key]=false; if(e.key.length===1) keys[e.key.toLowerCase()]=false; });
-window.addEventListener("blur",function(){ keys={}; });
+window.addEventListener("blur",function(){ keys={}; tgt=null; });
+function canvasPt(e){ var r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*W/r.width+cam.x, y:(e.clientY-r.top)*H/r.height+cam.y}; }
+cv.addEventListener("pointerdown",function(e){ if(paused) return; tgt=canvasPt(e); e.preventDefault(); });
+cv.addEventListener("pointermove",function(e){ if(tgt) tgt=canvasPt(e); });
+["pointerup","pointercancel","pointerleave"].forEach(function(n){ cv.addEventListener(n,function(){ tgt=null; }); });
+cv.style.touchAction="none";
+document.querySelectorAll("#pad div").forEach(function(d){ var k=d.getAttribute("data-k");
+  function on(e){ keys[k]=true; e.preventDefault(); } function off(e){ keys[k]=false; e.preventDefault(); }
+  d.addEventListener("pointerdown",on); d.addEventListener("pointerup",off); d.addEventListener("pointercancel",off); d.addEventListener("pointerleave",off); });
 
 hud();
 if(S.day===1&&S.min===8*60&&S.cash===50&&!S.job){
