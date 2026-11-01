@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stick RPG</title>
+<style>
+  html,body{margin:0;background:#111;color:#eee;font-family:Verdana,Arial,sans-serif;font-size:14px}
+  #wrap{width:800px;margin:10px auto;position:relative}
+  #hud{display:flex;flex-wrap:wrap;gap:6px 14px;background:#222;border:2px solid #555;padding:6px 10px;font-size:13px}
+  #hud b{color:#ffd54a}
+  #hud .bar{display:inline-block;width:80px;height:9px;background:#400;border:1px solid #888;vertical-align:middle}
+  #hud .bar i{display:block;height:100%;background:#e33}
+  canvas{display:block;background:#2e7d32;border:2px solid #555;border-top:0}
+  #menu{display:none;position:absolute;left:150px;top:120px;width:460px;background:#1b1b1b;border:3px solid #ffd54a;padding:14px 18px;box-shadow:0 0 30px #000}
+  #menu h2{margin:0 0 6px;font-size:20px;color:#ffd54a}
+  #menu p{margin:6px 0;color:#ccc}
+  #menu button{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 10px;background:#333;color:#fff;border:1px solid #777;cursor:pointer;font-family:inherit;font-size:14px}
+  #menu button:hover{background:#555}
+  #menu button:disabled{opacity:.4;cursor:default}
+  #msg{min-height:18px;color:#8f8;margin-top:6px;font-size:13px}
+  #help{color:#888;font-size:12px;margin-top:6px}
+  #help a{color:#aaa}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <span>Day <b id="h_day">1</b></span>
+    <span><b id="h_time">8:00 AM</b></span>
+    <span>$<b id="h_cash">0</b> <span style="color:#999">(bank $<span id="h_bank">0</span>)</span></span>
+    <span>HP <span class="bar"><i id="h_hp" style="width:100%"></i></span></span>
+    <span>STR <b id="h_str">1</b></span>
+    <span>INT <b id="h_int">1</b></span>
+    <span>CHA <b id="h_cha">1</b></span>
+    <span>Job: <b id="h_job">none</b></span>
+  </div>
+  <canvas id="c" width="800" height="560"></canvas>
+  <div id="menu"></div>
+  <div id="help">Arrow keys / WASD to walk. Walk into a door to enter. Esc closes a menu. Auto-saves in this browser. <a href="/">home</a></div>
+</div>
+<script>
+(function(){
+"use strict";
+var cv=document.getElementById("c"), cx=cv.getContext("2d"), W=cv.width, H=cv.height;
+var MAPW=1600, MAPH=1130;
+var menu=document.getElementById("menu");
+
+/* ---------- state ---------- */
+var S;
+function fresh(){ return { day:1, min:8*60, cash:50, bank:0, hp:100, maxhp:100, str:1, int:1, cha:1,
+  job:null, items:{}, x:190, y:360 }; }
+function save(){ try{ localStorage.setItem("stickrpg", JSON.stringify(S)); }catch(e){} }
+function load(){ try{ var s=localStorage.getItem("stickrpg"); if(s){ S=JSON.parse(s); return true; } }catch(e){} S=fresh(); return false; }
+load();
+
+/* ---------- world ---------- */
+var B=[
+ {id:"home", name:"Your Apartment", x:80,  y:80,  w:220, h:250, col:"#6d4c41"},
+ {id:"store",name:"Quik-Mart",      x:380, y:80,  w:260, h:250, col:"#1565c0"},
+ {id:"bank", name:"Bank",           x:720, y:80,  w:260, h:250, col:"#9e9e9e"},
+ {id:"uni",  name:"University",     x:1060,y:80,  w:440, h:250, col:"#8d6e63"},
+ {id:"gym",  name:"Gym",            x:80,  y:430, w:260, h:250, col:"#c62828"},
+ {id:"bar",  name:"The Bar",        x:420, y:430, w:260, h:250, col:"#4a148c"},
+ {id:"office",name:"Office Tower",  x:760, y:430, w:300, h:250, col:"#37474f"},
+ {id:"casino",name:"Casino",        x:1140,y:430, w:360, h:250, col:"#ad1457"},
+ {id:"auto", name:"Auto Shop",      x:80,  y:780, w:340, h:250, col:"#f9a825"},
+ {id:"pawn", name:"Pawn Shop",      x:500, y:780, w:260, h:250, col:"#00695c"},
+ {id:"hosp", name:"Hospital",       x:840, y:780, w:260, h:250, col:"#eceff1"}
+];
+var ROADS=[{y:330,h:100},{y:680,h:100}];
+B.forEach(function(b){ b.door={x:b.x+b.w/2-22, y:b.y+b.h-4, w:44, h:16}; });
+
+var keys={}, thugs=[], paused=false, fight=null;
+var JOBS={
+  store:[{t:"Clerk",w:7,r:{}},{t:"Shift Manager",w:12,r:{int:8,cha:8}},{t:"Store Manager",w:22,r:{int:20,cha:18}}],
+  office:[{t:"Intern",w:12,r:{int:10}},{t:"Analyst",w:26,r:{int:25,cha:10}},{t:"Manager",w:55,r:{int:40,cha:25}},{t:"CEO",w:140,r:{int:70,cha:50}}],
+  bar:[{t:"Bartender",w:16,r:{cha:15}},{t:"Bouncer",w:22,r:{str:20}},{t:"Bar Owner",w:60,r:{cha:40,str:25}}],
+  gym:[{t:"Personal Trainer",w:30,r:{str:30}},{t:"Gym Owner",w:70,r:{str:55,cha:20}}]
+};
+var WEAPONS={bat:{n:"Baseball Bat",d:6,p:150},knife:{n:"Knife",d:12,p:450},gun:{n:"Handgun",d:25,p:2500}};
+
+/* ---------- helpers ---------- */
+function clock(){ var m=S.min%1440, h=Math.floor(m/60), mm=m%60, ap=h>=12?"PM":"AM"; h=h%12; if(h===0)h=12; return h+":"+(mm<10?"0":"")+mm+" "+ap; }
+function hud(){
+  document.getElementById("h_day").textContent=S.day;
+  document.getElementById("h_time").textContent=clock();
+  document.getElementById("h_cash").textContent=Math.floor(S.cash);
+  document.getElementById("h_bank").textContent=Math.floor(S.bank);
+  document.getElementById("h_hp").style.width=Math.max(0,100*S.hp/S.maxhp)+"%";
+  document.getElementById("h_str").textContent=S.str;
+  document.getElementById("h_int").textContent=S.int;
+  document.getElementById("h_cha").textContent=S.cha;
+  document.getElementById("h_job").textContent=S.job?jobTitle(S.job):"none";
+}
+function meets(r){ return (!r.str||S.str>=r.str)&&(!r.int||S.int>=r.int)&&(!r.cha||S.cha>=r.cha); }
+function jobLevel(id){ var L=JOBS[id], best=-1; for(var i=0;i<L.length;i++) if(meets(L[i].r)) best=i; return best; }
+function jobTitle(id){ var l=jobLevel(id); return l<0?"fired":JOBS[id][l].t; }
+function reqStr(r){ var a=[]; for(var k in r) a.push(k.toUpperCase()+" "+r[k]); return a.length?a.join(", "):"none"; }
+function addTime(h){ S.min+=Math.round(h*60); checkPassOut(); }
+function checkPassOut(){
+  if(S.min>=28*60){ // 4 AM
+    S.min=8*60; S.day++; S.cash=Math.max(0,S.cash-50); S.hp=Math.max(10,S.hp-20);
+    S.x=190; S.y=360; interest(); thugs=[]; fight=null;
+    open("You passed out", ["<p>You stayed up way too late and passed out in the street. Someone took $50 from your pockets. You wake up at home.</p>"], [["OK",close]]);
+  }
+}
+function interest(){ S.bank=Math.floor(S.bank*1.02); }
+function newDay(){ S.min=8*60; S.day++; S.hp=S.maxhp; interest(); thugs=[]; }
+var pend=""; function msg(t){ pend=t; var m=document.getElementById("msg"); if(m) m.textContent=t; hud(); save(); }
+function menuClosed(){ return menu.style.display==="none"; }
+
+/* ---------- menu system ---------- */
+function open(title, html, buttons){
+  paused=true; menu.style.display="block";
+  menu.innerHTML="<h2>"+title+"</h2>"+(html||[]).join("");
+  (buttons||[]).forEach(function(b){
+    var bt=document.createElement("button"); bt.innerHTML=b[0]; bt.onclick=b[1]; if(b[2]) bt.disabled=true; menu.appendChild(bt);
+  });
+  var m=document.createElement("div"); m.id="msg"; m.textContent=pend; pend=""; menu.appendChild(m);
+}
+function close(){ pend=""; menu.style.display="none"; paused=false; S.y+=14; hud(); save(); }
+function enter(b){
+  if(b.id==="home") home(); else if(b.id==="store") store(); else if(b.id==="bank") bank(); else if(b.id==="uni") uni();
+  else if(b.id==="gym") gym(); else if(b.id==="bar") bar(); else if(b.id==="office") office(); else if(b.id==="casino") casino();
+  else if(b.id==="auto") auto(); else if(b.id==="pawn") pawn(); else if(b.id==="hosp") hosp();
+}
+function workBtn(id, reopen){
+  var l=jobLevel(id), J=JOBS[id];
+  if(S.job!==id){
+    var can=l>=0;
+    return ["Apply for a job here ("+(can?J[l].t+", $"+J[l].w+"/hr":"needs "+reqStr(J[0].r))+")", function(){
+      if(!can){ msg("They laugh at your resume. Needs "+reqStr(J[0].r)+"."); return; }
+      S.job=id; msg("You're hired as "+J[l].t+"!"); reopen(); }, !can];
+  }
+  return ["Work a 4 hour shift as "+J[l].t+" ($"+J[l].w+"/hr)", function(){
+    var pay=J[l].w*4+Math.floor(Math.random()*S.cha); S.cash+=pay; addTime(4);
+    var nl=jobLevel(id); msg("You worked 4 hours and earned $"+pay+"."+(nl>l?" PROMOTED to "+J[nl].t+"!":""));
+    if(!menuClosed()&&S.min<28*60) reopen(); }];
+}
+
+/* ---------- buildings ---------- */
+function home(){
+  var bt=[["Sleep until morning (heals, +2% bank interest)",function(){ newDay(); S.x=190;S.y=360; msg("Zzz... A new day. Day "+S.day+"."); home(); }]];
+  if(S.items.computer) bt.push(["Study on your computer (2 hrs, +1 INT)",function(){ S.int++; addTime(2); msg("You read Wikipedia for 2 hours. INT +1."); if(!menuClosed()) home(); }]);
+  if(S.items.tv) bt.push(["Watch TV (2 hrs, +1 CHA)",function(){ S.cha++; addTime(2); msg("You learned some great one-liners. CHA +1."); if(!menuClosed()) home(); }]);
+  if(S.items.weights) bt.push(["Lift weights (2 hrs, +1 STR)",function(){ S.str++; addTime(2); msg("Grunt. STR +1."); if(!menuClosed()) home(); }]);
+  bt.push(["Buy stuff for the apartment",function(){ homeShop(); }]);
+  bt.push(["Inventory",function(){ inv(home); }]);
+  bt.push(["Leave",close]);
+  open("Your Apartment",["<p>Home sweet home. A mattress on the floor"+(S.items.tv?", a TV":"")+(S.items.computer?", a computer":"")+(S.items.weights?", a bench press":"")+".</p>"],bt);
+}
+function homeShop(){
+  function buy(k,n,p){ return [n+" - $"+p+(S.items[k]?" (owned)":""),function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; S.items[k]=1; msg("Bought "+n+"."); homeShop(); }, !!S.items[k]||S.cash<p]; }
+  open("Furniture Catalog",["<p>Ordered from the back of a magazine. Delivered instantly.</p>"],[
+    buy("tv","Television",400), buy("computer","Computer",900), buy("weights","Bench Press",600),
+    ["Back",home]]);
+}
+function inv(back){
+  var l=[]; for(var k in S.items) if(S.items[k]) l.push(k==="car"?"Car":k==="skate"?"Skateboard":WEAPONS[k]?WEAPONS[k].n:k.charAt(0).toUpperCase()+k.slice(1));
+  open("Inventory",["<p>"+(l.length?l.join(", "):"Pocket lint.")+"</p><p>Weapon: "+weaponName()+" (+"+weaponDmg()+" damage)</p>"],[["Back",back]]);
+}
+function weaponDmg(){ var d=0; for(var k in WEAPONS) if(S.items[k]) d=Math.max(d,WEAPONS[k].d); return d; }
+function weaponName(){ var n="fists",d=0; for(var k in WEAPONS) if(S.items[k]&&WEAPONS[k].d>d){ d=WEAPONS[k].d; n=WEAPONS[k].n; } return n; }
+
+function store(){
+  function buy(n,p,fn){ return [n+" - $"+p,function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; fn(); store(); }, S.cash<p]; }
+  open("Quik-Mart",["<p>Fluorescent lights. A bored teenager at the register.</p>"],[
+    buy("Hot Dog (+20 HP)",4,function(){ S.hp=Math.min(S.maxhp,S.hp+20); msg("Delicious, probably."); }),
+    buy("Energy Drink (+40 HP)",9,function(){ S.hp=Math.min(S.maxhp,S.hp+40); msg("Your heart is racing."); }),
+    buy("Cigarettes (+1 CHA, -5 HP)",8,function(){ S.cha++; S.hp=Math.max(1,S.hp-5); msg("So cool. *cough*"); }),
+    buy("Lottery Ticket",5,function(){ var r=Math.random(); if(r<0.01){S.cash+=5000;msg("JACKPOT!!! $5000!");} else if(r<0.1){S.cash+=50;msg("Won $50!");} else msg("Not a winner."); }),
+    workBtn("store",store), ["Leave",close]]);
+}
+function bank(){
+  function amt(){ var v=parseInt(prompt("How much?","100"),10); return isNaN(v)||v<=0?0:v; }
+  open("Bank",["<p>Cash: $"+Math.floor(S.cash)+" &nbsp; Account: $"+Math.floor(S.bank)+"</p><p>2% interest every night. Muggers can't take what's in here.</p>"],[
+    ["Deposit",function(){ var v=Math.min(amt(),Math.floor(S.cash)); S.cash-=v; S.bank+=v; msg("Deposited $"+v+"."); bank(); }],
+    ["Withdraw",function(){ var v=Math.min(amt(),Math.floor(S.bank)); S.bank-=v; S.cash+=v; msg("Withdrew $"+v+"."); bank(); }],
+    ["Leave",close]]);
+}
+function uni(){
+  function cls(n,p,g,h){ return [n+" - $"+p+" ("+h+" hrs, +"+g+" INT)",function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; S.int+=g; addTime(h); msg("You feel smarter. INT +"+g+"."); if(!menuClosed()) uni(); }, S.cash<p]; }
+  open("University",["<p>Ivy on the walls. Students sleeping in the hallway.</p>"],[
+    cls("Intro Course",40,1,2), cls("Lecture Series",150,4,4), cls("Graduate Seminar",500,12,6), ["Leave",close]]);
+}
+function gym(){
+  function tr(n,p,g,h){ return [n+" - $"+p+" ("+h+" hrs, +"+g+" STR)",function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; S.str+=g; addTime(h); msg("Pain is weakness leaving the body. STR +"+g+"."); if(!menuClosed()) gym(); }, S.cash<p]; }
+  open("Gym",["<p>Smells like rubber and sweat.</p>"],[
+    tr("Light Workout",10,1,2), tr("Heavy Lifting",60,4,4), tr("Pro Training Camp",250,12,6), workBtn("gym",gym), ["Leave",close]]);
+}
+function bar(){
+  function dr(n,p,fn){ return [n+" - $"+p,function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; fn(); addTime(1); if(!menuClosed()) bar(); }, S.cash<p]; }
+  open("The Bar",["<p>Dim lights, sticky floor, a jukebox stuck on one song.</p>"],[
+    dr("Beer (+1 CHA)",6,function(){ S.cha++; msg("You tell a great story. CHA +1."); }),
+    dr("Whiskey (+2 CHA, -1 INT, -5 HP)",15,function(){ S.cha+=2; S.int=Math.max(1,S.int-1); S.hp=Math.max(1,S.hp-5); msg("Everything is funny now."); }),
+    ["Play darts for $20 (CHA helps)",function(){ if(S.cash<20){msg("Not enough cash.");return;} if(Math.random()<0.35+S.cha/200){ S.cash+=20; msg("Bullseye! Won $20."); } else { S.cash-=20; msg("You hit the wall. Lost $20."); } addTime(1); if(!menuClosed()) bar(); }],
+    workBtn("bar",bar), ["Leave",close]]);
+}
+function office(){
+  open("Office Tower",["<p>Cubicles as far as the eye can see. Someone microwaved fish.</p>"],[ workBtn("office",office), ["Leave",close]]);
+}
+function hosp(){
+  var cost=Math.max(10,(S.maxhp-S.hp)*2);
+  open("Hospital",["<p>HP: "+S.hp+"/"+S.maxhp+"</p>"],[
+    ["Full treatment - $"+cost,function(){ if(S.cash<cost){msg("Not enough cash.");return;} S.cash-=cost; S.hp=S.maxhp; msg("Good as new."); hosp(); }, S.hp>=S.maxhp||S.cash<cost],
+    ["Donate blood (+$30, -30 HP, 1 hr)",function(){ if(S.hp<=35){msg("You're too weak.");return;} S.hp-=30; S.cash+=30; addTime(1); msg("Thanks for the pint."); if(!menuClosed()) hosp(); }],
+    ["Leave",close]]);
+}
+function auto(){
+  function buy(k,n,p){ return [n+" - $"+p+(S.items[k]?" (owned)":""),function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; S.items[k]=1; msg("Bought a "+n+"!"); auto(); }, !!S.items[k]||S.cash<p]; }
+  open("Auto Shop",["<p>Faster ways to get around.</p>"],[ buy("skate","Skateboard (1.5x speed)",250), buy("car","Used Car (2.5x speed)",6000), ["Leave",close]]);
+}
+function pawn(){
+  var bt=[];
+  for(var k in WEAPONS)(function(k){ var w=WEAPONS[k]; bt.push([w.n+" (+"+w.d+" dmg) - $"+w.p+(S.items[k]?" (owned)":""),function(){ if(S.cash<w.p){msg("Not enough cash.");return;} S.cash-=w.p; S.items[k]=1; msg("Bought a "+w.n+". Be careful."); pawn(); }, !!S.items[k]||S.cash<w.p]); })(k);
+  bt.push(["Leave",close]);
+  open("Pawn Shop",["<p>Bars on the windows. Guy behind the counter doesn't blink.</p>"],bt);
+}
+
+/* ---------- casino ---------- */
+var IMG="/halloween/img/";
+function pic(src){ return "<img src='"+IMG+src+"' style='float:right;width:110px;height:110px;object-fit:cover;margin:0 0 6px 10px;border:2px solid #ffd54a'>"; }
+var SLOTS={
+  witch:{name:"Witch's Brew Slots",bet:10,img:"witch3.jpg",sym:["🧙","🎃","🔮","🦇","🐈"],jack:0,pay:[500,150,50,15],
+    blurb:"A cackling machine covered in cobwebs. Three witches wins the cauldron.",win:"The witch cackles. ",lose:"The cauldron bubbles. Nothing."},
+  hell:{name:"Hellraiser Slots",bet:50,img:"scare4.webp",sym:["📦","🪝","🩸","💀","🕯"],jack:0,pay:[2500,750,250,75],
+    blurb:"Cold iron, hooks and chains. Three puzzle boxes opens the box. High stakes.",win:"\"We have such sights to show you.\" ",lose:"\"No tears, please. It's a waste of good suffering.\""}
+};
+function casino(){
+  open("Casino",["<p>No clocks, no windows, free drinks if you're losing. Halloween theme all year.</p>"],[
+    ["Witch's Brew Slots ($10)",function(){ slots("witch"); }],["Hellraiser Slots ($50)",function(){ slots("hell"); }],["John Kramer's Blackjack",function(){ bjTable(); }],["Leave",close]]);
+}
+function slots(k,spin){
+  var T=SLOTS[k], html=[pic(T.img),"<p>"+T.blurb+"</p>"], bt=[];
+  if(spin){
+    if(S.cash<T.bet){ html.push("<p>You need $"+T.bet+".</p>"); }
+    else {
+      S.cash-=T.bet; var r=[0,0,0].map(function(){ return T.sym[Math.floor(Math.random()*T.sym.length)]; }), win=0;
+      if(r[0]===r[1]&&r[1]===r[2]) win=r[0]===T.sym[T.jack]?T.pay[0]:(r[0]===T.sym[1]?T.pay[1]:T.pay[2]); else if(r[0]===r[1]||r[1]===r[2]||r[0]===r[2]) win=T.pay[3];
+      S.cash+=win; addTime(0.25); if(menuClosed()) return;
+      html.push("<p style='font-size:34px;text-align:center;letter-spacing:14px;background:#000;border:2px solid #777;padding:6px;clear:both'>"+r.join("")+"</p><p>"+(win?T.win+"You win $"+win+"!":T.lose)+" Cash: $"+Math.floor(S.cash)+"</p>");
+    }
+  } else html.push("<p>Pays: 3x "+T.sym[T.jack]+" $"+T.pay[0]+", 3x "+T.sym[1]+" $"+T.pay[1]+", any other triple $"+T.pay[2]+", any pair $"+T.pay[3]+".</p>");
+  bt.push(["Pull the lever ($"+T.bet+")",function(){ slots(k,true); },S.cash<T.bet]); bt.push(["Back to the floor",casino]);
+  open(T.name,html,bt); hud(); save();
+}
+var bjs=null;
+function card(){ return Math.floor(Math.random()*13)+1; }
+function handVal(h){ var v=0,a=0; h.forEach(function(c){ if(c===1){a++;v+=11;} else v+=Math.min(10,c); }); while(v>21&&a>0){v-=10;a--;} return v; }
+function cs(c){ return c===1?"A":c===11?"J":c===12?"Q":c===13?"K":c; }
+function bjTable(){
+  open("John Kramer's Blackjack",[pic("saw3.jpg"),"<p>Jigsaw deals from behind Billy. Blackjack pays 2x. Dealer stands on 17.</p><p>\"Hello. I want to play a game.\"</p>"],[
+    ["Deal for $25",function(){ bj(25); },S.cash<25],["Deal for $100",function(){ bj(100); },S.cash<100],["Deal for $500",function(){ bj(500); },S.cash<500],["Back to the floor",casino]]);
+}
+function bj(bet){
+  S.cash-=bet; bjs={p:[card(),card()],d:[card(),card()],over:false,bet:bet}; bjShow();
+}
+function bjShow(res){
+  var pv=handVal(bjs.p), dv=handVal(bjs.d), html=[pic("saw3.jpg"),"<p>Dealer: "+(bjs.over?bjs.d.map(cs).join(" ")+" ("+dv+")":cs(bjs.d[0])+" ?")+"</p><p>You: "+bjs.p.map(cs).join(" ")+" ("+pv+")</p>"];
+  if(res) html.push("<p><b>"+res+"</b> Cash: $"+Math.floor(S.cash)+"</p>");
+  if(bjs.over) open("John Kramer's Blackjack",html,[["Deal again ($"+bjs.bet+")",function(){ bj(bjs.bet); },S.cash<bjs.bet],["Back to the table",bjTable]]);
+  else open("John Kramer's Blackjack",html,[["Hit",function(){ bjs.p.push(card()); if(handVal(bjs.p)>21){ bjs.over=true; bjShow("Bust. \"Game over.\""); } else bjShow(); }],
+    ["Stand",function(){ while(handVal(bjs.d)<17) bjs.d.push(card()); bjs.over=true; var d=handVal(bjs.d), p=handVal(bjs.p), r;
+      if(d>21||p>d){ S.cash+=bjs.bet*2; r="You win $"+bjs.bet+"! \"Congratulations. You are still alive.\""; } else if(p===d){ S.cash+=bjs.bet; r="Push. \"Live or die. Make your choice.\""; } else r="Dealer wins. \"Most people are so ungrateful to be alive.\""; bjShow(r); }]]);
+  hud(); save();
+}
+/* ---------- thugs & fighting ---------- */
+function isNight(){ var m=S.min%1440; return m>=21*60||m<5*60; }
+function spawnThug(){ var t; for(var k=0;k<30;k++){ var a=Math.random()*6.28, r=300+Math.random()*300; t={x:S.x+Math.cos(a)*r,y:S.y+Math.sin(a)*r,dx:0,dy:0,hp:30+S.day*3}; if(t.x>10&&t.x<MAPW-10&&t.y>40&&t.y<MAPH-6&&!hitB(t.x-8,t.y-4,16,8)) return thugs.push(t); } }
+function startFight(t){
+  fight={t:t}; fightShow("A thug jumps out of the shadows! \"Give me your money!\"");
+}
+function fightShow(txt){
+  var t=fight.t;
+  open("FIGHT!",["<p>Thug HP: "+t.hp+" &nbsp; Your HP: "+S.hp+"/"+S.maxhp+"</p><p>"+txt+"</p>"],[
+    ["Attack with "+weaponName(),function(){
+      var dmg=3+Math.floor(S.str*1.5)+weaponDmg()+Math.floor(Math.random()*6); t.hp-=dmg; var s="You hit for "+dmg+". ";
+      if(t.hp<=0){ var loot=20+Math.floor(Math.random()*40)+S.day*5; S.cash+=loot; thugs.splice(thugs.indexOf(t),1); fight=null;
+        open("You won!",["<p>The thug runs off. You find $"+loot+" he dropped.</p>"],[["Nice",close]]); hud(); return; }
+      var h=4+S.day+Math.floor(Math.random()*8); S.hp-=h; s+="Thug hits you for "+h+".";
+      if(S.hp<=0) return ko(); fightShow(s); }],
+    ["Run away (better with STR)",function(){
+      if(Math.random()<0.4+S.str/100){ thugs.splice(thugs.indexOf(t),1); fight=null; open("Escaped",["<p>You got away.</p>"],[["Phew",close]]); }
+      else { var h=4+S.day+Math.floor(Math.random()*8); S.hp-=h; if(S.hp<=0) return ko(); fightShow("He grabs you! Thug hits you for "+h+"."); } }]]);
+  hud();
+}
+function ko(){
+  var lost=Math.floor(S.cash/2); S.cash-=lost; S.hp=Math.floor(S.maxhp/2); fight=null; thugs=[]; S.min=8*60; S.day++; interest(); S.x=970; S.y=1055;
+  open("Knocked out",["<p>You wake up in the hospital the next morning. The thug took $"+lost+".</p>"],[["Ugh",close]]);
+}
+
+/* ---------- movement & collision ---------- */
+function hitB(x,y,w,h){ for(var i=0;i<B.length;i++){ var b=B[i]; if(x<b.x+b.w&&x+w>b.x&&y<b.y+b.h&&y+h>b.y) return b; } return null; }
+function speed(){ return S.items.car?6:S.items.skate?3.8:2.5; }
+var walk=0, lastT=0, acc=0;
+function step(dt){
+  if(paused) return;
+  var sp=speed(), dx=0, dy=0;
+  if(keys.ArrowLeft||keys.a) dx-=1; if(keys.ArrowRight||keys.d) dx+=1; if(keys.ArrowUp||keys.w) dy-=1; if(keys.ArrowDown||keys.s) dy+=1;
+  if(dx&&dy){ dx*=0.707; dy*=0.707; }
+  if(dx||dy) walk+=dt*0.02*sp;
+  var nx=S.x+dx*sp, ny=S.y+dy*sp; // feet box 16x8 at bottom
+  for(var i=0;i<B.length;i++){ var d=B[i].door; if(nx+8>d.x&&nx-8<d.x+d.w&&ny>d.y&&ny<d.y+d.h+8&&dy<0){ S.y=d.y+d.h+10; enter(B[i]); return; } }
+  if(!hitB(nx-8,S.y-4,16,8)) S.x=Math.max(10,Math.min(MAPW-10,nx));
+  if(!hitB(S.x-8,ny-4,16,8)) S.y=Math.max(40,Math.min(MAPH-6,ny));
+  acc+=dt; while(acc>120){ acc-=120; S.min++; if(S.min%30===0) save(); if(S.min%10===0) hud(); checkPassOut(); if(paused) return; }
+  if(isNight()){ if(thugs.length<3&&Math.random()<0.006) spawnThug(); } else thugs=[];
+  for(var j=0;j<thugs.length;j++){ var t=thugs[j];
+    if(Math.random()<0.02){ var a=Math.random()*6.28; t.dx=Math.cos(a)*1.2; t.dy=Math.sin(a)*1.2; }
+    var ddx=S.x-t.x, ddy=S.y-t.y, dist=Math.sqrt(ddx*ddx+ddy*ddy);
+    if(dist<260||Math.random()<0.6){ t.dx=ddx/dist*1.7; t.dy=ddy/dist*1.7; }
+    var tx=t.x+t.dx, ty=t.y+t.dy;
+    if(!hitB(tx-8,ty-4,16,8)&&tx>10&&tx<MAPW-10&&ty>40&&ty<MAPH-6){ t.x=tx; t.y=ty; }
+    else { if(!hitB(tx-8,t.y-4,16,8)&&tx>10&&tx<MAPW-10) t.x=tx; else if(!hitB(t.x-8,ty-4,16,8)&&ty>40&&ty<MAPH-6) t.y=ty; else { t.dx=-t.dy*1.5; t.dy=t.dx; } }
+    if(dist<16){ startFight(t); return; }
+  }
+}
+
+/* ---------- drawing ---------- */
+function stick(x,y,col,ph,car){
+  cx.strokeStyle=col; cx.fillStyle=col; cx.lineWidth=2.5; cx.lineCap="round";
+  if(car){ cx.fillStyle="#d32f2f"; cx.fillRect(x-22,y-18,44,16); cx.fillRect(x-12,y-30,24,12); cx.fillStyle="#222"; cx.beginPath(); cx.arc(x-13,y-2,5,0,7); cx.arc(x+13,y-2,5,0,7); cx.fill(); cx.fillStyle="#9cf"; cx.fillRect(x-9,y-28,18,8); return; }
+  var sw=Math.sin(ph)*6;
+  cx.beginPath(); cx.arc(x,y-34,6,0,Math.PI*2); cx.stroke();
+  cx.beginPath(); cx.moveTo(x,y-28); cx.lineTo(x,y-12);
+  cx.moveTo(x,y-24); cx.lineTo(x-8,y-14+sw*0.5); cx.moveTo(x,y-24); cx.lineTo(x+8,y-14-sw*0.5);
+  cx.moveTo(x,y-12); cx.lineTo(x-5+sw,y); cx.moveTo(x,y-12); cx.lineTo(x+5-sw,y); cx.stroke();
+  if(S.items.skate&&col==="#000"){ cx.fillStyle="#ff9800"; cx.fillRect(x-14,y+1,28,3); }
+}
+function draw(){
+  var camx=Math.max(0,Math.min(MAPW-W,S.x-W/2)), camy=Math.max(0,Math.min(MAPH-H,S.y-H/2));
+  cx.save(); cx.translate(-camx,-camy);
+  cx.fillStyle="#3a8a3e"; cx.fillRect(0,0,MAPW,MAPH);
+  ROADS.forEach(function(r){ cx.fillStyle="#9e9e9e"; cx.fillRect(0,r.y-12,MAPW,r.h+24); cx.fillStyle="#444"; cx.fillRect(0,r.y,MAPW,r.h);
+    cx.strokeStyle="#fdd835"; cx.lineWidth=3; cx.setLineDash([30,20]); cx.beginPath(); cx.moveTo(0,r.y+r.h/2); cx.lineTo(MAPW,r.y+r.h/2); cx.stroke(); cx.setLineDash([]); });
+  cx.fillStyle="#9e9e9e"; cx.fillRect(0,1045,MAPW,100);
+  B.forEach(function(b){
+    cx.fillStyle="rgba(0,0,0,.3)"; cx.fillRect(b.x+8,b.y+8,b.w,b.h);
+    cx.fillStyle=b.col; cx.fillRect(b.x,b.y,b.w,b.h);
+    cx.fillStyle="rgba(0,0,0,.25)"; cx.fillRect(b.x,b.y,b.w,40);
+    cx.fillStyle="rgba(255,255,255,.35)"; for(var wx=b.x+16;wx<b.x+b.w-24;wx+=40) for(var wy=b.y+60;wy<b.y+b.h-50;wy+=50) cx.fillRect(wx,wy,22,28);
+    cx.fillStyle="#ffd54a"; cx.fillRect(b.door.x,b.door.y,b.door.w,b.door.h); cx.fillStyle="#000"; cx.fillRect(b.door.x+4,b.door.y+3,b.door.w-8,b.door.h-3);
+    cx.fillStyle=b.id==="hosp"?"#000":"#fff"; cx.font="bold 18px Verdana"; cx.textAlign="center"; cx.fillText(b.name,b.x+b.w/2,b.y+28);
+  });
+  thugs.forEach(function(t){ stick(t.x,t.y,"#b71c1c",walk*3); });
+  stick(S.x,S.y,"#000",walk,S.items.car);
+  cx.restore();
+  var m=S.min%1440, dark=0; if(m>=19*60) dark=Math.min(0.55,(m-19*60)/180*0.55); else if(m<6*60) dark=0.55; else if(m<8*60) dark=0.55*(1-(m-6*60)/120);
+  if(dark>0){ cx.fillStyle="rgba(5,5,40,"+dark+")"; cx.fillRect(0,0,W,H); }
+  if(isNight()&&!paused){ cx.fillStyle="#f66"; cx.font="12px Verdana"; cx.textAlign="right"; cx.fillText("It's dangerous at night. Watch out for thugs.",W-10,H-10); }
+}
+function loop(t){ var dt=Math.min(50,(t-lastT)||16); lastT=t; step(dt); draw(); requestAnimationFrame(loop); }
+
+/* ---------- input ---------- */
+document.addEventListener("keydown",function(e){ keys[e.key]=true; if(e.key.length===1) keys[e.key.toLowerCase()]=true; if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].indexOf(e.key)>=0) e.preventDefault(); if(e.key==="Escape"&&paused&&!fight) close(); });
+document.addEventListener("keyup",function(e){ keys[e.key]=false; if(e.key.length===1) keys[e.key.toLowerCase()]=false; });
+window.addEventListener("blur",function(){ keys={}; });
+
+hud();
+if(S.day===1&&S.min===8*60&&S.cash===50&&!S.job){
+  open("Stick RPG",["<p>You wake up in a strange city with $50 and no idea how you got here.</p><p>Get a job, get stronger, smarter, cooler. Don't be out after 9 PM unless you can fight. Sleep at home to start a new day.</p>"],[["Let's go",close]]);
+} else open("Welcome back",["<p>Day "+S.day+", "+clock()+". Your save was loaded.</p>"],[["Continue",close],["Start over",function(){ S=fresh(); save(); location.reload(); }]]);
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
