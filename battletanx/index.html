@@ -5,31 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BattleTanx</title>
 <style>
-  html,body{margin:0;height:100%;background:#000;color:#eee;font-family:Impact,"Arial Narrow","Arial Black",sans-serif;overflow:hidden}
+  html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;font-size:16px;overflow:hidden}
   #game{position:absolute;inset:0;background:#000}
-  #ui{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
-  .scr{position:relative;width:min(100vw,133.33vh);height:min(100vh,75vw);overflow:hidden;font-size:calc(min(100vw,133.33vh)/32);background:linear-gradient(#000 0,#000 18%,#6a1a08 26%,#1a1a1e 40%,#101014 100%)}
-  .scr:before{content:"";position:absolute;left:0;right:0;top:14%;height:14%;background:repeating-linear-gradient(90deg,#000 0 6%,transparent 6% 9%,#000 9% 20%,transparent 20% 23%);pointer-events:none}
-  .ttl{text-align:center;font-size:3.2em;line-height:.95;letter-spacing:.04em;background:linear-gradient(#fff 0,#b9c6d4 45%,#5b6a7a 50%,#e8eef4 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(.06em .06em 0 #000);font-weight:900;transform:scaleY(1.3)}
-  .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 1.5em}
-  .press{color:#ffd21a;font-size:1.15em;text-shadow:.08em .08em 0 #000;cursor:pointer}
-  .press.blink{animation:bl 1s steps(2) infinite}
-  @keyframes bl{50%{opacity:0}}
-  .small{font:.55em Verdana,sans-serif;color:#bbb;line-height:1.5;max-width:36em}
-  .drop{margin:1em 0;padding:1.2em 2em;border:.15em dashed #9a7a4a;color:#ffd21a;cursor:pointer;background:rgba(0,0,0,.4)}
-  .drop.over{background:rgba(255,210,26,.15)}
-  input{font:1em Verdana;padding:.2em;background:#222;color:#fff;border:.1em solid #9a7a4a;text-transform:uppercase}
+  #ui{position:absolute;inset:0;display:block;background:#000;overflow:auto}
+  .scr{padding:16px}
+  p{margin:0 0 16px}
+  a,.press{color:#fff;cursor:pointer;text-decoration:underline}
+  input{font:16px Arial,Helvetica,sans-serif;padding:2px 4px;background:#000;color:#fff;border:1px solid #fff;text-transform:uppercase;width:5em}
   input[type=password]{text-transform:none}
-  a{color:#ffd21a}
-  #msg{color:#e8321a;font:.55em Verdana;min-height:1.2em;margin-top:.5em}
-  table.k{font:.5em Verdana;color:#ddd;border-collapse:collapse;margin-top:.8em}table.k td{padding:.1em .6em;border:1px solid #555}
-  .row{margin:.35em 0;font-size:.9em}
-  #badge{position:absolute;left:8px;top:8px;z-index:50;background:rgba(0,0,0,.75);color:#ffd21a;font:13px Verdana;padding:6px 10px;border:1px solid #9a7a4a;display:none;pointer-events:auto}
-  #badge b{color:#fff;font-size:18px;letter-spacing:2px}
-  #badge span.x{cursor:pointer;color:#aaa;margin-left:10px}
+  #msg{min-height:1.2em}
+  .drop.over{outline:1px dashed #fff}
+  #badge{position:absolute;left:8px;top:8px;z-index:50;background:#000;color:#fff;font:13px Arial,Helvetica,sans-serif;padding:6px 10px;border:1px solid #fff;display:none;pointer-events:auto}
+  #badge b{font-size:18px;letter-spacing:2px}
+  #badge span.x{cursor:pointer;margin-left:10px;text-decoration:underline}
   #guest{position:absolute;inset:0;display:none;background:#000;align-items:center;justify-content:center}
   #guest video{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
-  #gstat{position:absolute;left:0;right:0;bottom:0;text-align:center;font:12px Verdana;color:#9a7a4a;padding:4px;background:rgba(0,0,0,.5)}
+  #gstat{position:absolute;left:0;right:0;bottom:0;text-align:center;font:12px Arial,Helvetica,sans-serif;color:#fff;padding:4px;background:#000}
 </style>
 </head>
 <body>
@@ -47,9 +38,9 @@ function idb(){ return new Promise(function(res,rej){ var r=indexedDB.open(DB,1)
 function getRom(){ return idb().then(function(db){ return new Promise(function(res){ var t=db.transaction(STORE,"readonly").objectStore(STORE).get("file"); t.onsuccess=function(){ res(t.result||null); }; t.onerror=function(){ res(null); }; }); }).catch(function(){ return null; }); }
 function putRom(rec){ return idb().then(function(db){ return new Promise(function(res){ var t=db.transaction(STORE,"readwrite").objectStore(STORE).put(rec,"file"); t.oncomplete=function(){ res(true); }; t.onerror=function(){ res(false); }; }); }).catch(function(){ return false; }); }
 function delRom(){ return idb().then(function(db){ return new Promise(function(res){ var t=db.transaction(STORE,"readwrite").objectStore(STORE).delete("file"); t.oncomplete=function(){ res(true); }; t.onerror=function(){ res(false); }; }); }).catch(function(){ return false; }); }
-function show(html){ ui.style.display="flex"; ui.innerHTML="<div class='scr'><div class='center'>"+html+"</div></div>"; }
+function show(html){ ui.style.display="block"; ui.innerHTML="<div class='scr'>"+html+"</div>"; }
 function hide(){ ui.style.display="none"; ui.innerHTML=""; }
-function title(){ return "<div class='ttl'>BATTLE<br>TANX</div><div style='height:1em'></div>"; }
+function title(){ return "<p>BattleTanx</p>"; }
 function roomCode(){ var s="", c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; for(var i=0;i<4;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
 
 /* ---------- ROM check: N64 magic bytes in any byte order ---------- */
@@ -62,28 +53,27 @@ function romInfo(buf){ var b=new Uint8Array(buf); if(b.length<0x40) return null;
 var KEYMAP={88:0,90:1,13:3,38:4,40:5,37:6,39:7,81:10,69:11,16:12,68:16,65:17,83:18,87:19,76:20,74:21,75:22,73:23};
 var STICK=[16,17,18,19,20,21,22,23];
 var EJS_CONTROLS={0:{0:{value:88,value2:"BUTTON_2"},1:{value:90,value2:"BUTTON_4"},3:{value:13,value2:"START"},4:{value:38,value2:"DPAD_UP"},5:{value:40,value2:"DPAD_DOWN"},6:{value:37,value2:"DPAD_LEFT"},7:{value:39,value2:"DPAD_RIGHT"},10:{value:81,value2:"LEFT_TOP_SHOULDER"},11:{value:69,value2:"RIGHT_TOP_SHOULDER"},12:{value:16,value2:"LEFT_BOTTOM_SHOULDER"},16:{value:68,value2:"LEFT_STICK_X:+1"},17:{value:65,value2:"LEFT_STICK_X:-1"},18:{value:83,value2:"LEFT_STICK_Y:+1"},19:{value:87,value2:"LEFT_STICK_Y:-1"},20:{value:76,value2:"RIGHT_STICK_X:+1"},21:{value:74,value2:"RIGHT_STICK_X:-1"},22:{value:75,value2:"RIGHT_STICK_Y:+1"},23:{value:73,value2:"RIGHT_STICK_Y:-1"}},1:{},2:{},3:{}};
-var CONTROLS_TABLE="<table class='k'><tr><td></td><td>STICK</td><td>A</td><td>B</td><td>Z</td><td>START</td><td>C BUTTONS</td><td>L / R</td></tr><tr><td>KEYS</td><td>W A S D (arrows = d-pad)</td><td>X</td><td>Z</td><td>SHIFT</td><td>ENTER</td><td>I J K L</td><td>Q / E</td></tr><tr><td>PAD</td><td>left stick / d-pad</td><td>A</td><td>B or X</td><td>triggers</td><td>Start</td><td>right stick</td><td>LB / RB</td></tr></table>";
+var CONTROLS_TABLE="<p>keys: wasd stick, x = a, z = b, shift = z, enter = start, ijkl = c, q/e = l/r. gamepads 1-4 work.</p>";
 
 /* ---------- screens ---------- */
 function gate(){ var ok=false; try{ var qp=new URLSearchParams(location.search); if(qp.get("pw")===PASS) sessionStorage.setItem("btx","1"); ok=sessionStorage.getItem("btx")==="1"; }catch(e){} if(ok){ boot(); return; }
-  show(title()+"<div class='small'>Restricted area. Enter the password.</div><div style='margin:.6em'><input id='pw' type='password'> <span class='press' id='go'>ENTER</span></div><div id='msg'></div>");
-  var inp=document.getElementById("pw"); function tryIt(){ if(inp.value===PASS){ try{ sessionStorage.setItem("btx","1"); }catch(e){} boot(); } else { document.getElementById("msg").textContent="Wrong. Three of something."; inp.value=""; } }
+  show(title()+"<p><input id='pw' type='password' style='width:8em'> <span class='press' id='go'>enter</span></p><p id='msg'></p>");
+  var inp=document.getElementById("pw"); function tryIt(){ if(inp.value===PASS){ try{ sessionStorage.setItem("btx","1"); }catch(e){} boot(); } else { document.getElementById("msg").textContent="wrong"; inp.value=""; } }
   document.getElementById("go").onclick=tryIt; inp.onkeydown=function(e){ if(e.key==="Enter") tryIt(); }; inp.focus(); }
 function boot(){ var qp=new URLSearchParams(location.search), dev=qp.get("rom"), join=qp.get("join");
   if(join){ guestJoin(join.toUpperCase()); return; }
   if(dev&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname)){ fetch(dev).then(function(r){ return r.arrayBuffer(); }).then(function(b){ var info=romInfo(b); if(!info) throw new Error("not a rom"); ready({name:info.name,file:"dev",bytes:info.bytes}); }).catch(function(e){ pick("Dev ROM failed: "+e.message); }); return; }
   getRom().then(function(rec){ if(rec&&rec.bytes){ ready(rec); } else pick(); }); }
 function pick(msg){
-  show(title()+"<div class='small'>This page runs the real N64 game in your browser (mupen64plus compiled to WebAssembly). It needs your own BattleTanx ROM file (.z64, .n64 or .v64). The file is stored only in this browser, nothing is uploaded.</div><div class='drop' id='drop'>CLICK OR DROP YOUR ROM HERE</div><input id='file' type='file' accept='.z64,.n64,.v64,.rom,.bin' style='display:none'><div id='msg'>"+(msg||"")+"</div><div class='row'><span class='small'>Joining a friend instead? Room code </span><input id='jcode' maxlength='4' style='width:4em;font-size:.8em'> <span class='press' id='jgo' style='font-size:.9em'>JOIN</span></div><div class='small' style='margin-top:1em'>No ROM? The <a href='/battletanx/clone/'>hand-made clone</a> still works without one.</div>");
+  show(title()+"<p><span class='press drop' id='drop'>load rom</span></p><input id='file' type='file' accept='.z64,.n64,.v64,.rom,.bin' style='display:none'><p id='msg'>"+(msg||"")+"</p><p>join a room: <input id='jcode' maxlength='4'> <span class='press' id='jgo'>join</span></p><p><a href='/'>home</a></p>");
   var d=document.getElementById("drop"), f=document.getElementById("file"); d.onclick=function(){ f.click(); }; f.onchange=function(){ if(f.files[0]) load(f.files[0]); };
   d.ondragover=function(e){ e.preventDefault(); d.classList.add("over"); }; d.ondragleave=function(){ d.classList.remove("over"); }; d.ondrop=function(e){ e.preventDefault(); d.classList.remove("over"); if(e.dataTransfer.files[0]) load(e.dataTransfer.files[0]); };
   wireJoin();
-  function load(file){ document.getElementById("msg").textContent="Reading "+file.name+"..."; file.arrayBuffer().then(function(b){ var info=romInfo(b); if(!info){ document.getElementById("msg").textContent="That is not an N64 ROM (no N64 header)."; return; } var rec={name:info.name,file:file.name,bytes:info.bytes,when:Date.now()}; putRom(rec).then(function(){ ready(rec); }); }); } }
-function wireJoin(){ var jc=document.getElementById("jcode"), jg=document.getElementById("jgo"); if(!jc) return; function go(){ var c=jc.value.trim().toUpperCase(); if(c.length!==4){ document.getElementById("msg").textContent="Room codes are 4 letters."; return; } location.search="?join="+c; } jg.onclick=go; jc.onkeydown=function(e){ e.stopPropagation(); if(e.key==="Enter") go(); }; }
+  function load(file){ document.getElementById("msg").textContent="reading "+file.name+"..."; file.arrayBuffer().then(function(b){ var info=romInfo(b); if(!info){ document.getElementById("msg").textContent="not an n64 rom"; return; } var rec={name:info.name,file:file.name,bytes:info.bytes,when:Date.now()}; ready(rec); putRom(rec); }); } }
+function wireJoin(){ var jc=document.getElementById("jcode"), jg=document.getElementById("jgo"); if(!jc) return; function go(){ var c=jc.value.trim().toUpperCase(); if(c.length!==4){ document.getElementById("msg").textContent="codes are 4 letters"; return; } location.search="?join="+c; } jg.onclick=go; jc.onkeydown=function(e){ e.stopPropagation(); if(e.key==="Enter") go(); }; }
 function ready(rec){
-  show(title()+"<div class='small'>ROM: <b style='color:#fff'>"+rec.name+"</b> ("+rec.file+", "+(rec.bytes.length/1048576).toFixed(0)+" MB)</div><div style='height:.6em'></div><div class='press blink' id='start'>PRESS START</div><div class='row'><span class='press' id='host' style='font-size:.9em'>HOST A ROOM FOR FRIENDS</span></div><div class='row'><span class='small'>or join a friend's room: </span><input id='jcode' maxlength='4' style='width:4em;font-size:.8em'> <span class='press' id='jgo' style='font-size:.9em'>JOIN</span></div>"+CONTROLS_TABLE+
-    "<div class='small' style='margin-top:.8em'>Local multiplayer is the game's own: Game Setup &gt; Players, then Deathmatch or Battlelord, split-screen for 2-4 with up to four controllers. Online: the host's game is streamed to friends and their buttons come back as controllers 2-4. Saves go to a virtual Controller Pak in this browser. <span id='forget' style='cursor:pointer;color:#ffd21a'>Forget this ROM</span> &middot; <a href='/battletanx/clone/'>clone</a> &middot; <a href='/'>home</a></div>");
-  document.getElementById("start").onclick=function(){ run(rec,false); }; document.getElementById("host").onclick=function(){ run(rec,true); }; document.getElementById("forget").onclick=function(){ delRom().then(function(){ pick("ROM removed from this browser."); }); }; wireJoin();
+  show(title()+"<p>rom: "+rec.name.toLowerCase()+"</p><p><span class='press' id='start'>press start</span></p><p><span class='press' id='host'>host a room</span></p><p>join a room: <input id='jcode' maxlength='4'> <span class='press' id='jgo'>join</span></p>"+CONTROLS_TABLE+"<p><span class='press' id='forget'>forget rom</span></p><p><a href='/'>home</a></p>");
+  document.getElementById("start").onclick=function(){ run(rec,false); }; document.getElementById("host").onclick=function(){ run(rec,true); }; document.getElementById("forget").onclick=function(){ delRom().then(function(){ pick(""); }); }; wireJoin();
   document.addEventListener("keydown",function h(e){ if(e.target&&e.target.tagName==="INPUT") return; if(e.key==="Enter"){ document.removeEventListener("keydown",h); run(rec,false); } }); }
 function run(rec,host){
   hide();
@@ -93,7 +83,7 @@ function run(rec,host){
   window.EJS_defaultOptions={"mupen64plus-169screensize":"640x480","mupen64plus-aspect":"4:3","mupen64plus-rdp-plugin":"gliden64","mupen64plus-rsp-plugin":"hle","mupen64plus-pak1":"memory","mupen64plus-pak2":"memory","mupen64plus-pak3":"memory","mupen64plus-pak4":"memory"};
   window.EJS_defaultControls=EJS_CONTROLS;
   window.EJS_onGameStart=function(){ if(host) hostRoom(); };
-  var s=document.createElement("script"); s.src="https://cdn.emulatorjs.org/stable/data/loader.js"; s.onerror=function(){ show(title()+"<div class='small'>Could not load the emulator from cdn.emulatorjs.org. Check your connection and reload.</div>"); }; document.body.appendChild(s); }
+  var s=document.createElement("script"); s.src="https://cdn.emulatorjs.org/stable/data/loader.js"; s.onerror=function(){ show(title()+"<p>could not load the emulator. check your connection and reload.</p>"); }; document.body.appendChild(s); }
 
 /* ---------- HOST: stream the game out, take friends' inputs in ---------- */
 var net={peer:null,conns:[],slots:{},stream:null};
@@ -110,15 +100,15 @@ function hostRoom(){
 }
 function getStream(){ if(net.stream) return net.stream; var e=window.EJS_emulator; try{ var f=e.collectScreenRecordingMediaTracks?e.collectScreenRecordingMediaTracks.bind(e):e.gameManager.collectScreenRecordingMediaTracks.bind(e.gameManager); net.stream=f(e.canvas,30); }catch(x){ try{ net.stream=e.canvas.captureStream(30); }catch(y){ net.stream=null; } } return net.stream; }
 function callOut(peerId){ var st=getStream(); if(!st) return; try{ net.peer.call(peerId,st); }catch(e){} }
-function renderBadge(code){ var names=Object.keys(net.slots).map(function(s){ return "P"+(+s+1); }); setBadge("ROOM <b>"+code+"</b> &nbsp; friends: "+(names.length?names.join(" "):"none yet")+" &nbsp; <span style='color:#aaa'>they open this page, enter the password, type the code</span> <span class='x' id='bx'>hide</span>"); document.getElementById("bx").onclick=function(){ setBadge(""); }; }
+function renderBadge(code){ var names=Object.keys(net.slots).map(function(s){ return "P"+(+s+1); }); setBadge("room <b>"+code+"</b> &nbsp; "+(names.length?names.join(" "):"waiting")+" <span class='x' id='bx'>hide</span>"); document.getElementById("bx").onclick=function(){ setBadge(""); }; }
 
 /* ---------- GUEST: show the host's stream, send our buttons ---------- */
 function guestJoin(code){
-  var g=document.getElementById("guest"), v=document.getElementById("gv"), st=document.getElementById("gstat"); hide(); g.style.display="flex"; st.textContent="Joining room "+code+"...";
+  var g=document.getElementById("guest"), v=document.getElementById("gv"), st=document.getElementById("gstat"); hide(); g.style.display="flex"; st.textContent="joining "+code+"...";
   var peer=new Peer({debug:1}), conn=null, slot=-1;
-  peer.on("error",function(e){ st.textContent="Could not join: "+e.type+". Check the code and that the host is in the game. Reload to retry."; });
-  peer.on("open",function(){ conn=peer.connect("btx-"+code,{reliable:false}); conn.on("open",function(){ st.textContent="Connected, waiting for the picture..."; }); conn.on("data",function(d){ if(d.t==="slot"){ slot=d.slot; st.textContent="You are PLAYER "+(slot+1)+" in room "+code+". Waiting for the picture... (the host must set Players to "+(slot+1)+"+ in Game Setup)"; } }); conn.on("close",function(){ st.textContent="The host left. Reload to rejoin."; }); });
-  peer.on("call",function(call){ call.answer(); call.on("stream",function(s){ v.srcObject=s; v.muted=false; v.play().catch(function(){ v.muted=true; v.play(); st.textContent+=" (click for sound)"; v.onclick=function(){ v.muted=false; }; }); st.textContent="PLAYER "+(slot+1)+" in room "+code+". Keys: WASD stick, X=A, Z=B, Shift=Z, Enter=Start, IJKL=C, Q/E=L/R, or a gamepad."; }); });
+  peer.on("error",function(e){ st.textContent="could not join ("+e.type+"). reload to retry."; });
+  peer.on("open",function(){ conn=peer.connect("btx-"+code,{reliable:false}); conn.on("open",function(){ st.textContent="connected"; }); conn.on("data",function(d){ if(d.t==="slot"){ slot=d.slot; st.textContent="player "+(slot+1)+" in "+code; } }); conn.on("close",function(){ st.textContent="host left"; }); });
+  peer.on("call",function(call){ call.answer(); call.on("stream",function(s){ v.srcObject=s; v.muted=false; v.play().catch(function(){ v.muted=true; v.play(); st.textContent+=" (click for sound)"; v.onclick=function(){ v.muted=false; }; }); st.textContent="player "+(slot+1)+" in "+code; }); });
   var down={}; function send(j,val){ if(conn&&conn.open) conn.send({t:"i",j:j,v:val}); }
   document.addEventListener("keydown",function(e){ var j=KEYMAP[e.keyCode]; if(j===undefined||e.repeat) return; e.preventDefault(); down[j]=1; send(j,STICK.indexOf(j)>=0?0x7fff:1); });
   document.addEventListener("keyup",function(e){ var j=KEYMAP[e.keyCode]; if(j===undefined) return; e.preventDefault(); down[j]=0; send(j,0); });
