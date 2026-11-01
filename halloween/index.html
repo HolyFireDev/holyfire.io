@@ -167,8 +167,8 @@ function scream(){ try{ var c=ac(), t=c.currentTime, dur=1.1;
   var nb=c.createBuffer(1,c.sampleRate*dur,c.sampleRate), d=nb.getChannelData(0); for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.5;
   var ns=c.createBufferSource(); ns.buffer=nb; var nf=c.createBiquadFilter(); nf.type="bandpass"; nf.frequency.value=2200; nf.Q.value=0.7; ns.connect(nf); nf.connect(sh); ns.start(t);
   sh.connect(g); g.connect(c.destination); }catch(x){} }
-function scare(src){ if(scaring) return; scaring=true; var e=document.getElementById("scare");
-  var freddy = !src; document.getElementById("scareimg").src = src || "img/goldenfreddy.png";
+function scare(src, huge){ if(scaring) return; scaring=true; var e=document.getElementById("scare");
+  var freddy = !src; var si=document.getElementById("scareimg"); si.src = src || "img/goldenfreddy.png"; si.style.height = huge ? "260vh" : "100vh"; si.style.maxWidth = huge ? "none" : "100vw";
   if(freddy){ if(Math.random()<0.5) fart(); else scream(); }
   try{ speechSynthesis.cancel(); }catch(x){}
   setTimeout(function(){ e.style.display="none"; try{ window.getSelection().removeAllRanges(); }catch(x){} setTimeout(function(){scaring=false;},800); }, 1100);
@@ -180,7 +180,7 @@ document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
 document.addEventListener("pointerdown", function(){ try{ac();}catch(x){} }, {once:true});
 // type 1987 anywhere = bite of 87
 var typed="";
-document.addEventListener("keydown", function(e){ if(e.key && e.key.length===1){ typed=(typed+e.key).slice(-4); if(typed==="1987"){ typed=""; scare(); } } });
+document.addEventListener("keydown", function(e){ if(e.key && e.key.length===1){ typed=(typed+e.key).slice(-4); if(typed==="1987"){ typed=""; scare(); } if(typed.slice(-2)==="64"){ typed=""; scare("img/scare5.jpg", true); } } });
 // secret dials
 document.getElementById("secret").onclick=function(){ var d=document.getElementById("dials"); d.style.display=d.style.display==="none"?"block":"none"; };
 document.getElementById("dialsclose").onclick=function(e){ e.preventDefault(); document.getElementById("dials").style.display="none"; };
