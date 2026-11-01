@@ -100,9 +100,12 @@ function pile(id, count, h){
     box.appendChild(im);
   }
 }
-pile("pile", 45, 620); pile("pile2", 25, 500);
+// how many images this time? reroll every refresh. sometimes almost none, sometimes way too many
+var MOOD=Math.random(), MULT = MOOD<0.1 ? 0.1 : (MOOD<0.8 ? 0.3+Math.random()*1.4 : 2+Math.random()*2.5);
+function howmany(base){ return Math.max(1, Math.round(base*MULT*(0.6+Math.random()*0.8))); }
+pile("pile", howmany(45), 620); pile("pile2", howmany(25), 500);
 (function(){ var bg=document.getElementById("bg"), H=document.body.scrollHeight; bg.style.height=H+"px";
-  for(var i=0;i<60;i++){ var im=document.createElement("img"); im.src="img/saw"+(1+Math.floor(Math.random()*12))+".jpg";
+  for(var i=0,N=howmany(60);i<N;i++){ var im=document.createElement("img"); im.src="img/saw"+(1+Math.floor(Math.random()*12))+".jpg";
     var w=80+Math.floor(Math.random()*600), ht=50+Math.floor(Math.random()*450); im.style.width=w+"px"; im.style.height=ht+"px";
     var r=Math.random(); im.style.objectFit = r<0.4?"fill":(r<0.8?"cover":"none"); im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%";
     im.style.left=Math.floor(Math.random()*window.innerWidth-w*0.3)+"px"; im.style.top=Math.floor(Math.random()*H)+"px";
