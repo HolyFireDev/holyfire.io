@@ -87,6 +87,8 @@ on top % <span id="v_ontop">15</span><br><input id="d_ontop" type="range" min="0
 spin seconds <span id="v_spin">100</span><br><input id="d_spin" type="range" min="1" max="300" value="100" style="width:100%"><br>
 <button id="d_reroll" style="font-size:13px">reroll</button>
 </div>
+<div id="scare" style="display:none;position:fixed;inset:0;background:#000;z-index:99999;align-items:center;justify-content:center"><img src="img/goldenfreddy.png" style="height:100vh;max-width:100vw;object-fit:contain;border:0;margin:0;animation:jolt .08s infinite"></div>
+<style>@keyframes jolt{0%{transform:translate(0,0) scale(1.05)}25%{transform:translate(-14px,9px) scale(1.1)}50%{transform:translate(12px,-10px) scale(1.07)}75%{transform:translate(-8px,-12px) scale(1.12)}100%{transform:translate(10px,11px) scale(1.05)}}</style>
 <div id="overlay"><div>
   <b>THE WHEEL HAS SPOKEN:</b><br><br>
   <span id="winner" style="font-size:44px;color:red"></span><br><br>
@@ -145,6 +147,14 @@ function render(){
     bg.appendChild(im); }
 }
 render();
+// golden freddy if u highlight anything
+var scaring=false;
+function scare(){ if(scaring) return; scaring=true; var e=document.getElementById("scare"); e.style.display="flex"; try{ speechSynthesis.cancel(); }catch(x){}
+  setTimeout(function(){ e.style.display="none"; try{ window.getSelection().removeAllRanges(); }catch(x){} setTimeout(function(){scaring=false;},800); }, 1100); }
+function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0) scare(); }
+document.addEventListener("mouseup", function(){ setTimeout(checkSel,10); });
+document.addEventListener("keyup", function(e){ if(e.shiftKey || e.key==="a" && (e.ctrlKey||e.metaKey)) setTimeout(checkSel,10); });
+document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
 // secret dials
 document.getElementById("secret").onclick=function(){ var d=document.getElementById("dials"); d.style.display=d.style.display==="none"?"block":"none"; };
 document.getElementById("dialsclose").onclick=function(e){ e.preventDefault(); document.getElementById("dials").style.display="none"; };
