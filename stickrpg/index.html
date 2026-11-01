@@ -27,7 +27,9 @@
   .stick b{position:absolute;left:0;right:0;top:-20px;text-align:center;font-size:11px;color:#ccc;font-weight:normal}
   #chubtn{display:none;position:fixed;left:50%;margin-left:-40px;bottom:30px;width:80px;padding:10px 0;text-align:center;border-radius:20px;background:rgba(255,200,0,.5);border:2px solid rgba(255,255,255,.5);color:#fff;font-size:12px;z-index:3;touch-action:none;user-select:none}
   @media (pointer:coarse){ #chubtn{display:block} }
-  #modebtn{margin-left:auto;background:#444;color:#ffd54a;border:1px solid #888;cursor:pointer;font-family:inherit;font-size:12px;padding:2px 8px}
+  .hudbtn{background:#444;color:#ffd54a;border:1px solid #888;cursor:pointer;font-family:inherit;font-size:12px;padding:2px 8px}
+  #statbtn{margin-left:auto}
+  #modebtn{background:#444;color:#ffd54a;border:1px solid #888;cursor:pointer;font-family:inherit;font-size:12px;padding:2px 8px}
   @media (pointer:coarse){ .stick{display:block} }
   @media (max-width:820px){
     #wrap{width:100%;margin:0}
@@ -49,7 +51,8 @@
     <span>INT <b id="h_int">1</b></span>
     <span>CHA <b id="h_cha">1</b></span>
     <span>Job: <b id="h_job">none</b></span>
-    <button id="modebtn">First person (F)</button>
+    <button id="statbtn" class="hudbtn">Stats (I)</button>
+    <button id="modebtn" class="hudbtn">First person (F)</button>
   </div>
   <canvas id="c" width="800" height="560"></canvas>
   <div id="lstick" class="stick"><b>move</b><i></i></div><div id="chubtn">bombchu</div><div id="rstick" class="stick"><b id="rlabel">pan</b><i></i></div>
@@ -68,8 +71,8 @@ var menu=document.getElementById("menu");
 
 /* ---------- state ---------- */
 var S;
-function fresh(){ return { day:1, min:8*60, cash:50, bank:0, hp:100, maxhp:100, str:1, int:1, cha:1,
-  job:null, items:{}, x:190, y:360, ang:-1.5708, fps:false }; }
+function fresh(){ return { day:1, min:8*60, cash:100, bank:0, loan:0, hp:100, maxhp:100, str:1, int:1, cha:1, karma:0,
+  job:null, items:{}, x:190, y:360, ang:-1.5708, fps:false, created:false, name:"Anonymous", len:0, home:0, fights:0, powder:0, over:false }; }
 function save(){ try{ localStorage.setItem("stickrpg", JSON.stringify(S)); }catch(e){} }
 function load(){ try{ var s=localStorage.getItem("stickrpg"); if(s){ S=JSON.parse(s); return true; } }catch(e){} S=fresh(); return false; }
 load();
@@ -92,8 +95,13 @@ var B=[
 var ROADS=[{y:330,h:100},{y:680,h:100}];
 B.forEach(function(b){ b.door={x:b.x+b.w/2-22, y:b.y+b.h-4, w:44, h:16}; });
 
+var cars=[], carHurt=0;
 var keys={}, thugs=[], paused=false, fight=null, tgt=null, cam={x:0,y:0}, pan={x:0,y:0}, LS={x:0,y:0}, RS={x:0,y:0}, shotT=0, hurtT=0;
 if(S.ang===undefined){ S.ang=-1.5708; S.fps=false; }
+if(S.karma===undefined){ S.karma=0; S.loan=0; S.created=true; S.name="Anonymous"; S.len=0; S.home=0; S.fights=0; S.powder=0; S.over=false; }
+var HOMES=[{n:"Your Apartment",v:0,d:"A mattress on the floor"},{n:"Your Condo",v:25000,d:"A real bed, a balcony, a doorman who judges you"},{n:"Your Mansion",v:100000,d:"Marble floors, a pool, a butler named Jeeves"},{n:"Your Castle",v:500000,d:"A moat. An actual moat. Megalomania achieved"}];
+function netWorth(){ return Math.floor(S.cash+S.bank-S.loan+HOMES[S.home].v+(S.items.car?6000:0)+(S.items.skate?250:0)); }
+function syncHome(){ B[0].name=HOMES[S.home].n; }
 var JOBS={
   store:[{t:"Clerk",w:7,r:{}},{t:"Shift Manager",w:12,r:{int:8,cha:8}},{t:"Store Manager",w:22,r:{int:20,cha:18}}],
   office:[{t:"Intern",w:12,r:{int:10}},{t:"Analyst",w:26,r:{int:25,cha:10}},{t:"Manager",w:55,r:{int:40,cha:25}},{t:"CEO",w:140,r:{int:70,cha:50}}],
@@ -113,7 +121,14 @@ function hud(){
   document.getElementById("h_str").textContent=S.str;
   document.getElementById("h_int").textContent=S.int;
   document.getElementById("h_cha").textContent=S.cha;
-  document.getElementById("h_job").textContent=S.job?jobTitle(S.job):"none";
+  document.getElementById("h_job").textContent=S.job?jobTitle(S.job):"McSlave";
+  syncHome();
+}
+function statsPanel(){
+  if(S.over) return;
+  var l=[]; for(var k in S.items) if(S.items[k]) l.push((k==="car"?"Car":k==="skate"?"Skateboard":WEAPONS[k]?WEAPONS[k].n:k==="chus"?"Bombchus":k==="oil"?"Lamp Oil":k.charAt(0).toUpperCase()+k.slice(1))+(S.items[k]>1?" x"+S.items[k]:""));
+  if(S.powder>0) l.push("Mystery Powder x"+S.powder);
+  open("Stats: "+S.name,["<p>Job title: <b>"+(S.job?jobTitle(S.job):"McSlave")+"</b></p><p>CHARM "+S.cha+" &nbsp; STRENGTH "+S.str+" &nbsp; INTELLIGENCE "+S.int+" &nbsp; KARMA "+S.karma+"</p><p>Cash $"+Math.floor(S.cash)+" &nbsp; Bank $"+Math.floor(S.bank)+" &nbsp; Loans $"+Math.floor(S.loan)+" &nbsp; Home: "+HOMES[S.home].n.replace("Your ","")+"</p><p><b style='color:#ffd54a'>NET WORTH: $"+netWorth()+"</b> (cash + bank - loans + property)</p><p>Day "+S.day+(S.len?" of "+S.len:" (unlimited)")+" &nbsp; Weapon: "+weaponName()+"</p><p>Inventory: "+(l.length?l.join(", "):"pocket lint")+"</p>"],[["Close",close]]);
 }
 function meets(r){ return (!r.str||S.str>=r.str)&&(!r.int||S.int>=r.int)&&(!r.cha||S.cha>=r.cha); }
 function jobLevel(id){ var L=JOBS[id], best=-1; for(var i=0;i<L.length;i++) if(meets(L[i].r)) best=i; return best; }
@@ -121,19 +136,30 @@ function jobTitle(id){ var l=jobLevel(id); return l<0?"fired":JOBS[id][l].t; }
 function reqStr(r){ var a=[]; for(var k in r) a.push(k.toUpperCase()+" "+r[k]); return a.length?a.join(", "):"none"; }
 function addTime(h){ S.min+=Math.round(h*60); checkPassOut(); }
 function checkPassOut(){
+  if(S.over) return;
   if(S.min>=28*60){ // 4 AM
     S.min=8*60; S.day++; S.cash=Math.max(0,S.cash-50); S.hp=Math.max(10,S.hp-20);
     S.x=190; S.y=360; interest(); thugs=[]; fight=null;
     open("You passed out", ["<p>You stayed up way too late and passed out in the street. Someone took $50 from your pockets. You wake up at home.</p>"], [["OK",close]]);
   }
 }
-function interest(){ S.bank=Math.floor(S.bank*1.02); }
-function newDay(){ S.min=8*60; S.day++; S.hp=S.maxhp; interest(); thugs=[]; }
+function interest(){ S.bank=Math.floor(S.bank*1.02); S.loan=Math.floor(S.loan*1.05); }
+function newDay(){ S.min=8*60; S.day++; S.hp=S.maxhp; interest(); thugs=[]; cars=[]; if(S.len&&S.day>S.len) gameOver(); }
+function rating(nw){ var r=nw<1000?"UTTER FAILURE":nw<10000?"LOSER":nw<50000?"AVERAGE JOE":nw<250000?"BIG SHOT":nw<1000000?"TYCOON":"MEGALOMANIAC"; if(S.karma<=-15) r+=" (and a scumbag)"; else if(S.karma>=15) r+=" (and a saint)"; return r; }
+function gameOver(why){
+  S.over=true; paused=true; fight=null; var nw=netWorth();
+  menu.style.display="block"; menu.innerHTML="<h2>"+(why?"GAME OVER":"TIME'S UP")+"</h2><div style='position:relative;border:2px solid #ffd54a;padding:10px'>"+(why?"<p>"+why+"</p>":"<p>Day "+S.len+" is over. Final report:</p>")+
+    "<p><b>"+S.name+"</b> &nbsp; "+(S.job?jobTitle(S.job):"McSlave")+"</p><p>CHARM "+S.cha+" &nbsp; STRENGTH "+S.str+" &nbsp; INTELLIGENCE "+S.int+" &nbsp; KARMA "+S.karma+"</p><p>Cash $"+Math.floor(S.cash)+" + Bank $"+Math.floor(S.bank)+" - Loans $"+Math.floor(S.loan)+" + Property $"+(HOMES[S.home].v+(S.items.car?6000:0)+(S.items.skate?250:0))+"</p><p style='font-size:22px;color:#ffd54a'>NET WORTH: $"+nw+"</p>"+
+    "<div style='position:absolute;right:10px;top:30px;transform:rotate(-18deg);border:4px solid #e33;color:#e33;font:bold 26px Impact,Verdana;padding:4px 10px;opacity:.85'>"+rating(nw)+"</div></div>";
+  var b=document.createElement("button"); b.textContent="Start a new game"; b.onclick=function(){ S=fresh(); save(); location.reload(); }; menu.appendChild(b);
+  try{ localStorage.removeItem("stickrpg"); }catch(e){}
+}
 var pend=""; function msg(t){ pend=t; var m=document.getElementById("msg"); if(m) m.textContent=t; hud(); save(); }
 function menuClosed(){ return menu.style.display==="none"; }
 
 /* ---------- menu system ---------- */
 function open(title, html, buttons){
+  if(S.over) return;
   paused=true; menu.style.display="block";
   menu.innerHTML="<h2>"+title+"</h2>"+(html||[]).join("");
   (buttons||[]).forEach(function(b){
@@ -163,15 +189,16 @@ function workBtn(id, reopen){
 
 /* ---------- buildings ---------- */
 function home(){
-  var bt=[["Sleep until morning (heals, +2% bank interest)",function(){ newDay(); S.x=190;S.y=360; msg("Zzz... A new day. Day "+S.day+"."); home(); }]];
+  var bt=[["Sleep until morning (heals, +2% bank interest)",function(){ newDay(); S.x=190;S.y=360; var bonus=""; if(S.home===1){ S.cha++; bonus=" Condo life: CHA +1."; } if(S.home===2){ S.cha++; S.int++; S.str++; bonus=" Mansion life: all stats +1."; } if(S.home===3){ S.cha+=2; S.int+=2; S.str+=2; bonus=" Castle life: all stats +2."; } msg("Zzz... A new day. Day "+S.day+"."+bonus); if(!S.over) home(); }]];
   if(S.items.computer) bt.push(["Study on your computer (2 hrs, +1 INT)",function(){ S.int++; addTime(2); msg("You read Wikipedia for 2 hours. INT +1."); if(!menuClosed()) home(); }]);
   if(S.items.tv) bt.push(["Watch TV (2 hrs, +1 CHA)",function(){ S.cha++; addTime(2); msg("You learned some great one-liners. CHA +1."); if(!menuClosed()) home(); }]);
   if(S.items.weights) bt.push(["Lift weights (2 hrs, +1 STR)",function(){ S.str++; addTime(2); msg("Grunt. STR +1."); if(!menuClosed()) home(); }]);
-  bt.push(["Buy stuff for the apartment",function(){ homeShop(); }]);
+  bt.push(["Buy stuff for the place",function(){ homeShop(); }]);
+  if(S.home<3) bt.push(["Real estate: upgrade to "+HOMES[S.home+1].n.replace("Your ","")+" - $"+HOMES[S.home+1].v,function(){ var h=HOMES[S.home+1]; if(S.cash<h.v){ msg("Not enough cash. Try the bank."); return; } S.cash-=h.v; S.home++; syncHome(); msg("You moved into a "+h.n.replace("Your ","")+"! Net worth went up, not down."); home(); }, S.cash<HOMES[S.home+1].v]);
   if(S.items.oil>0) bt.push(["Drink lamp oil (+10 HP, "+S.items.oil+" left)",function(){ S.items.oil--; S.hp=Math.min(S.maxhp,S.hp+10); msg("Tastes awful. +10 HP."); home(); }]);
   bt.push(["Inventory",function(){ inv(home); }]);
   bt.push(["Leave",close]);
-  open("Your Apartment",["<p>Home sweet home. A mattress on the floor"+(S.items.tv?", a TV":"")+(S.items.computer?", a computer":"")+(S.items.weights?", a bench press":"")+".</p>"],bt);
+  open(HOMES[S.home].n,["<p>Home sweet home. "+HOMES[S.home].d+(S.items.tv?", a TV":"")+(S.items.computer?", a computer":"")+(S.items.weights?", a bench press":"")+".</p>"],bt);
 }
 function homeShop(){
   function buy(k,n,p){ return [n+" - $"+p+(S.items[k]?" (owned)":""),function(){ if(S.cash<p){msg("Not enough cash.");return;} S.cash-=p; S.items[k]=1; msg("Bought "+n+"."); homeShop(); }, !!S.items[k]||S.cash<p]; }
@@ -209,9 +236,12 @@ function store(first){
 }
 function bank(){
   function amt(){ var v=parseInt(prompt("How much?","100"),10); return isNaN(v)||v<=0?0:v; }
-  open("Bank",["<p>Cash: $"+Math.floor(S.cash)+" &nbsp; Account: $"+Math.floor(S.bank)+"</p><p>2% interest every night. Muggers can't take what's in here.</p>"],[
+  var maxLoan=Math.max(0,2000+S.day*500+Math.floor(S.bank*0.5)-S.loan);
+  open("Bank",["<p>Cash: $"+Math.floor(S.cash)+" &nbsp; Account: $"+Math.floor(S.bank)+" &nbsp; Loan: $"+Math.floor(S.loan)+"</p><p>2% interest on savings every night. 5% interest on loans every night. Muggers can't take what's in here.</p>"],[
     ["Deposit",function(){ var v=Math.min(amt(),Math.floor(S.cash)); S.cash-=v; S.bank+=v; msg("Deposited $"+v+"."); bank(); }],
     ["Withdraw",function(){ var v=Math.min(amt(),Math.floor(S.bank)); S.bank-=v; S.cash+=v; msg("Withdrew $"+v+"."); bank(); }],
+    ["Take a loan (up to $"+maxLoan+")",function(){ var v=Math.min(amt(),maxLoan); if(v<=0){ msg("The loan officer laughs."); return; } S.loan+=v; S.cash+=v; msg("Borrowed $"+v+". Don't forget to pay it back."); bank(); }, maxLoan<=0],
+    ["Repay loan",function(){ var v=Math.min(amt(),Math.floor(S.loan),Math.floor(S.cash)); S.loan-=v; S.cash-=v; msg("Repaid $"+v+"."); bank(); }, S.loan<=0],
     ["Leave",close]]);
 }
 function uni(){
@@ -229,6 +259,15 @@ function bar(){
   open("The Bar",["<p>Dim lights, sticky floor, a jukebox stuck on one song.</p>"],[
     dr("Beer (+1 CHA)",6,function(){ S.cha++; msg("You tell a great story. CHA +1."); }),
     dr("Whiskey (+2 CHA, -1 INT, -5 HP)",15,function(){ S.cha+=2; S.int=Math.max(1,S.int-1); S.hp=Math.max(1,S.hp-5); msg("Everything is funny now."); }),
+    ["Pick a fight (bar brawl, STR helps, round "+(S.fights+1)+")",function(){
+      var me=S.str*2+Math.floor(weaponDmg()/2)+Math.floor(Math.random()*12), op=4+S.fights*3+Math.floor(Math.random()*12); addTime(1);
+      if(me>=op){ var w=20+S.fights*10; S.cash+=w; S.fights++; var g=Math.random()<0.3; if(g) S.str++; msg("You win the brawl! +$"+w+(g?" and STR +1.":".")); }
+      else { S.hp=Math.max(1,S.hp-15); var l=Math.min(S.cash,20); S.cash-=l; msg("You get thrown out the window. -15 HP, -$"+l+"."); }
+      if(!menuClosed()) bar(); }],
+    ["Sell mystery powder ("+S.powder+" bags)",function(){
+      if(Math.random()<0.15){ var fine=Math.min(S.cash,500); S.cash-=fine; S.powder=0; S.karma-=5; msg("It was an undercover cop. Powder confiscated, $"+fine+" fine, KARMA -5."); }
+      else { var price=300+Math.floor(Math.random()*300); S.powder--; S.cash+=price; S.karma-=2; msg("A guy in the bathroom pays $"+price+". KARMA -2."); }
+      addTime(0.5); if(!menuClosed()) bar(); }, !(S.powder>0)],
     ["Play darts for $20 (CHA helps)",function(){ if(S.cash<20){msg("Not enough cash.");return;} if(Math.random()<0.35+S.cha/200){ S.cash+=20; msg("Bullseye! Won $20."); } else { S.cash-=20; msg("You hit the wall. Lost $20."); } addTime(1); if(!menuClosed()) bar(); }],
     workBtn("bar",bar), ["Leave",close]]);
 }
@@ -239,6 +278,7 @@ function hosp(){
   var cost=Math.max(10,(S.maxhp-S.hp)*2);
   open("Hospital",["<p>HP: "+S.hp+"/"+S.maxhp+"</p>"],[
     ["Full treatment - $"+cost,function(){ if(S.cash<cost){msg("Not enough cash.");return;} S.cash-=cost; S.hp=S.maxhp; msg("Good as new."); hosp(); }, S.hp>=S.maxhp||S.cash<cost],
+    ["Donate $100 to the children's ward (KARMA +3)",function(){ if(S.cash<100){ msg("Not enough cash."); return; } S.cash-=100; S.karma+=3; msg("A nurse hugs you. KARMA +3."); hosp(); }, S.cash<100],
     ["Donate blood (+$30, -30 HP, 1 hr)",function(){ if(S.hp<=35){msg("You're too weak.");return;} S.hp-=30; S.cash+=30; addTime(1); msg("Thanks for the pint."); if(!menuClosed()) hosp(); }],
     ["Leave",close]]);
 }
@@ -249,6 +289,7 @@ function auto(){
 function pawn(){
   var bt=[];
   for(var k in WEAPONS)(function(k){ var w=WEAPONS[k]; bt.push([w.n+" (+"+w.d+" dmg) - $"+w.p+(S.items[k]?" (owned)":""),function(){ if(S.cash<w.p){msg("Not enough cash.");return;} S.cash-=w.p; S.items[k]=1; msg("Bought a "+w.n+". Be careful."); pawn(); }, !!S.items[k]||S.cash<w.p]); })(k);
+  bt.push(["\"Psst. Mystery powder. $200 a bag. Ask around at the bar.\" (you have "+S.powder+")",function(){ if(S.cash<200){ msg("\"Come back with money.\""); return; } S.cash-=200; S.powder++; S.karma--; msg("You now own a bag of something. KARMA -1."); pawn(); }, S.cash<200]);
   bt.push(["Leave",close]);
   open("Pawn Shop",["<p>Bars on the windows. Guy behind the counter doesn't blink.</p>"],bt);
 }
@@ -342,6 +383,18 @@ function bjShow(res){
 }
 /* ---------- thugs & fighting ---------- */
 function isNight(){ var m=S.min%1440; return m>=21*60||m<5*60; }
+var CARCOL=["#d32f2f","#1976d2","#fbc02d","#388e3c","#7b1fa2","#f57c00","#eee","#212121"];
+function spawnCar(){ var r=ROADS[Math.floor(Math.random()*ROADS.length)], dir=Math.random()<0.5?1:-1, lane=dir>0?r.y+r.h*0.72:r.y+r.h*0.28;
+  cars.push({x:dir>0?-60:MAPW+60,y:lane,dir:dir,spd:3.5+Math.random()*3.5,col:CARCOL[Math.floor(Math.random()*CARCOL.length)]}); }
+function stepCars(dt){
+  if(cars.length<5&&Math.random()<0.012) spawnCar();
+  for(var i=cars.length-1;i>=0;i--){ var c=cars[i]; c.x+=c.dir*c.spd*dt/16; if(c.x<-120||c.x>MAPW+120){ cars.splice(i,1); continue; }
+    if(!S.items.car&&performance.now()-carHurt>1200&&Math.abs(c.x-S.x)<30&&Math.abs(c.y-(S.y-6))<16){
+      carHurt=performance.now(); hurtT=carHurt; var h=12+Math.floor(Math.random()*12); S.hp-=h; S.y+=c.y<S.y-6?28:-28; msgFloat="HIT BY A CAR! -"+h+" HP"; msgT=carHurt; hud();
+      if(S.hp<=0){ gameOver("You were run over by a "+({"#d32f2f":"red","#1976d2":"blue","#fbc02d":"yellow","#388e3c":"green","#7b1fa2":"purple","#f57c00":"orange","#eee":"white","#212121":"black"}[c.col]||"")+" car. Look both ways."); return; } } }
+}
+function drawCar(c){ cx.fillStyle="rgba(0,0,0,.3)"; cx.fillRect(c.x-24,c.y-8,52,22); cx.fillStyle=c.col; cx.fillRect(c.x-26,c.y-11,52,22); cx.fillStyle="#9cf"; cx.fillRect(c.x-(c.dir>0?6:18),c.y-8,12,16); cx.fillRect(c.x+(c.dir>0?8:-20),c.y-8,10,16); cx.fillStyle="#222"; cx.fillRect(c.x-20,c.y-14,10,4); cx.fillRect(c.x+10,c.y-14,10,4); cx.fillRect(c.x-20,c.y+10,10,4); cx.fillRect(c.x+10,c.y+10,10,4); cx.fillStyle="#ff0"; cx.fillRect(c.dir>0?c.x+24:c.x-26,c.y-9,2,5); cx.fillRect(c.dir>0?c.x+24:c.x-26,c.y+4,2,5); }
+(function(){ var c=document.createElement("canvas"); c.width=52; c.height=30; var g=c.getContext("2d"); g.fillStyle="#d32f2f"; g.fillRect(0,10,52,16); g.fillRect(12,2,28,10); g.fillStyle="#9cf"; g.fillRect(15,4,22,7); g.fillStyle="#222"; g.beginPath(); g.arc(12,27,4,0,7); g.arc(40,27,4,0,7); g.fill(); window.CARSPR=c; })();
 function spawnThug(){ var t; for(var k=0;k<30;k++){ var a=Math.random()*6.28, r=300+Math.random()*300; t={x:S.x+Math.cos(a)*r,y:S.y+Math.sin(a)*r,dx:0,dy:0,hp:30+S.day*3,spr:Math.floor(Math.random()*5),last:0}; if(t.x>10&&t.x<MAPW-10&&t.y>40&&t.y<MAPH-6&&!hitB(t.x-8,t.y-4,16,8)) return thugs.push(t); } }
 function startFight(t){
   fight={t:t}; fightShow("A thug jumps out of the shadows! \"Give me your money!\"");
@@ -373,6 +426,7 @@ function fightShow(txt){
   hud();
 }
 function ko(){
+  if(S.over) return;
   var lost=Math.floor(S.cash/2); S.cash-=lost; S.hp=Math.floor(S.maxhp/2); fight=null; thugs=[]; S.min=8*60; S.day++; interest(); S.x=970; S.y=1055;
   open("Knocked out",["<p>You wake up in the hospital the next morning. The thug took $"+lost+".</p>"],[["Ugh",close]]);
 }
@@ -419,7 +473,7 @@ function drawFPS(){
     if(isDoor){ cx.fillStyle=shade("#111111",f); cx.fillRect(col,top+wh*0.35,1,wh*0.65); }
     else if(!wall){ var u=(h.side==="x"?h.hy:h.hx)%40; if(u>12&&u<34){ cx.fillStyle="rgba(255,255,255,"+(0.25*f)+")"; cx.fillRect(col,top+wh*0.3,1,wh*0.3); } }
   }
-  var list=thugs.map(function(t){ return {o:t,x:t.x,y:t.y,im:SPR[t.spr],hgt:70,thug:true}; }).concat(chus.map(function(c){ return {o:c,x:c.x,y:c.y,im:CHUIMG,hgt:16}; }));
+  var list=thugs.map(function(t){ return {o:t,x:t.x,y:t.y,im:SPR[t.spr],hgt:70,thug:true}; }).concat(chus.map(function(c){ return {o:c,x:c.x,y:c.y,im:CHUIMG,hgt:16}; })).concat(cars.map(function(c){ return {o:c,x:c.x,y:c.y,im:CARSPR,hgt:34}; }));
   list.sort(function(a,b){ return ((b.x-px)*(b.x-px)+(b.y-py)*(b.y-py))-((a.x-px)*(a.x-px)+(a.y-py)*(a.y-py)); });
   var ca=Math.cos(S.ang), sa=Math.sin(S.ang);
   list.forEach(function(sp){ var t=sp.o;
@@ -460,6 +514,7 @@ function drawFloat(){ if(performance.now()-msgT<1500){ cx.fillStyle="#ff0"; cx.f
 function toggleFPS(){ if(paused) return; S.fps=!S.fps; pan.x=pan.y=0; modeUI(); save(); }
 function modeUI(){ document.getElementById("modebtn").textContent=S.fps?"Map view (F)":"First person (F)"; document.getElementById("rlabel").textContent=S.fps?"aim":"pan"; }
 document.getElementById("modebtn").onclick=toggleFPS; modeUI();
+document.getElementById("statbtn").onclick=function(){ if(S.over||!S.created||paused) return; statsPanel(); };
 
 /* ---------- movement & collision ---------- */
 function hitB(x,y,w,h){ for(var i=0;i<B.length;i++){ var b=B[i]; if(x<b.x+b.w&&x+w>b.x&&y<b.y+b.h&&y+h>b.y) return b; } return null; }
@@ -492,7 +547,7 @@ function step(dt){
   if(!hitB(S.x-8,ny-4,16,8)) S.y=Math.max(40,Math.min(MAPH-6,ny));
   acc+=dt; while(acc>120){ acc-=120; S.min++; if(S.min%30===0) save(); if(S.min%10===0) hud(); checkPassOut(); if(paused) return; }
   if(isNight()){ if(thugs.length<3&&Math.random()<0.006) spawnThug(); } else thugs=[];
-  stepChus();
+  stepChus(); stepCars(dt); if(paused) return;
   for(var j=0;j<thugs.length;j++){ var t=thugs[j];
     if(Math.random()<0.02){ var a=Math.random()*6.28; t.dx=Math.cos(a)*1.2; t.dy=Math.sin(a)*1.2; }
     var ddx=S.x-t.x, ddy=S.y-t.y, dist=Math.sqrt(ddx*ddx+ddy*ddy);
@@ -532,6 +587,7 @@ function draw(){
     cx.fillStyle="#ffd54a"; cx.fillRect(b.door.x,b.door.y,b.door.w,b.door.h); cx.fillStyle="#000"; cx.fillRect(b.door.x+4,b.door.y+3,b.door.w-8,b.door.h-3);
     cx.fillStyle=b.id==="hosp"?"#000":"#fff"; cx.font="bold 18px Verdana"; cx.textAlign="center"; cx.fillText(b.name,b.x+b.w/2,b.y+28);
   });
+  cars.forEach(drawCar);
   thugs.forEach(function(t){ stick(t.x,t.y,"#b71c1c",walk*3); });
   chus.forEach(function(c){ if(CHUIMG.width) cx.drawImage(CHUIMG,c.x-10,c.y-7,20,14); });
   stick(S.x,S.y,"#000",walk,S.items.car);
@@ -543,7 +599,7 @@ function draw(){
 function loop(t){ var dt=Math.min(50,(t-lastT)||16); lastT=t; step(dt); draw(); drawFloat(); requestAnimationFrame(loop); }
 
 /* ---------- input ---------- */
-document.addEventListener("keydown",function(e){ keys[e.key]=true; if(e.key.length===1) keys[e.key.toLowerCase()]=true; if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].indexOf(e.key)>=0) e.preventDefault(); if(e.key==="Escape"&&paused&&!fight) close(); if((e.key==="f"||e.key==="F")&&!paused) toggleFPS(); if(e.key===" "&&S.fps) shoot(); if(e.key==="b"||e.key==="B") releaseChu(); });
+document.addEventListener("keydown",function(e){ keys[e.key]=true; if(e.key.length===1) keys[e.key.toLowerCase()]=true; if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].indexOf(e.key)>=0) e.preventDefault(); if(e.key==="Escape"&&paused&&!fight) close(); if((e.key==="f"||e.key==="F")&&!paused) toggleFPS(); if((e.key==="i"||e.key==="I")&&!paused&&S.created&&!S.over) statsPanel(); if(e.key===" "&&S.fps) shoot(); if(e.key==="b"||e.key==="B") releaseChu(); });
 document.addEventListener("keyup",function(e){ keys[e.key]=false; if(e.key.length===1) keys[e.key.toLowerCase()]=false; });
 window.addEventListener("blur",function(){ keys={}; tgt=null; });
 function canvasPt(e){ var r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*W/r.width+cam.x, y:(e.clientY-r.top)*H/r.height+cam.y}; }
@@ -564,9 +620,23 @@ document.getElementById("chubtn").addEventListener("pointerdown",function(e){ e.
 
 
 hud();
-if(S.day===1&&S.min===8*60&&S.cash===50&&!S.job){
-  open("Stick RPG",["<p>You wake up in a strange city with $50 and no idea how you got here.</p><p>Get a job, get stronger, smarter, cooler. Don't be out after 9 PM unless you can fight. Sleep at home to start a new day.</p>"],[["Let's go",close]]);
-} else open("Welcome back",["<p>Day "+S.day+", "+clock()+". Your save was loaded.</p>"],[["Continue",close],["Start over",function(){ S=fresh(); save(); location.reload(); }]]);
+function newGame(){
+  open("New Game",["<p>How long are you stuck in the 2nd dimension?</p>"],[
+    ["Short (15 days)",function(){ S.len=15; createChar(); }],["Medium (40 days)",function(){ S.len=40; createChar(); }],["Long (100 days)",function(){ S.len=100; createChar(); }],["Unlimited",function(){ S.len=0; createChar(); }]]);
+}
+var roll={cha:5,str:5,int:5,extra:3};
+function rollStats(){ roll.cha=1+Math.floor(Math.random()*8); roll.str=1+Math.floor(Math.random()*8); roll.int=1+Math.floor(Math.random()*8); roll.extra=3; }
+function createChar(){
+  var h="<p>Name: <input id='cname' value='"+S.name.replace(/'/g,"")+"' maxlength='16' style='font-family:inherit;font-size:14px;padding:3px;width:160px'></p>";
+  ["cha","str","int"].forEach(function(k){ h+="<p>"+({cha:"CHARM",str:"STRENGTH",int:"INTELLIGENCE"}[k])+": <button class='pm' data-k='"+k+"' data-d='-1' style='display:inline;width:auto;margin:0 4px;padding:0 8px'>-</button><b>"+roll[k]+"</b><button class='pm' data-k='"+k+"' data-d='1' style='display:inline;width:auto;margin:0 4px;padding:0 8px'>+</button></p>"; });
+  h+="<p>Extra points: <b>"+roll.extra+"</b></p>";
+  open("Create Character",[h],[["Roll again",function(){ keepName(); rollStats(); createChar(); }],["Done",function(){ keepName(); S.cha=roll.cha; S.str=roll.str; S.int=roll.int; S.created=true; save(); hud();
+    open("Stick RPG",["<p>One uneventful afternoon you drift off to sleep and wake up in the 2nd dimension with $100 and no idea how you got here.</p><p>Get a job, get stronger, smarter, cooler. Acquire as much NET WORTH as you can"+(S.len?" in "+S.len+" days":"")+". Look both ways before crossing the street. Don't be out after 9 PM unless you can fight. Sleep at home to start a new day.</p>"],[["Let's go",close]]); }]]);
+  function keepName(){ var n=document.getElementById("cname"); if(n&&n.value.trim()) S.name=n.value.trim(); }
+  menu.querySelectorAll(".pm").forEach(function(b){ b.onclick=function(){ var k=b.getAttribute("data-k"), d=parseInt(b.getAttribute("data-d"),10); if(d>0&&roll.extra>0){ roll[k]++; roll.extra--; } if(d<0&&roll[k]>1){ roll[k]--; roll.extra++; } keepName(); createChar(); }; });
+}
+if(!S.created){ rollStats(); newGame(); }
+else open("Welcome back",["<p>"+S.name+", day "+S.day+", "+clock()+". Your save was loaded.</p>"],[["Continue",close],["Start over",function(){ S=fresh(); save(); location.reload(); }]]);
 requestAnimationFrame(loop);
 })();
 </script>
