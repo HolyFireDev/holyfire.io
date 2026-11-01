@@ -178,9 +178,12 @@ document.addEventListener("mouseup", function(){ setTimeout(checkSel,10); });
 document.addEventListener("keyup", function(e){ if(e.shiftKey || e.key==="a" && (e.ctrlKey||e.metaKey)) setTimeout(checkSel,10); });
 document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
 document.addEventListener("pointerdown", function(){ try{ac();}catch(x){} }, {once:true});
+// type 64 = a huge general scales just shows up and stays
+function scales(){ var im=document.createElement("img"); im.src="img/scare5.jpg"; im.style.cssText="position:absolute;border:0;margin:0;z-index:50;pointer-events:none;height:"+(900+Math.floor(Math.random()*900))+"px;";
+  im.style.left=Math.floor(Math.random()*Math.max(1,window.innerWidth-500))+"px"; im.style.top=(window.scrollY+Math.floor(Math.random()*200)-100)+"px"; document.body.appendChild(im); }
 // type 1987 anywhere = bite of 87
 var typed="";
-document.addEventListener("keydown", function(e){ if(e.key && e.key.length===1){ typed=(typed+e.key).slice(-4); if(typed==="1987"){ typed=""; scare(); } if(typed.slice(-2)==="64"){ typed=""; scare("img/scare5.jpg", true); } } });
+document.addEventListener("keydown", function(e){ if(e.key && e.key.length===1){ typed=(typed+e.key).slice(-4); if(typed==="1987"){ typed=""; scare(); } if(typed.slice(-2)==="64"){ typed=""; scales(); } } });
 // secret dials
 document.getElementById("secret").onclick=function(){ var d=document.getElementById("dials"); d.style.display=d.style.display==="none"?"block":"none"; };
 document.getElementById("dialsclose").onclick=function(e){ e.preventDefault(); document.getElementById("dials").style.display="none"; };
