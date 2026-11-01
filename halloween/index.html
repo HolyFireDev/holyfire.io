@@ -8,7 +8,7 @@ img, .ph { border: 4px ridge #888; background: #ccc; margin: 6px; vertical-align
 .ph { display: inline-block; width: 200px; height: 150px; color: #000; font-family: Arial; font-size: 12px; line-height: 150px; }
 td { vertical-align: top; }
 #pile, #pile2 { position: relative; height: 620px; overflow: hidden; }
-#pile img, #pile2 img { position: absolute; border: 4px ridge #888; }
+#pile img, #pile2 img { position: absolute; border: 0; margin: 0; background: none; }
 #toggle { font-size: 70px; cursor: pointer; border: 3px dashed yellow; display: inline-block; padding: 4px 30px; background: #333; }
 #timer { color: lime; font-size: 48px; font-family: "Courier New"; }
 textarea { width: 300px; height: 250px; font-family: "Comic Sans MS"; }
@@ -82,10 +82,14 @@ function pile(id, count, h){
   var box=document.getElementById(id); box.style.height=h+"px";
   for(var i=0;i<count;i++){
     var im=document.createElement("img"); im.src="img/saw"+(1+Math.floor(Math.random()*12))+".jpg";
-    var w=80+Math.floor(Math.random()*420); im.width=w;
+    var w=60+Math.floor(Math.random()*500), ht=40+Math.floor(Math.random()*400);
+    im.style.width=w+"px"; im.style.height=ht+"px";
+    var r=Math.random();
+    if(r<0.4){ im.style.objectFit="fill"; }                       // stretched
+    else if(r<0.8){ im.style.objectFit="cover"; im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%"; } // cropped
+    else { im.style.objectFit="none"; im.style.objectPosition=Math.floor(Math.random()*100)+"% "+Math.floor(Math.random()*100)+"%"; }          // hard crop at native size
     im.style.left=Math.floor(Math.random()*(window.innerWidth-w*0.5)-w*0.25)+"px";
-    im.style.top=Math.floor(Math.random()*(h-80))+"px";
-    im.style.transform="rotate("+(Math.random()*40-20)+"deg)";
+    im.style.top=Math.floor(Math.random()*(h-60))+"px";
     im.style.zIndex=Math.floor(Math.random()*50);
     box.appendChild(im);
   }
