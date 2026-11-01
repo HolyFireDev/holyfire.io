@@ -7,6 +7,8 @@ h1 { color: red; font-size: 60px; font-family: Impact, "Comic Sans MS"; text-dec
 img, .ph { border: 4px ridge #888; background: #ccc; margin: 6px; vertical-align: middle; }
 .ph { display: inline-block; width: 200px; height: 150px; color: #000; font-family: Arial; font-size: 12px; line-height: 150px; }
 td { vertical-align: top; }
+#pile, #pile2 { position: relative; height: 620px; overflow: hidden; }
+#pile img, #pile2 img { position: absolute; border: 4px ridge #888; }
 #toggle { font-size: 70px; cursor: pointer; border: 3px dashed yellow; display: inline-block; padding: 4px 30px; background: #333; }
 #timer { color: lime; font-size: 48px; font-family: "Courier New"; }
 textarea { width: 300px; height: 250px; font-family: "Comic Sans MS"; }
@@ -27,19 +29,7 @@ blink { animation: b 1s step-start infinite; } @keyframes b { 50% { opacity: 0 }
 <blink><font size="5" color="yellow">!!! UNDER CONSTRUCTION !!! 🚧</font></blink>
 <p><font color="white">welcome to my web site. the wheel spins for 100 seconds. deal with it.</font></p>
 
-<img src="img/billy.jpg" width="200" height="150" onerror="ph(this,'billy.jpg')">
-<img src="img/saw-cover.jpg" width="200" height="150" onerror="ph(this,'saw-cover.jpg')">
-<img src="img/spirit-logo.png" width="200" height="150" onerror="ph(this,'spirit-logo.png')">
-<img src="img/bathroom.jpg" width="200" height="150" onerror="ph(this,'bathroom.jpg')">
-<img src="img/beartrap.jpg" width="200" height="150" onerror="ph(this,'beartrap.jpg')">
-<br>
-<img src="img/reaper.jpg" width="200" height="150" onerror="ph(this,'reaper.jpg')">
-<img src="img/scarecrow.jpg" width="200" height="150" onerror="ph(this,'scarecrow.jpg')">
-<img src="img/freddy.jpg" width="200" height="150" onerror="ph(this,'freddy.jpg')">
-<img src="img/vampires.jpg" width="200" height="150" onerror="ph(this,'vampires.jpg')">
-<img src="img/ghostface.jpg" width="200" height="150" onerror="ph(this,'ghostface.jpg')">
-<img src="img/civic.jpg" width="200" height="150" onerror="ph(this,'civic.jpg')">
-
+<div id="pile"></div>
 <hr size="8" color="red">
 
 <p><font size="5" color="white">MODE: <span id="modename">SAW FILMS</span></font></p>
@@ -77,11 +67,8 @@ Nay: 5 Nights at Freddy's</textarea><br>
 </table>
 
 <br>
-<img src="img/civic.jpg" width="400" height="300" onerror="ph(this,'civic.jpg (the car)')">
-<img src="img/billy.jpg" width="200" height="300" onerror="ph(this,'billy.jpg again')">
-<br>
+<div id="pile2"></div>
 <p><font color="gray" size="2">best viewed in internet explorer 6 at 800x600. you are visitor number <b>000666</b>. copyright 2003 spirit halloween (not really)</font></p>
-<p><font color="white">to show the real pictures put them in a folder called <b>img</b> next to this file with those file names</font></p>
 
 <div id="overlay"><div>
   <b>THE WHEEL HAS SPOKEN:</b><br><br>
@@ -91,6 +78,19 @@ Nay: 5 Nights at Freddy's</textarea><br>
 </div></div>
 
 <script>
+function pile(id, count, h){
+  var box=document.getElementById(id); box.style.height=h+"px";
+  for(var i=0;i<count;i++){
+    var im=document.createElement("img"); im.src="img/saw"+(1+Math.floor(Math.random()*12))+".jpg";
+    var w=80+Math.floor(Math.random()*420); im.width=w;
+    im.style.left=Math.floor(Math.random()*(window.innerWidth-w*0.5)-w*0.25)+"px";
+    im.style.top=Math.floor(Math.random()*(h-80))+"px";
+    im.style.transform="rotate("+(Math.random()*40-20)+"deg)";
+    im.style.zIndex=Math.floor(Math.random()*50);
+    box.appendChild(im);
+  }
+}
+pile("pile", 45, 620); pile("pile2", 25, 500);
 function ph(img, name){ var d=document.createElement("span"); d.className="ph"; d.style.width=img.width+"px"; d.style.height=img.height+"px"; d.style.lineHeight=img.height+"px"; d.textContent="[ "+name+" ]"; img.parentNode.replaceChild(d,img); }
 
 var SAW=["Saw (2004)","Saw II","Saw III","Saw IV","Saw V","Saw VI","Saw 3D","Jigsaw","Spiral","Saw X"];
