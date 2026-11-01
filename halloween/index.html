@@ -173,13 +173,14 @@ function scare(src, huge){ if(scaring) return; scaring=true; var e=document.getE
   try{ speechSynthesis.cancel(); }catch(x){}
   setTimeout(function(){ e.style.display="none"; try{ window.getSelection().removeAllRanges(); }catch(x){} setTimeout(function(){scaring=false;},800); }, 1100);
   e.style.display="flex"; }
-function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0 && Math.random()<0.1) scare(SCARES[Math.floor(Math.random()*SCARES.length)]); }
+function checkSel(){ var t=window.getSelection?window.getSelection().toString():""; if(t && t.trim().length>0 && Math.random()<0.1) setBg(SCARES[Math.floor(Math.random()*SCARES.length)]); }
 document.addEventListener("mouseup", function(){ setTimeout(checkSel,10); });
 document.addEventListener("keyup", function(e){ if(e.shiftKey || e.key==="a" && (e.ctrlKey||e.metaKey)) setTimeout(checkSel,10); });
 document.addEventListener("touchend", function(){ setTimeout(checkSel,300); });
 document.addEventListener("pointerdown", function(){ try{ac();}catch(x){} }, {once:true});
 // type 64 = the background becomes a huge general scales
-function scales(){ document.body.style.background="#000 url(img/scare5.jpg) center / cover no-repeat fixed"; }
+function setBg(src){ document.body.style.background="#000 url("+src+") center / cover no-repeat fixed"; }
+function scales(){ setBg("img/scare5.jpg"); }
 // type 1987 anywhere = bite of 87
 var typed="";
 document.addEventListener("keydown", function(e){ if(e.key && e.key.length===1){ typed=(typed+e.key).slice(-4); if(typed==="1987"){ typed=""; scare(); } if(typed.slice(-2)==="64"){ typed=""; scales(); } } });
