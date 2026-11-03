@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thing thing</title>
+<style>
+  body { margin: 16px; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 16px; }
+  p { margin: 0 0 16px; }
+  a { color: #fff; }
+  #game { width: 800px; height: 400px; max-width: 100%; display: block; }
+</style>
+</head>
+<body>
+  <p><a href="/">Holy Fire</a> / <a href="/flash/">flash</a> / thing thing</p>
+  <div id="game"></div>
+  <p>click the game once so it gets the keyboard</p>
+  <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+  <script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = { autoplay: "on", unmuteOverlay: "visible", letterbox: "on", scale: "showAll", backgroundColor: "#000000", allowScriptAccess: false, quality: "high", warnOnUnsupportedContent: false };
+    window.addEventListener("load", function () {
+      var player = window.RufflePlayer.newest().createPlayer();
+      player.style.width = "100%"; player.style.height = "100%";
+      document.getElementById("game").appendChild(player);
+      player.load("/flash/thingthing1.swf");
+    });
+  </script>
+</body>
+</html>
