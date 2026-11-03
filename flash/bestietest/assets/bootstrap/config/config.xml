@@ -1,0 +1,81 @@
+<config>
+	<!-- DEBUG -->
+	<debug enabled="false" />
+	
+    <!-- SERVICES -->
+    <!-- Enable, disable, and configure services here -->
+	<services>
+		<service type="analytics" enabled="false" id="x" />
+		<service type="canadaTracking" enabled="false" showGameTitle="Show Title: Game Title"/>
+		<service type="nickanalytics" enabled="false" id_qa="x" id_live="x" enabledQA="true"/>	
+	</services>
+		
+	<!-- LOCALIZATION -->
+	      
+    <localization>
+    	<region>en</region>
+    </localization>
+    	
+	<!-- PACK DEFINITIONS -->
+	<!-- Define packs, flump folders, and tilesheets to be loaded later -->
+	      
+    <packs>
+    	<pack id="preload"/>							<!-- This phase loads fonts, and any loading bars or title cards you need to display on the splash screen -->
+    	<pack id="initial_universal"/>					<!-- This phase loads the pre-gameplay ui -->
+    	<pack id="initial_sd"/>
+    	<pack id="initial_hd"/>
+    	<pack id="initial_soundfx"/>
+    	<pack id="initial_music"/>
+   		<!-- END OF PACKS -->
+    </packs>
+    
+    <!-- CHUNKS -->
+    <!-- Define larger bundles of chunks and packs to load -->
+    
+    <chunks>
+    	<!-- EX
+    	<chunk id="chunk">
+			<pack>load_part_1</pack>
+			<pack>load_part_2</pack>
+		</chunk>
+    	-->
+    	
+    	<chunk id="preload">
+    		<pack>preload</pack>
+    	</chunk>
+    	
+    	<chunk id="initial_sd">
+    		<pack>initial_universal</pack>
+    		<pack>initial_sd</pack>
+    	</chunk>
+    	
+    	<chunk id="initial_hd">
+    		<pack>initial_universal</pack>
+    		<pack>initial_hd</pack>     
+    	</chunk>
+    	
+    	<chunk id="initial_audio_with_soundfx">
+    		<pack>initial_music</pack>
+    		<pack>initial_soundfx</pack>
+    	</chunk>
+    	
+    	<chunk id="initial_audio_only_music">
+    		<pack>initial_music</pack>
+    	</chunk>
+
+        <!-- END OF CHUNKS -->
+    </chunks>
+    
+    <!-- QUALITY / BENCHMARKING -->
+    <!-- index -->
+    <!-- 	-1: Self determine via flambe benchmark -->
+    <!-- 	 0: Lowest quality -->
+    <!-- 	As the index increases the better the quality -->
+    <!-- 	-1, 0, and 1 are the normal options, but more can be added if necessary (this is rare) -->
+    <!-- forceLowQualityMobile -->
+    <!-- 	Only affects html touch platforms -->
+    <!-- 	False, do not force low quality -->
+    <!-- 	True, force low quality -->
+    <quality index="0" forceLowQualityMobile="true"/>
+    
+</config>

@@ -5,20 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>thing thing 4</title>
 <style>
-  body { margin: 16px; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 16px; }
-  p { margin: 0 0 16px; }
+  html, body { height: 100%; }
+  body { margin: 0; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  p { margin: 0; }
   a { color: #fff; }
-  #game { width: 550px; height: 400px; max-width: 100%; display: block; }
+  #nav { position: fixed; top: 16px; left: 16px; }
+  #game { width: 550px; height: 400px; max-width: 100vw; max-height: 100vh; }
+  #hint { position: fixed; bottom: 16px; left: 16px; }
 </style>
 </head>
 <body>
-  <p><a href="/">Holy Fire</a> / <a href="/flash/">flash</a> / thing thing 4</p>
+  <p id="nav"><a href="/">Holy Fire</a> / <a href="/flash/">flash</a> / thing thing 4</p>
   <div id="game"></div>
-  <p>click the game once so it gets the keyboard</p>
+  <p id="hint">click the game once so it gets the keyboard</p>
   <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
   <script>
     window.RufflePlayer = window.RufflePlayer || {};
-    window.RufflePlayer.config = { autoplay: "on", unmuteOverlay: "visible", letterbox: "on", scale: "showAll", backgroundColor: "#000000", allowScriptAccess: false, quality: "high", warnOnUnsupportedContent: false };
+    window.RufflePlayer.config = { autoplay: "on", unmuteOverlay: "visible", letterbox: "on", scale: "showAll", backgroundColor: "#000000", allowScriptAccess: false, quality: "high", warnOnUnsupportedContent: false, spoofUrl: "http://www.crazymonkeygames.com/thing-thing4.swf" };
     window.addEventListener("load", function () {
       var player = window.RufflePlayer.newest().createPlayer();
       player.style.width = "100%"; player.style.height = "100%";

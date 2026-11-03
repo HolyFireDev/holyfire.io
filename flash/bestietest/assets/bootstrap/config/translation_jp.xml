@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--<translation attributes>-->
+<!-- defaultFont dictates the font (based on the id set in fonts.xml) that all fields will use unless fontId is specified within that field's individual tag.-->
+
+<!-- <Node Attributes> -->
+<!-- id is not Optional. It tells flash which text field to change. -->
+<!-- fontScale is Optional. It allows you to customize the size of the font used in this particular field. 1 is normal. 2 is double size. .5 is half size. Defaults to 1.-->
+<!-- fontName is Optional. It allows you to customize the font used in this particular field. Leave it out to use the default font (specified by defaultFont).-->
+<!-- offsetX is Optional. It allows you to move the text field a certain number of pixels on the X axis. Leave it out or use 0 if you don't want to move the text. -->
+<!-- offsetY is Optional. It allows you to move the text field a certain number of pixels on the Y axis. Leave it out or use 0 if you don't want to move the text.--> 
+
+<strings defaultFont="futura_bold">
+	<!--Preloader-->
+	<string id="loading"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Loading]]></string>
+	
+	<!--Basics-->
+	<string id="orientation_landscape"	fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Please flip back to Landscape mode.]]></string>
+	<string id="share_header"			fontName="futura_bold"	fontScale=".7"	offsetX="0" offsetY="0"><![CDATA[GET URL]]></string>
+	<string id="share_copy"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Copy and paste this URL, and email or IM it to your friends.]]></string>
+	
+	<!--Game Buttons-->
+	<string id="start"					fontName="futura_bold"	fontScale=".6"	offsetX="0" offsetY="0"><![CDATA[START QUIZ]]></string>
+	<string id="submit"					fontName="futura_bold"	fontScale="1"	offsetX="0" offsetY="0"><![CDATA[SUBMIT]]></string>
+	<string id="try_again"				fontName="futura_bold"	fontScale=".6"	offsetX="0" offsetY="0"><![CDATA[REPLAY]]></string>
+	<string id="share"					fontName="futura_bold"	fontScale=".6"	offsetX="0" offsetY="0"><![CDATA[SHARE]]></string>	
+	<string id="more"					fontName="futura_bold"	fontScale=".6"	offsetX="0" offsetY="0"><![CDATA[MORE]]></string>	
+	<string id="take_quiz"				fontName="futura_bold"	fontScale=".6"	offsetX="0" offsetY="0"><![CDATA[TAKE QUIZ]]></string>	
+	<string id="done_meter"				fontName="futura_bold"	fontScale=".4"	offsetX="0" offsetY="0"><![CDATA[THIS IS HOW I FEEL]]></string>
+	<string id="done_sort"				fontName="futura_bold"	fontScale=".4"	offsetX="0" offsetY="0"><![CDATA[DONE]]></string>
+	<string id="copy"					fontName="futura_bold"	fontScale=".6"	offsetX="0" offsetY="0"><![CDATA[COPY]]></string>
+	<string id="close"					fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[X]]></string>
+	<string id="cyoe_ending"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[WATCH OTHER ENDING]]></string>
+	<string id="cyoe_return"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[WATCH THE BEGINNING]]></string>
+	
+	<!--Copy-->
+	<string id="prompt"					fontName="futura_bold"	fontScale="1"	offsetX="0" offsetY="0"><![CDATA[Quiz prompt goes here!]]></string>
+	<string id="prompt_desc"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Add more text here to describe in detail about the quiz.]]></string>
+	
+	<string id="ready"					fontName="futura_bold"	fontScale="1"	offsetX="0" offsetY="0"><![CDATA[Are you ready to find out your results?]]></string>
+
+	<string id="question_1"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Select 1 image.]]></string>
+	<string id="question_2"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[How do you feel about a thing?]]></string>
+	<string id="question_3"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer this complex questions with complex answers.]]></string>
+	<string id="question_4"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Priority list.]]></string>
+	<string id="question_5"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Follow a choice path to a final destination.]]></string>
+	<string id="question_5_1"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Question 1.]]></string>
+	<string id="question_5_2"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Question 2.]]></string>
+	<string id="question_5_3"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Question 3.]]></string>
+	<string id="question_5_4"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Question 4.]]></string>
+	<string id="question_5_5"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Question 5.]]></string>
+	<string id="question_5_6"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 6.]]></string>
+	<string id="question_5_7"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 7.]]></string>
+	<string id="question_5_8"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 8.]]></string>
+	<string id="question_5_9"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 9.]]></string>
+	<string id="question_5_10"			fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 10.]]></string>
+	<string id="question_6"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Sort the images.]]></string>
+	<string id="question_7"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer question relating to a video clip on the right.]]></string>
+	<string id="question_8"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Choose your own ending.]]></string>
+	
+	<string id="answer_1_1"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 1]]></string>
+	<string id="answer_1_2"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 2]]></string>
+	<string id="answer_1_3"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 3]]></string>
+	<string id="answer_1_4"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 4]]></string>
+	<string id="answer_1_5"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 5]]></string>
+	<string id="answer_1_6"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 6]]></string>
+	<string id="answer_1_7"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 7]]></string>
+	<string id="answer_1_8"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Answer 8]]></string>
+	<string id="answer_2_1"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[I love it!]]></string>
+	<string id="answer_2_2"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[I like it!]]></string>
+	<string id="answer_2_3"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Meh.]]></string>
+	<string id="answer_2_4"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[I don't like it!]]></string>
+	<string id="answer_2_5"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[I hate it!]]></string>
+	<string id="answer_3_1"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[This is complex answer #1]]></string>
+	<string id="answer_3_2"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[This is complex answer #2]]></string>
+	<string id="answer_3_3"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[This is complex answer #3]]></string>
+	<string id="answer_3_4"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[This is complex answer #4]]></string>
+	<string id="answer_5_1"				fontName="futura_bold"	fontScale=".25"	offsetX="0" offsetY="0"><![CDATA[Answer 1]]></string>
+	<string id="answer_5_2"				fontName="futura_bold"	fontScale=".25"	offsetX="0" offsetY="0"><![CDATA[Answer 2]]></string>
+	<string id="answer_6_1"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Good]]></string>
+	<string id="answer_6_2"				fontName="futura_bold"	fontScale=".5"	offsetX="0" offsetY="0"><![CDATA[Bad]]></string>
+	
+	<string id="result_1"				fontName="futura_bold"	fontScale=".7"	offsetX="0" offsetY="0"><![CDATA[You got result 1!]]></string>
+	<string id="result_2"				fontName="futura_bold"	fontScale=".7"	offsetX="0" offsetY="0"><![CDATA[You got result 2!]]></string>
+	<string id="result_3"				fontName="futura_bold"	fontScale=".7"	offsetX="0" offsetY="0"><![CDATA[You got result 3!]]></string>
+	<string id="result_4"				fontName="futura_bold"	fontScale=".7"	offsetX="0" offsetY="0"><![CDATA[You got result 4!]]></string>
+</strings>

@@ -1,0 +1,70 @@
+<config>	
+	<quiz image="" bgColor="0x363535" fontDefault="futura_medium" fontDefaultScale="0.5" fontDefaultColor="0xff076c">
+		<strings>
+			<string id="loading" text="Loading"  fontName="futura_bold"/>
+			<string id="share_header" text="SHARE YOUR RESULTS" loadStart="true"  fontName="futura_bold"/>
+			<string id="share_copy" text="Copy and paste this link to share with your friends!" />
+			<string id="share_popup" loadStart="true" image="bg_share.png" bgColor="#55d8f6"/>
+			<string id="share_link" text="12px arial" bgColor="#333333" />
+			<string id="result_1" text="Besties For Life!" fontScale="0.5" fontName="futura_bold" textAlign="left"/>
+			<string id="result_2" text="Dynamic Duo!" fontScale="0.5" fontName="futura_bold" textAlign="left"/>
+			<string id="result_3" text="Best Frenemies!" fontScale="0.5" fontName="futura_bold" textAlign="left"/>
+			<string id="cocoon_ok" text="Ok" />
+			<string id="cocoon_cancel" text="Cancel"  />
+		</strings>
+		<button id="more" url="http://www.nick.com/100-things/"/>
+		<buttons>
+			<button id="start" x="745" y="355" />
+			<button id="page" bgColor="0xff076c"/>
+			<button id="page_done" bgColor="0xa8df16"/>
+			<button id="page_arrow" bgColor="0x1fe402"/>
+			<button id="page_select" bgColor="0x00b2ff"/>
+			<button id="more" url="http://www.nick.com/100-things-to-do-before-high-school/"/>
+		</buttons>
+				<question type="1" prefixImage="question_1" text="Which emoji would you text your bff?" fontScale="0.4" fontName="futura_bold">
+			<answer value="2"/>
+			<answer value="3"/>
+			<answer value="1"/>
+		</question>
+		<question type="1" prefixImage="question_2" text="You like to hang out..." fontScale="0.4" fontName="futura_bold">
+			<answer value="1" text="In a trio" />
+			<answer value="2" text="One on one" />
+			<answer value="3" text="In a group" />
+		</question>
+		<question type="1" prefixImage="question_3" text="Where are you and your bud usually found?" fontScale="0.4" fontName="futura_bold">
+			<answer value="2" text="Hallway"/>
+			<answer value="3" text="Popular kids' table"/>
+			<answer value="1" text="Guidance Counselor's office"/>
+		</question>
+		<question type="1" prefixImage="question_4" text="You and your pal both love..." fontScale="0.4" fontName="futura_bold">
+			<answer value="2" text="Sirens"/>
+			<answer value="1" text="Going on adventures"/>
+			<answer value="3" text="Dreamy pop stars"/>
+		</question>
+			<question type="1" prefixImage="question_5" text="What club would you and your BFF join?" fontScale="0.4" fontName="futura_bold">
+			<answer value="2" />
+			<answer value="1" />
+			<answer value="3" />	
+		</question>
+		<question type="1" prefixImage="question_6" text="Your friend always..." fontScale="0.4" fontName="futura_bold">
+			<answer value="3" />
+			<answer value="1" />
+			<answer value="2" />
+		</question>
+		<question type="1" prefixImage="question_7" text="You and your BFF go together like..." fontScale="0.4" fontName="futura_bold">
+			<answer value="1" text="Peanut butter and jelly"/>
+			<answer value="2" text="Liver and onions"/>
+			<answer value="3" text="OJ and toothpaste"/>
+		</question>
+		<question type="1" prefixImage="question_8" text="Which gift would you give your bestie?" fontScale="0.4" fontName="futura_bold">
+			<answer value="1" text="Concert tickers"/>
+			<answer value="2" text="Megaphone"/>
+			<answer value="3" text="Mirror"/>
+		</question>
+		<results type="1" prefixImage="result" >
+			<result id="1" text="Just like CJ, Fenwick and Crispo, you and your BFFs were meant to be. You guys know each other better than anyone and nothing can ever come between you-- not even high school!" fontScale="0.4" textAlign="left"/>
+			<result id="2" text="Like Crispo and Paul Schmolitor, you and your bestie have had some ups and downs. But when you join forces, you make a perfect team!" fontScale="0.4" textAlign="left"/>
+			<result id="3" text="Like CJ and Mindy, you and your BFF don't always get along-- but you never stop believing in each other. At the end of the day, you've got each other's back!" fontScale="0.4" textAlign="left"/>
+		</results>
+	</quiz>
+</config>
