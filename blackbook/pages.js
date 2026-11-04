@@ -287,5 +287,39 @@ window.BLACK_BOOK = [
       "I awake on the bank of the pond, a new nail in my hands.",
       "Perhaps it was just a dream."
     ]
+  },
+  {
+    title: "Wrath's Crusade",
+    lines: [
+      "Wrath's Crusade",
+      "September 14, 19xx",
+      "I'm getting good at killing these things.",
+      "I burn the rest of the cards in one go, and grab a fist full of brass shells, each humming a different note in a chord",
+      "I load them 2 at a time into my Trench Gun",
+      "Rack",
+      "Eat this you rotbags",
+      "",
+      "thhhhhTCK",
+      "SPLASH",
+      "I saw the first Tar Man in half at the waist with barbed wire shot, and although the top half is still crawling towards me, it's bound up in the wire.",
+      "Rack",
+      "KKRACKOOOM",
+      "zzzz",
+      "An electric shell.",
+      "LIGHTNING strikes from the barrel, and hits the whole lot of them. It's enough to kill the crawler and the other 5 are convulsing",
+      "Rack",
+      "thhhhhTCKRAKOOOOOMzzzzz",
+      "SPLash",
+      "One of these time gadget shells. It makes whatever came before it, happen again.",
+      "The 5 are sliced, and zapped once again for good measure.",
+      "I pick up a trinket from the tar. A worn photo. Reminds me of a girl I knew.",
+      "It burns in my hand, too fast, and I'm left confused.",
+      "The Trench Gun is hungrier now. Empowered by the artifact's fire.",
+      "3 cards appear in my hand. At first, all 3 appear useless to varying degrees.",
+      "And then I get an awful idea, smile, and pick the first one.",
+      "Booyah.",
+      "I open the stupid book and move the Knight towards the Tower.",
+      "Calibrator's note - he remembers her. But he can't hear our voice, a faulty transmission?"
+    ]
   }
 ];
