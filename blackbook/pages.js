@@ -644,5 +644,17 @@ window.BLACK_BOOK = [
       "It wrapped itself around the world, the real world",
       "And wrote a new law"
     ] }
+  },
+  {
+    title: "The Tavern in the center of the world",
+    lines: [
+      "Direct your attention to the Tavern in the center of the world",
+      "Walk into that Black Tower, past gray smoke and grey men, into the elevator. Next stop, the basement.",
+      "Here is a place right in the middle of things, the balance point in-between the entry and exit wound.",
+      "The dream of the system",
+      "The law of the dreamer",
+      "A man in fine clothes hangs his hat as he enters the bar.",
+      "Mr. Adversary"
+    ]
   }
 ];
