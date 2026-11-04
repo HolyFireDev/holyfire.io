@@ -40,5 +40,21 @@ window.BLACK_BOOK = [
       "Open the Black Book",
       "And I will save you all"
     ]
+  },
+  {
+    title: "On this day, humanity received a gift from The Adversary",
+    lines: [
+      "On this day, humanity received a gift from The Adversary",
+      "We look upon the earth, viewed from space. You can see it all from up here.",
+      "The sun has set on this side, but another light emerges in the darkness. Cities. Fires. Small and dim.",
+      "The Adversary smiled",
+      "\"A good start. Let's add some fuel to the fire.\"",
+      "He raised an impossibly long spear of black ichor, and throws it true. It pierces right through the crust and back out the other side, and keeps going forever.",
+      "On the street, a door opens at the front of the tower. Ground floor. Open for business.",
+      "The Adversary exports the best stuff. The cheapest fuel, the most plentiful food, and the most addictive entertainment. Tar oozes from the wounded earth, and it burns. It changes.",
+      "The great cities of the world call a census, and every man woman and child is bestowed with the Mark, a tattoo made of tar, connected to the black tower with an impossibly long chain that cannot be perceived by humanity.",
+      "As a reward, they are given the Black Book. It knows everything they think, say, want and feel, or close enough to function. The ink moves, like a living thing. It alters the perception of the humans",
+      "A year later, the Adversary looks out the window of the top floor. The fire burns brighter. He can hear the screams from here, once a whisper."
+    ]
   }
 ];
