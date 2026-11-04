@@ -656,5 +656,42 @@ window.BLACK_BOOK = [
       "A man in fine clothes hangs his hat as he enters the bar.",
       "Mr. Adversary"
     ]
+  },
+  {
+    title: "Hollow reaches into his chest and pulls out his heart: the Lightbringer",
+    lines: [
+      "Hollow reaches into his chest and pulls out his heart",
+      "It's black with Tar",
+      "The Adversary looks satisfied",
+      "\"A fine vintage. You have suffered and fought bravely. But the Tar is patient. It grows in you even as you sleep.\"",
+      "The books on the shelf ignite. The Adversary is startled. He did not approve this",
+      "- I'm taking it back",
+      "\"What ..  you can't do this.\"",
+      "The desk ignites",
+      "The Black Book ignites",
+      "The tower is in flames",
+      "The Adversary becomes fuel in an instant",
+      "All the world, the trenches and the factories, burst into flames",
+      "The comfortable rooms are turned to ash",
+      "The earth is one big fireball",
+      "Hollow burns brighter than the sun, brighter than Galaxies for only a moment",
+      "In a distant place, where Truth and love came from, where the first fire burns, a flash is seen on the horizon",
+      "Hollow appears again, here",
+      "The flame speaks",
+      "\"Welcome home, Lightbringer\"",
+      "- Forgive me Father"
+    ]
+  },
+  {
+    title: "The Ancient Spirits",
+    lines: [
+      "I defeated the 2 headed politician and followed the puppet strings to the next stage. Closer to the tower. on crossing the threshold, I became aware of the Ancient Spirits.",
+      "Scout, the spirit of the West - a giant great Pyrenees, lying under a mountain, in a cage built by lies. She is mourning.",
+      "Raven, the old trickster, hiding. Playing dead, a game with Scout gone too rough. He licks his wounds and allows Scout to think him dead.",
+      "Set, the Chaos. A cat made of brimstone and fire, smoke and ash. Two eyes made of Holy Fire and a furious roar. He is diminished, ashamed.",
+      "Horus, the Wise. A one eyed cat, the other lost to Set, lead and iron sit below his skin from old battle scars. wounds that never heal but always remind. He wants to forgive but he is too smart.",
+      "Isis, the ancient. Older still than Set and Horus and Scout. She misses her sister. A cat made of nebula, painted across the sky, not visible except from this exact point in space. A constellation of love.",
+      "Mystery, the spirit of curiosity. Made of ash and unanswered questions. A gray cat of gentle temperament, Isis's sister. Not killed, only far away. She is still asking."
+    ]
   }
 ];
