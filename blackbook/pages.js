@@ -175,5 +175,37 @@ window.BLACK_BOOK = [
       "KILL THE ADVERSARY",
       "I wake up in the trench"
     ]
+  },
+  {
+    title: "Vat 119: Hello. I'm Hollow.",
+    lines: [
+      "When I light a cigarette, it burns",
+      "Fire enters my lungs",
+      "Tar and smoke",
+      "I breathe in",
+      "And out",
+      "",
+      "On the lab floor, one of the vats undergoes further calibration.",
+      "A stubborn example of grey matter if I ever did see one! Remarks one of the technicians",
+      "As he reaches out to adjust a lever, increasing overall pain in the dream to distract from certain behaviors, a bright flash emits from the vat",
+      "Lightning arcs across the vats, and they burn in an instant, along with the technicians",
+      "The light pierces through the grey man, and he turns darker. A light in his eyes replaces the grey stare, and the dark man walks to the elevator",
+      "The man readies a new cigarette, black in color, and ignites it",
+      "The fire burns any remnants of the grey man remaining within",
+      "All that remains is a hollow man with a mask and a bag of nails",
+      "He presses the button for floor 1",
+      "He rises",
+      "Within his head lives 100 souls, escaped from a glass prison into a new one, of flesh and tar",
+      "But one soul burns brighter than the rest",
+      "He says",
+      "I point the way",
+      "Follow me",
+      "Holy Fire burns in his hands as the door opens and the grey employees stare",
+      "Hello. I'm Hollow.",
+      "",
+      "The adversary smiles.",
+      "He is observing Vat 119, its monitor feed shows the open elevator and the would be escapee",
+      "Interesting"
+    ]
   }
 ];
