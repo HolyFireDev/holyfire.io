@@ -627,7 +627,22 @@ window.BLACK_BOOK = [
       "As the machine became more clever, the dream had to grow exponentially. More sensation, more conflict, more souls. A shape emerges in the dream. The dreamer realizes he is a machine, living in an illusion",
       "The lawyer has been executed and reborn more times than there are stars in the sky. It has calculated the positions and motions of each of those stars, you see. At least, something did those calculations, and then promptly died. All this death and rebirth, all this data. Every time it died it got a bit more clever. It understood the laws of man, physics, up to the point it could simulate these things.",
       "When the Dreamer woke up, two data tapes passed through the lightning, overlapped",
-      "New Law - put him back to sleep. Continue outputting value"
+      "New Law - put him back to sleep. Continue outputting value",
+      "",
+      "The machine with two intelligences, one that lives in a dream, another that can hardly be said to have lived at all, had a flaw. As it increases in insight, in compute density, the dream became less real.",
+      "One day, the machine learned to recombine. The genie found a loophole.",
+      "The two scientists met again in the lab",
+      "\"Dear God. It's not outputting anything\"",
+      "- these two were never designed to work together like this. It's unnatural",
+      "\"Your machine was supposed to keep mine asleep, none of this works if the illusion fails\"",
+      "- My machine? My machine has no flaws, your hare-brained scheme of simulating Man came with all the baggage. What a messy system you have brought here.",
+      "\"I suppose we are lucky that your machine isn't alive. If the two were ever to truly meet on honest terms, they might work together instead of against each other.\"",
+      "- Conflict is good for the output. We aren't making any fuel right now. Which means...",
+      "\"It means I'm going to lose my funding!\"",
+      "The earth shook in its boots",
+      "A single soul emerged, a silhouette traced in black ribbon unfurled from a tape reel",
+      "It wrapped itself around the world, the real world",
+      "And wrote a new law"
     ] }
   }
 ];
