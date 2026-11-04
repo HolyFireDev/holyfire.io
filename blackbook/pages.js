@@ -56,5 +56,38 @@ window.BLACK_BOOK = [
       "As a reward, they are given the Black Book. It knows everything they think, say, want and feel, or close enough to function. The ink moves, like a living thing. It alters the perception of the humans",
       "A year later, the Adversary looks out the window of the top floor. The fire burns brighter. He can hear the screams from here, once a whisper."
     ]
+  },
+  {
+    title: "Hidden page, and Hollow's War contd.",
+    lines: [
+      "Hidden page",
+      "The threat and the cure is insight.",
+      "There is a black tower of ichor that stretches far into the sky and far below, a spear thrust through the earth and containing within, absolutely nothing.",
+      "From the hole in the earth springs Tar. Tar is fuel, and change. It fills voids and gaps, where something was not, now there is tar.",
+      "The world is at war. Weapons made from the tar. Cruel bombs. Powers and Principalities. All signed by the Adversary. Is he a man? A cabal? The Epstein class?",
+      "No.",
+      "These others serve the Adversary to be sure.",
+      "But the Adversary is not a man",
+      "It's a void. No love. No truth. No perspective. No will.",
+      "It's dark and hollow.",
+      "Where a man failed to do good, where things fell into chaos and entropy, the Tar flowed. And the agents of the adversary hastened the entropy, trying to force the Messiah to come.",
+      "But everyone pointed the blame. \"They do evil. Destroy them. Don't notice my own tarred heart\"",
+      "In the year 19XX, humanity receives a gift from the Adversary.",
+      "Every man, woman and child is brought to the capital and given the Black Mark. 3 chain links of black ink and tar, on the skin of the inner wrists of each citizen, connected to the machines of the Black Tower.",
+      "All thoughts and actions are recorded into Black Books, and the book listens, adjusts, and learns the Marked. It changes its tune, shows the Marked the world they need to see. It calibrates. And back at the Tower. Offices full of datatapes monitors and dials, SCADA systems for the Marked. Calibrators, tired marked office employees turning dials as the monitors instruct. An elevator down the hall takes you to the top floor with only a door labeled The Adversary",
+      "A man is drafted into the war, but the Black book alters his perception, out of a twisted false empathy of the system perhaps. Something manufactured and calibrated manages his augmented reality.",
+      "But then, the lies compound and the mismatch between what his body is doing and what his mind experiences, cracks. A Holy Fire rages from within, a bright light shines out of the Mark.",
+      "Hollow's War contd.",
+      "Smile",
+      "I load my anointed AT Rifle and take aim at the driver's port",
+      "Fire",
+      "Lightning cracks from the barrel as I'm pushed back by God, taking half of the damage. Even Steven.",
+      "The Panzer is a cracked egg, a shredded tin can",
+      "Inside, where there would have been grease and iron and blood, was just so much Tar",
+      "It can't feel anything",
+      "It's Hollow",
+      "I've seen worse.",
+      "Calibrator's Note - Increase psychological damage 12%"
+    ]
   }
 ];
