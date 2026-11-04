@@ -42,6 +42,18 @@
         });
       }
       render(page.lines, el);
+      // A page may branch: a list of numbered choices, each with its own lines and further choices.
+      function offer(choices, into) {
+        if (!choices || !choices.length) return;
+        var row = document.createElement("p"); row.className = "acts";
+        choices.forEach(function (c) {
+          var a = document.createElement("a"); a.href = "#"; a.textContent = c.label;
+          a.addEventListener("click", function (e) { e.preventDefault(); row.remove(); render(c.lines, into); offer(c.choices, into); });
+          row.appendChild(a);
+        });
+        into.appendChild(row);
+      }
+      offer(page.choices, el);
       // A page may hide more lines behind a phrase; clicking the phrase reveals them once.
       if (page.hidden && page.hidden.trigger) {
         var ps = el.querySelectorAll("p"), t = page.hidden.trigger;

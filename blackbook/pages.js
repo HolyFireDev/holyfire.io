@@ -693,5 +693,165 @@ window.BLACK_BOOK = [
       "Isis, the ancient. Older still than Set and Horus and Scout. She misses her sister. A cat made of nebula, painted across the sky, not visible except from this exact point in space. A constellation of love.",
       "Mystery, the spirit of curiosity. Made of ash and unanswered questions. A gray cat of gentle temperament, Isis's sister. Not killed, only far away. She is still asking."
     ]
+  },
+  {
+    title: "The Knife Store",
+    lines: [
+      "A little chunk of suburbia that fell into the trench",
+      "A man in a leather duster and a cowboy hat stands at the entrance",
+      "Arrogant. Arms out wide, loud, in a Jesus Christ pose",
+      "In front of an attached garage, a sign painted in tar",
+      "KNIVES",
+      "An Australian shop keeper dressed like a western.",
+      "Got a good selection, stranger",
+      "Three options appear in the black book"
+    ],
+    choices: [
+      {
+        label: "1 Bargain bin",
+        lines: [
+          "30 Silver Dollars",
+          "I dig through the bin. Rust, bone handles, a bayonet with somebody else's initials on it.",
+          "I take one. He doesn't look up."
+        ]
+      },
+      {
+        label: "2 Dealer's choice",
+        lines: [
+          "60 Silver Dollars",
+          "He doesn't look at the bin. He reaches under the counter and comes up with two, wrapped in a rag.",
+          "- Don't ask."
+        ]
+      },
+      {
+        label: "3 Where did you find this?",
+        lines: [
+          "He stops smiling.",
+          "- That one's not for sale, stranger. That one's for giving away.",
+          "",
+          "The Dark Blade",
+          "Curse. Melee. 1 energy. -2 max HP. Ready The Dark Blade.",
+          "Swing a black as ichor great sword, generated from the Mark, dealing 12 damage, plus every curse cast and every point of damage dealt to yourself this game.",
+          "When the cost would kill you, you do not die. You come back, and The Dark Blade becomes the Sated Dark Blade.",
+          "",
+          "Sated Dark Blade",
+          "Curse. Melee. 1 energy. Ready Sated Dark Blade.",
+          "Swing a black as ichor ultra great sword, generated from the Mark. Its damage is frozen at the moment of your resurrection, doubled. It can grow no further.",
+          "",
+          "Whoever carries the blade carries this too: when a curse is removed from your deck, lose 30 HP.",
+          "",
+          "- Pleasure doing business."
+        ]
+      }
+    ]
+  },
+  {
+    title: "A Perfect World",
+    lines: [
+      "I came upon a white door.",
+      "Another trap?",
+      "I open the door and enter a jungle, or is it a home? A Garden?",
+      "A branch full of morphing vines and big green leaves"
+    ],
+    choices: [
+      {
+        label: "1",
+        lines: [
+          "I think red and sour. I reach out my hand and receive a pile of raspberries."
+        ]
+      },
+      {
+        label: "2",
+        lines: [
+          "My sore back conjures a hot bath in an oak tub."
+        ]
+      },
+      {
+        label: "3",
+        lines: [
+          "Small, fuzzy bees buzz a joke in my ear. I actually laugh."
+        ]
+      }
+    ]
+  },
+  {
+    title: "Farm House",
+    lines: [
+      "I came upon a Farmer's home on the edges of the battle line.",
+      "As I rounded the corner of the house",
+      "A Panzer!",
+      "It's quiet, and not moving."
+    ],
+    choices: [
+      {
+        label: "1",
+        lines: [
+          "I climb to approach the hatch, [nail] in hand. I jab it under the lid, and pull, hard.",
+          "Crack"
+        ],
+        choices: [
+          {
+            label: "1.1",
+            lines: [
+              "Inside is a black void. Not Darkness. Alive. This is dangerous.",
+              "It's breathing heavily, excited.",
+              "I hastily ready my [Rifle] and fire into the exposed hatch.",
+              "Fire",
+              "The void takes the round the way a pond takes a stone. Ripples. Then nothing.",
+              "Then the ripples come back out.",
+              "I'm on my back in the dirt and the hatch is shut again. The Panzer is quiet. Still not moving.",
+              "The Book scratches. It doesn't write down what it saw.",
+              "I leave it. Some doors are shut for a reason."
+            ]
+          },
+          {
+            label: "1.2",
+            lines: [
+              "A big, pink round face fully occupies the circular opening.",
+              "It speaks in a borrowed voice.",
+              "\"I used to live in the closet here, before that it was a cave. But there are no more people in the house, and I'm so lonely. Can you help me get this running?\""
+            ],
+            choices: [
+              {
+                label: "1.2.1",
+                lines: [
+                  "I jam the nail right through its big blue eye, and it screams in a borrowed voice.",
+                  "Another demon.",
+                  "The face comes apart like wet paper, and the Tar underneath goes looking for somewhere else to be.",
+                  "The Panzer shudders once and settles into the mud for good.",
+                  "Inside, under the seat, a photograph of the family that lived here. I put it back where I found it.",
+                  "I pull the nail out of the steel. Still sharp. Always is."
+                ]
+              },
+              {
+                label: "1.2.2",
+                lines: [
+                  "I grab a [Wrench] from the barn and change the treads.",
+                  "It takes until dark. The face watches me work and tells me about the closet, and the cave before that, and the people, and how quiet it got.",
+                  "I don't say much. It doesn't need me to.",
+                  "The engine catches on the third try. Tar in the fuel line, but it burns.",
+                  "- Where will you go?",
+                  "It thinks about it, which is more than most of them do.",
+                  "It drives off east, away from the line, towards the last place it heard people.",
+                  "I keep the wrench.",
+                  "Calibrator's note - unit retained. What did he just do?"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        label: "2",
+        lines: [
+          "I keep walking. It's not moving.",
+          "I give it a wide berth and cut through the field.",
+          "Halfway across, I hear the hatch open behind me.",
+          "I don't turn around.",
+          "Something in a borrowed voice says goodbye.",
+          "Calibrator's note - subject declined engagement. Log it as fear."
+        ]
+      }
+    ]
   }
 ];
