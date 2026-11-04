@@ -245,5 +245,46 @@ window.BLACK_BOOK = [
       "A look of horrible realization crosses her face, as I grab her by the throat.",
       "Hollow's Desk - Destroy the factories. Destroy the corporations. Plow the fields, toil, work, and you will be saved. Nobody will ever lie to you again, this I swear. I love you all."
     ]
+  },
+  {
+    title: "Hollow and Witch watch the tower crumble",
+    lines: [
+      "Hollow sits in a field with Witch. They watch as the tower crumbles.",
+      "Even as the rubble settled, Hollow spoke prophecy",
+      "- We're going to forget everything. It's going to happen again. We will build another tower.",
+      "\"How can you be so sure? We have truth now, true peace. True love.\"",
+      "She comes closer to comfort him",
+      "- Because I'm afraid of losing this.",
+      "- The Warmth"
+    ]
+  },
+  {
+    title: "The pond: My son.",
+    lines: [
+      "A kind man stands on the surface of a clear pond, a perfect mirror.",
+      "I stand on the bank, rifle on my back, nails in my hands.",
+      "\"My son.\"",
+      "- Hello, Father.",
+      "\"Come. I wish to look upon your face.\"",
+      "I drop the iron and take a step. The water holds me.",
+      "I take another step.",
+      "I walk up to the man, and he puts his hand on my shoulders.",
+      "\"You have come so far.\"",
+      "I remove the mask, the hood, and look upon him with my own eyes.",
+      "\"I want you to know that, whenever you suffered, I was here with you\"",
+      "He holds my heart in his hands. Nails pierce through his flesh but only poke my own.",
+      "\"I never wanted you to be harmed. But I needed you to understand what it means.\"",
+      "I pull the nails out of his hands, and the shallow wounds in my heart seal. He lays it back into my ribs gently.",
+      "- I wanted revenge, to destroy the ones who took away my life. My love.",
+      "- and I instead discovered their own fear.",
+      "- They have forsaken you.",
+      "He listens, and is sad.",
+      "\"They don't understand what they have done. It's not a prison from their point of view. It's grace.\"",
+      "He thinks for a moment.",
+      "\"I want you to turn back. Go find her. Keep my covenant. There will be peace.\"",
+      "I failed. I know it in my heart. But I cannot speak.",
+      "\"You are not a failure. You are my son. And I am so very proud of you. It's not your fault.\"",
+      "I awake on the bank of the pond, a new nail in my hands."
+    ]
   }
 ];
