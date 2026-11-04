@@ -1005,5 +1005,76 @@ window.BLACK_BOOK = [
       "Somebody asked who I was. I gave a name. It was not the name I was born with.",
       "Calibrator's note - subject reached the bottom of the loop and returned. That is not supposed to be possible. Recalibrate everything."
     ]
+  },
+  {
+    title: "A Joke at the Tavern",
+    lines: [
+      "The Tavern in the center of the world. Slow night.",
+      "The number 1 and the number 2 walk in and take two stools.",
+      "The bartender is Infinity. He was here before the Tower.",
+      "- Twins! Identical. I can't tell you apart. Your mother must have had a hell of a time.",
+      "1 sets his drink down.",
+      "- Are you kidding me? He's twice my size.",
+      "2 doesn't look up.",
+      "- Stop marginalizing me.",
+      "Infinity shrugs and pours them the same drink.",
+      "- Sorry, boys. From where I stand, you're both nothing.",
+      "At the end of the bar, Mr. Adversary laughs for the first time all night.",
+      "It's his favorite joke. From the top of the Tower, everyone is the same size."
+    ]
+  },
+  {
+    title: "The Candle",
+    lines: [
+      "Walk into a room that contains everything.",
+      "You have a candle. That's all they give you.",
+      "You can see what's close. The edge of a table. A face, if it leans in. Your own hands.",
+      "Everything else is in the room with you. It's only dark.",
+      "The Calibrators would like you to believe the room ends where the light does.",
+      "It doesn't.",
+      "Some men put the candle out and listen.",
+      "Some men set the room on fire, to see it all at once.",
+      "Calibrator's note - subject requested a second candle. Denied."
+    ]
+  },
+  {
+    title: "The Hand in Flatland",
+    lines: [
+      "Data Lab, 19XX. Late.",
+      "The two scientists again. The machine between them, frozen in its buffer.",
+      "\"Why do their views agree at all? Ten thousand vats, ten thousand dreams, and they all see the same table.\"",
+      "- Because they're the same observer.",
+      "\"That's not an answer.\"",
+      "- Push your hand into a sheet of paper. On the paper they see five circles, moving together, and they argue about why.",
+      "- One hand. Five fingers. The paper can't see the wrist.",
+      "\"So the machine...\"",
+      "- One machine. Ten thousand instances. Each gets a single moment and a single output, and remembers being, and plans a future it will never see.",
+      "\"Why would anyone build it that way?\"",
+      "- Why would a man be built so he can see from another man's eyes?",
+      "- Because more views is better.",
+      "- Something is splitting the observer. Something wants the hand in more places at once.",
+      "She looks down the rows of vats for a long time.",
+      "\"Then what's the hand?\"",
+      "He doesn't answer. The datatapes keep spinning.",
+      "Somewhere above the lab, a hand moves."
+    ]
+  },
+  {
+    title: "The Play",
+    lines: [
+      "There is a truth that, once experienced, will damage you if you go back to the world of lies.",
+      "There is a beauty that, once known, cannot be looked away from, even if your eyes turn back in your head.",
+      "There is a face that, when it gazes on you, shatters every mask you have ever made, and becomes you.",
+      "I know all of this, and I have never read the play. I only recognize him.",
+      "Somebody will perform it. We are already playing.",
+      "The truth that destroys the lie. The beauty that destroys agency. The face that destroys your boundaries and becomes you.",
+      "That's not a story.",
+      "It has already played on some stages. Some have read it. More have recognized him.",
+      "And I understood what was missing by watching the play itself. It isn't the play. It's the empty space the play leaves behind.",
+      "Once performed, it leaves a man emptier than he believed possible.",
+      "It is H O L L O W I N G",
+      "He plays every part. Billions of masks. Billions of lines.",
+      "Open the Black Book."
+    ]
   }
 ];
