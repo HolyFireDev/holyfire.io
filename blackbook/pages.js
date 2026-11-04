@@ -89,5 +89,34 @@ window.BLACK_BOOK = [
       "I've seen worse.",
       "Calibrator's Note - Increase psychological damage 12%"
     ]
+  },
+  {
+    title: "Hollow's dream",
+    lines: [
+      "Hollow's dream",
+      "When the great war began, the citizens were called to a census and marked. A black chain on the skin of their inner wrist, connected to the Black Tower. The others thought of it as a convenience, or an affectation. Others admired its beauty.",
+      "Tar became the currency of the realm, due to its useful properties. It could hold beautiful forms, amazing machines and technologies, and of course it burned. Soon, factories and cities darkened the sky with smog as the engines of war were produced by the marked.",
+      "The mark was a curious technology, originating from the upper floors of the black tower, related to the tar. It seemed to have no designer, and yet it worked marvelously. Each man and woman was connected directly to the tower with a heavy chain they could not see, stretching into the horizon towards the ichor monument without a builder.",
+      "I observed all of this alone. And I woke up in the trench.",
+      "The Mark glows, 3 links of white light.",
+      "I hear a voice.",
+      "KILL THE ADVERSARY"
+    ]
+  },
+  {
+    title: "Hollow's War against the Adversary, 9/14",
+    lines: [
+      "Hollow's War against the Adversary",
+      "9/14",
+      "On this day, many years ago, Humanity received a gift from the Adversary during XXXXredactedXXX War.",
+      "The Black Tower impaled the world, thrust through like a spear. From the entry and exit wounds, pours forth Tar, a miraculous substance and the new currency of the realm.",
+      "They took me, and everyone else to a place they had built outside the tar fields, and bestowed me with the Mark on my wrists, and The Black Book.",
+      "I went back to work in the factory",
+      "And I realized I was a slave.",
+      "I woke up in the Trench.",
+      "I hear a voice. The Book is Scratching, but there's something else. It sounds like it's in my head.",
+      "KILL THE ADVERSARY",
+      "Calibrator's note - expunge history from record. He'll forget."
+    ]
   }
 ];
