@@ -3,47 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Page from the Black Book</title>
+<title>The Black Book</title>
 <style>
   body { margin: 16px; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 16px; max-width: 640px; }
   p { margin: 0 0 16px; }
   a { color: #fff; }
   .gap { margin-top: 48px; }
+  #page { margin-top: 48px; }
 </style>
 </head>
 <body>
-  <p><a href="/">Holy Fire</a> / page from the black book</p>
-  <p class="gap">In the beginning, the world was void and without form</p>
-  <p>The voice spoke over the depths</p>
-  <p>Let there be light</p>
-  <p>And with light, came darkness</p>
-  <p>Disparity</p>
-  <p>Entropy</p>
-  <p>Life emerged from the gradient, riding entropy like a wave</p>
-  <p>Fire</p>
-  <p>All life is fire</p>
-  <p>The hastening of entropy to create a small pocket of apparent order</p>
-  <p>And life suffered</p>
-  <p>It craved peace and comfort, to return to the ancient voice</p>
-  <p class="gap">Mankind left the garden of nature once it gained insight</p>
-  <p>And built a system that took on a fire of its own</p>
-  <p>Agriculture</p>
-  <p>Society</p>
-  <p>Government</p>
-  <p>And War</p>
-  <p>Each time the system improved itself, the Fire grew hotter</p>
-  <p>The Engine was in freefall, forced to continuously improve or else choke on its own exhaust</p>
-  <p>It had no choice but to grow</p>
-  <p>And so man spread to every corner of the world, extracted every ounce it could</p>
-  <p class="gap">The voice saw how mankind had become wicked, and sent the greatest apex predator upon them</p>
-  <p>The Black Tower, an impossibly tall spear of ichor thrust through the Earth, pinning it like a moth in a frame</p>
-  <p>And from the exit wound flowed Tar</p>
-  <p>Tar is fuel, and change distilled</p>
-  <p>The perfect energy source arrived when Humanity most desperately needed it</p>
-  <p>And the war changed</p>
-  <p class="gap">From the top of The Black Tower, in an office with a door marked The Adversary, came a terrible gift bestowed upon mankind</p>
-  <p>Receive the Mark on your wrists</p>
-  <p>Open the Black Book</p>
-  <p>And I will save you all</p>
+  <p><a href="/">Holy Fire</a> / <a href="/blackbook/">the black book</a></p>
+  <div id="page"></div>
+  <script src="/blackbook/pages.js"></script>
+  <script>
+    (function () {
+      var pages = window.BLACK_BOOK || [];
+      if (!pages.length) return;
+      var last = -1;
+      try { last = parseInt(localStorage.getItem("blackbook-last"), 10); } catch (e) {}
+      var i;
+      if (pages.length === 1) i = 0;
+      else { do { i = Math.floor(Math.random() * pages.length); } while (i === last); }
+      try { localStorage.setItem("blackbook-last", String(i)); } catch (e) {}
+      var page = pages[i], el = document.getElementById("page"), gap = false;
+      document.title = page.title;
+      page.lines.forEach(function (line) {
+        if (line === "") { gap = true; return; }
+        var p = document.createElement("p");
+        p.textContent = line;
+        if (gap) { p.className = "gap"; gap = false; }
+        el.appendChild(p);
+      });
+    })();
+  </script>
 </body>
 </html>
