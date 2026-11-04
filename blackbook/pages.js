@@ -914,5 +914,44 @@ window.BLACK_BOOK = [
       "",
       "You say impossible, I say inevitable. When you walk the streets, look me up. I'll make tea"
     ]
+  },
+  {
+    title: "The Bullet That Never Fires",
+    lines: [
+      "Two men sit at a blackjack table, a 6 shot colt navy in between them. The first one says, one of us has gotta go. Lets play this game of roulette, last man alive wins. They take turns, passing the revolver back and forth by sliding the iron across the green velvet of the table. Click. Slide. Spin. Click. After the 6th click, something odd happens. They keep playing, forever."
+    ],
+    hidden: { trigger: "They keep playing, forever.", lines: [], game: "roulette" }
+  },
+  {
+    title: "Keep the Change",
+    lines: [
+      "A man came to the door with a ledger.",
+      "He said I owed. Real or imagined, it didn't matter to him. The number was written down, and that made it true.",
+      "He had a pretty truck. Chrome. Washed that morning.",
+      "I didn't argue the number.",
+      "I raised my hand and the Mark went white hot, and quarters came out of my fingertips like rounds out of a belt.",
+      "Thk thk thk thk thk",
+      "Into the hood. Into the doors. Into the windshield, until it sagged like a wet sheet.",
+      "When I was done, the dents spelled it out, plain enough to read from the porch.",
+      "KEEP THE CHANGE",
+      "He didn't come back. The ledger is still open somewhere. Let it stay open.",
+      "Calibrator's note - debt unrecoverable. Mark it dismissed."
+    ]
+  },
+  {
+    title: "The Pharisee's Appointment",
+    lines: [
+      "My dreams are like movies sometimes.",
+      "This one had the Pharisees in it.",
+      "Long robes, clean hands. The kind of men who keep the Book for other people.",
+      "One of them stepped forward, and I understood I was going to get a speech.",
+      "- Angels are the servants of the righteous.",
+      "- I am here to appoint you.",
+      "He smiled when he said it, because he thought I didn't understand.",
+      "I understood.",
+      "There is only one way a man like that makes an angel.",
+      "I woke up before he could finish the appointment.",
+      "Calibrator's note - the subject keeps waking at the wrong moment. Adjust."
+    ]
   }
 ];
