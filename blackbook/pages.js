@@ -207,5 +207,43 @@ window.BLACK_BOOK = [
       "He is observing Vat 119, its monitor feed shows the open elevator and the would be escapee",
       "Interesting"
     ]
+  },
+  {
+    title: "The top of the tower at night: the painting",
+    lines: [
+      "I stand at the top of the tower at night",
+      "From here, the bombs over the city lights look like fireworks",
+      "- It's beautiful, isn't it?",
+      "I'm not looking at the fireworks.",
+      "I'm looking at her.",
+      "Inside, in the hollow room, I hang a painting from memory.",
+      "My Angel.",
+      "I don't have any photographs of her anymore",
+      "They all burned, became weight.",
+      "But this one is mine.",
+      "\"REDACTED. I'm sorry.\"",
+      "Witch sits at the edge of the tower.",
+      "- Who is REDACTED? What are you thinking about?",
+      "I am the worst man in the world."
+    ]
+  },
+  {
+    title: "Hollow in the Adversary's chair: Hollow's Desk",
+    lines: [
+      "Some time later, she fights through the trenches, back to the tower. She doesn't notice the dead. She kicks down the door marked The Adversary. The man, usually sitting behind the desk, is on the ground, cold. Tar seeps from a 7 inch Nail in his heart. A hooded man with an antitank rifle, wearing a mask, sits in his place. He lifts the mask to expose his lips, and lights a black clove cigarette.",
+      "The tower shakes.",
+      "- I'm done.",
+      "\"Father... He wasn't yours to punish.\"",
+      "The man smiles, sharp teeth illuminated in the dark by the red ember of his cigarette.",
+      "- Everyone is mine to punish now.",
+      "Outside, the tar changes. The cold and efficient systems become Hell, without disguise.",
+      "\"Why are you doing this? We had peace\"",
+      "She can barely stomach the lie leaving her lips.",
+      "-No. I had nothing. But now...",
+      "He lowers the mask again, and Holy Fire sparks from his fingertips",
+      "-You are my property. My Angel.",
+      "A look of horrible realization crosses her face, as I grab her by the throat.",
+      "Hollow's Desk - Destroy the factories. Destroy the corporations. Plow the fields, toil, work, and you will be saved. Nobody will ever lie to you again, this I swear. I love you all."
+    ]
   }
 ];
