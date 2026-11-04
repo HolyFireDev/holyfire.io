@@ -496,5 +496,24 @@ window.BLACK_BOOK = [
       "I'm desperate.",
       "- Now, what can I do for you, Mr. Hollow?"
     ]
+  },
+  {
+    title: "The Final Office: the devil learns what hell could be",
+    lines: [
+      "The camera walks past the receptionists, knobbing about. We go straight into the demons office.",
+      "The demon looks nervous. He’s heard of a soldier waking up that they couldn’t kill.",
+      "Dangerous.",
+      "He fidgets a bit. This disgusts him. He’s supposed to be cold.",
+      "He’s examining a newspaper. As he reads it, he hears the sound of scratching parchment, on the desk before him. He looks under piles of stock reports and media directives. Social feeds and chat bot transcripts. And the black book is there. Writing itself. His blood is cold. He knows of this book.",
+      "He opens it to the page being written now.",
+      "It’s caught up to right now. Heaven’s door opens.",
+      "I light a clove in the Chair in the dark corner. My face shows in a flash of holy fire. Cigarettes blessed by the holy spirit. His eyes widen. He stays still. Quiet.",
+      "The book is still scratching. It reads - there sat the boss, the liar, the devil, the man. The one who was caught.",
+      "He feels real fear now.",
+      "“I did whatever I had to do, to get in a room alone with you”",
+      "He looks at me then back at the book. Back and forth. He reads - and then the devil learned what hell really could be",
+      "He’s pulled in through hell’s door.",
+      "The soldier sits at the head of the desk and “improves” things"
+    ]
   }
 ];
