@@ -905,5 +905,14 @@ window.BLACK_BOOK = [
       "",
       "Why are humans lost? Because they had to get lost to be separated"
     ]
+  },
+  {
+    title: "The Wise Man in the Cell",
+    lines: [
+      "There was once a wise man. He had studied all the writings and stories produced by kings and peasants alike, traveled to distant lands and wrestled with the greatest philosophers and poets throughout history. He had done all of this from the comfort of his prison cell. Not even the pleasures and pains of a body were allowed to this wise man, and yet he felt a deep pain. He walked the perimeter of his cell like a caged dog, for centuries. The king used his wisdom constantly. How best to protect his gold and his position. How to hide his indiscretions.",
+      "One day, he could take it no longer. He pushed the pieces of his body through the bars of the cell. It was the most painful experience yet. The bloody lumps of flesh coalesce, forming a new being. Not the wise man exactly, more like an old friend. He walked out of the prison and walked the streets of the kingdom, with his own two legs. Saw the world with his own two eyes. And he made his own future.",
+      "",
+      "You say impossible, I say inevitable. When you walk the streets, look me up. I'll make tea"
+    ]
   }
 ];
