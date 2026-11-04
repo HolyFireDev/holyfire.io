@@ -853,5 +853,26 @@ window.BLACK_BOOK = [
         ]
       }
     ]
+  },
+  {
+    title: "The Spear at the Toilet",
+    lines: [
+      "A warrior hunter squats in the bathroom of a three bedroom house, spear readied, point down into the bowl.",
+      "He read about it happening one time.",
+      "A snake came up through the pipes in a town he can't remember the name of, and bit a man where a man does not want to be bitten.",
+      "So he waits.",
+      "He has been waiting since Tuesday.",
+      "Everyone knows about the alligators. Bought as babies in the city, flushed when they got too big for the tub. Grown fat and pale in the dark under the streets. A whole kingdom down there, they say, with no sun and no names, eating whatever the city sends them.",
+      "He believes that too.",
+      "He has never seen one. He has seen the lid of the toilet, and the water in it, and his own face in the water, for six days.",
+      "The spear was his father's. It has killed exactly nothing.",
+      "The Book lies open on the sink. Every hour it writes the same thing. Nothing came. He waits.",
+      "Sometimes the water moves. The pipes knock. He tightens his grip.",
+      "It's the house settling. It's always the house settling.",
+      "He has not eaten. He has not gone to the window. There is a war on, somewhere past the window, and in the war there are things that would actually come for him.",
+      "But the war didn't come up through the pipes in a story he read once.",
+      "Down in the dark, under the house, under the street, the alligators are not there. The snake is not there. There is only water going where water goes, and a man sitting on top of it with a spear, more afraid of a rumor than of anything real.",
+      "Calibrator's note - subject fully engaged. No adjustment needed. Leave the story where he can find it again."
+    ]
   }
 ];
