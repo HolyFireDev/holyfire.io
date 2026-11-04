@@ -321,5 +321,47 @@ window.BLACK_BOOK = [
       "I open the stupid book and move the Knight towards the Tower.",
       "Calibrator's note - he remembers her. But he can't hear our voice, a faulty transmission?"
     ]
+  },
+  {
+    title: "Chained, 9/25/19xx: the Factory",
+    lines: [
+      "Chained",
+      "9/25/19xx",
+      "I wake up in the Factory",
+      "Smoke and tar coagulate on rusty iron beams, as orange embers smolder in the forge",
+      "Noise noise noise",
+      "Hotter than hell",
+      "Tar men all around me swing hammers, pull chains, weld joints",
+      "What are they making this time?",
+      "More tanks",
+      "The iron hull of another killing machine fresh off the line",
+      "A group of the tar men do final checks, and stamp the papers into a big black book",
+      "One of them approaches me.",
+      "\"Hello, Jack. Are you working today?\"",
+      "I tell him yes. I always am.",
+      "\"The boss sent this for you, here take it. I gotta get back to it.\"",
+      "The tar man walks back over to the assembly line, leaving black mounds of ichor with every step",
+      "It's a contract",
+      "I wipe the tar from my brow",
+      "- deliver me sevenfold tarred souls, and I will let you leave.",
+      "Signed The Adversary",
+      "-ps",
+      "I'll take your comrades in the factory as collateral",
+      "And so in that roaring factory of Tar men, one walked out the door before the whistles blew and into the trench, and the rest of them were thrown into the forge"
+    ]
+  },
+  {
+    title: "Jack and the Sugar Factory",
+    lines: [
+      "Jack walks through the sweet rot of an abandoned sugar factory",
+      "here, on the bayou, in the hot sticky south",
+      "ships without flags or crew arrive from across the great ocean carrying their paydirt to the stacks",
+      "brown, dirty sugar is stacked in a pile the size of a basketball field like a pyramid of dirt",
+      "a moat of syrup and wasps surrounds it",
+      "the palletizers and conveyors and the augers still spin, but the men are gone",
+      "the dirty sugar is liquidized with hot water and alcohol, sieved through charred bones of animals, dried and ground and loaded into bags of many sizes",
+      "and they leave the factory clean",
+      "but the factory is darker, damper, and another part rusts off"
+    ]
   }
 ];
