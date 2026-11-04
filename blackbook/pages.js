@@ -118,5 +118,62 @@ window.BLACK_BOOK = [
       "KILL THE ADVERSARY",
       "Calibrator's note - expunge history from record. He'll forget."
     ]
+  },
+  {
+    title: "Hollow's war against the adversary, 19XX Jun 12",
+    lines: [
+      "Hollow's war against the adversary.",
+      "19XX, Jun 12",
+      "I gained insight",
+      "I woke up in the trench",
+      "The map lies before me",
+      "I move the rook to the node behind me, towards the tower. Into the tar.",
+      "The trench melts like wax and I'm standing in a city, ruined by Tank fire.",
+      "Speak of the devil",
+      "A Tar Panzer is approaching",
+      "My right hand opens and the Holy Fire burning in my hand ignites into 5 cards of light, floating within my grasp. I take what I need, and focus my intent. My hand clasps around the light and I'm holding an etched cartridge.",
+      "Smile",
+      "I load my anointed AT Rifle and take aim at the driver's port",
+      "Fire",
+      "Lightning cracks from the barrel as I'm pushed back by God, taking half of the damage. Even Steven.",
+      "The Panzer is a cracked egg, a shredded tin can",
+      "Inside, where there would have been grease and iron and blood, was just so much Tar",
+      "It can't feel anything",
+      "It's Hollow",
+      "I've seen worse.",
+      "Calibrator's Note - Increase psychological damage 12%"
+    ]
+  },
+  {
+    title: "The Giant: WHO ARE YOU?",
+    lines: [
+      "The Giant bellows",
+      "\"WHO ARE YOU?\"",
+      "- No one at all",
+      "I seal the engraving with my strongest fire, and rack the rifle",
+      "I fight the weight, and raise the barrel to meet the beast",
+      "Fire",
+      "The Giant is impaled through the eye",
+      "Thunder",
+      "I walk up to claim my trinket.",
+      "I pull from the Tar, a baseball card",
+      "The Iron Horse",
+      "It burns to ash in my hand before I remember the game. The Rifle gets heavier. But I'm stronger.",
+      "I take the power, and a handful of silver coins, and the 3 options appear again in the palm of my hand. Before I can plan my next move, I hear something. Voices? I come closer to the giant's body, now lying in the mud",
+      "It cannot be.",
+      "I raise a nail and plunge it into the monster's gut, and rip a door.",
+      "There's light inside.",
+      "I step in",
+      "It's a village square, it looks like a farmers market or a festival.",
+      "Stalls full of honey and turkey legs, watermelon and ale.",
+      "Everyone is singing, dancing, taking part in the feast and the trade",
+      "They turn and see me all at once, and are silent as the grave.",
+      "The market is rotting",
+      "\"You have destroyed our world.\"",
+      "I'm lying in the mud, looking up at the grey.",
+      "What does it all mean?",
+      "KILL THE ADVERSARY",
+      "I wake up in the trench"
+    ]
   }
 ];
