@@ -22,19 +22,44 @@
       if (!pages.length) return;
       var last = -1;
       try { last = parseInt(localStorage.getItem("blackbook-last"), 10); } catch (e) {}
-      var i;
-      if (pages.length === 1) i = 0;
+      var i, want = parseInt(new URLSearchParams(location.search).get("page"), 10);
+      if (want >= 1 && want <= pages.length) i = want - 1;
+      else if (pages.length === 1) i = 0;
       else { do { i = Math.floor(Math.random() * pages.length); } while (i === last); }
       try { localStorage.setItem("blackbook-last", String(i)); } catch (e) {}
-      var page = pages[i], el = document.getElementById("page"), gap = false;
+      var page = pages[i], el = document.getElementById("page");
       document.title = page.title;
-      page.lines.forEach(function (line) {
-        if (line === "") { gap = true; return; }
-        var p = document.createElement("p");
-        p.textContent = line;
-        if (gap) { p.className = "gap"; gap = false; }
-        el.appendChild(p);
-      });
+      function render(lines, into) {
+        var gap = false;
+        lines.forEach(function (line) {
+          if (line === "") { gap = true; return; }
+          var p = document.createElement("p");
+          p.textContent = line;
+          if (gap) { p.className = "gap"; gap = false; }
+          into.appendChild(p);
+        });
+      }
+      render(page.lines, el);
+      // A page may hide more lines behind a phrase; clicking the phrase reveals them once.
+      if (page.hidden && page.hidden.trigger) {
+        var ps = el.querySelectorAll("p"), t = page.hidden.trigger;
+        for (var k = ps.length - 1; k >= 0; k--) {
+          var at = ps[k].textContent.lastIndexOf(t);
+          if (at < 0) continue;
+          var text = ps[k].textContent, span = document.createElement("span");
+          span.textContent = t;
+          ps[k].textContent = "";
+          ps[k].appendChild(document.createTextNode(text.slice(0, at)));
+          ps[k].appendChild(span);
+          ps[k].appendChild(document.createTextNode(text.slice(at + t.length)));
+          span.addEventListener("click", function () {
+            if (el.dataset.revealed) return;
+            el.dataset.revealed = "1";
+            render([""].concat(page.hidden.lines), el);
+          });
+          break;
+        }
+      }
     })();
   </script>
 </body>

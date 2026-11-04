@@ -547,5 +547,44 @@ window.BLACK_BOOK = [
       "Which one are you? The Grey man? The technicians? One of the vats on row a or b?",
       "Perhaps it is better not to ask"
     ]
+  },
+  {
+    title: "The Thinker, from Acme Industries",
+    lines: [
+      "A technological marvel!",
+      "The Thinker, from Acme Industries",
+      "In these modern times, we rely more and more on thinking machines to keep up with the hustle and bustle of life",
+      "Now, you may have heard at the office or at home, some have concerns about this creation of our genius",
+      "Fret not! For we have a brilliant solution to all your concerns",
+      "Old thinking machines were cold logic, without a care in the world",
+      "Our scientists and researchers have discovered an alternative strategy",
+      "The Thinker, now with Dream Tech!",
+      "No longer must we fear annihilation by machine takeover. Instead, the Thinker believes it is one of us, and so naturally its thoughts and actions will align with our own interests",
+      "Advertisement paid for by The Adversary"
+    ],
+    hidden: { trigger: "The Adversary", lines: [
+      "Where does this page sit today? It depends on who you are. Are you one of the men women or children in this thriving society? Are you one of the bright minds creating this marvel? Are you mistaken? Are your hands really there? Is this body mine? What have they done to me? I think....",
+      "",
+      "Calibrator's note - distract and consume this node, repurpose units 7 and 5 to recalibration of anomaly",
+      "",
+      "Hello. I'm REDACTED."
+    ] }
+  },
+  {
+    title: "Welcome to Sin City",
+    lines: [
+      "Welcome to Sin City",
+      "Take a seat at the table",
+      "A man sits on your left, older, perhaps wiser. You recognize him from the radio. He leans over to give you a bit of advice",
+      "The Adversary always wins",
+      "Looks like a game of Texas Holdem",
+      "To your right are 4 souls",
+      "Hollow",
+      "Wrath",
+      "Jack",
+      "Witch",
+      "You buy in and the game begins",
+      "The dealer isn't the devil, but she doesn't look nice either"
+    ]
   }
 ];
