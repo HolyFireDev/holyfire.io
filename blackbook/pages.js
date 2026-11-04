@@ -363,5 +363,46 @@ window.BLACK_BOOK = [
       "and they leave the factory clean",
       "but the factory is darker, damper, and another part rusts off"
     ]
+  },
+  {
+    title: "Calibrator's Desk: Witch at the fire, 14.9.19xx",
+    lines: [
+      "Calibrator's Desk",
+      "14.9.19xx",
+      "13:39 PST",
+      "Attn. To field agent",
+      "Observe and report",
+      "Witch closes her Book and recites the fear killer in a whisper.",
+      "She confidently strides up to the fire, 4 men sitting around the flame.",
+      "One man, a tattered shroud, pale light eyes in a Hollow in the hood, and two pale hands wrapped loosely in cloth. He has a bag of long nails and cards, and a pack of Unlucky Strikes. On his back, a 50 pound rifle that's singing a hymn. He doesn't look at you. He doesn't move at all, just staring at the flame.",
+      "To his right, a loud Wrathful sort of man. Fun, but scary. He's spinning yarns for the other lads. They aren't leaving, so they must not mind. He's sharing a pint of beer with his Shotgun",
+      "Across from him, a grey man. He's weary, and you can begin to guess why. He's wrapped in golden chains of ammunition, all coiling into the receiver of a machine gun. He sighs after a slightly sad story from the now drunk Wrathful man.",
+      "\"I lost something once. Better to move on\"",
+      "The Gray man, Chained, went back to his tasks and the angry man grew quiet.",
+      "The last of them, but the first to acknowledge my presence, stood to greet me.",
+      "Clad in heavy armor of yore. Curious.",
+      "Another Warrior? Share our fire.",
+      "The armored one turned to the fire, reached in a metal hand and pulled out a loaf of bread, and a flagon of beer.",
+      "Witch recited the act of gratitude and accepted these gifts",
+      "The Angry man gave up his seat for the lady and began another tale of adventure. And another beer from the fire of course.",
+      "Witch recited the act of inspiration. Plus a bit of humor concentrate.",
+      "The Angry man was crying laughing at the story.",
+      "\"You're not half bad stranger.\"",
+      "Hollow chuckled. Like he had heard it before.",
+      "Wrath stopped laughing.",
+      "The armored man smiled",
+      "\"Where is your Weapon?\"",
+      "Witch revealed the Book",
+      "The others, perplexed, reached for their own books subconsciously",
+      "Witch performed the Observation seal behind her back, in-between bites of baked bread.",
+      "The Black Book scratched copies of every card the others carried, and Witch picked one to make real. She pulled it out of her book and the others watched.",
+      "The Left Nail",
+      "A 7 inch iron nail materialized in her hand, and the sudden weight caused her surprise.",
+      "She offered it to Hollow.",
+      "He shook his head.",
+      "The angry man, more suspicious, broke the uncomfortable silence with another tale.",
+      "Calibrator's Desk",
+      "Well done, Field agent. Continue as instructed. We love you."
+    ]
   }
 ];
