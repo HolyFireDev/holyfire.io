@@ -874,5 +874,36 @@ window.BLACK_BOOK = [
       "Down in the dark, under the house, under the street, the alligators are not there. The snake is not there. There is only water going where water goes, and a man sitting on top of it with a spear, more afraid of a rumor than of anything real.",
       "Calibrator's note - subject fully engaged. No adjustment needed. Leave the story where he can find it again."
     ]
+  },
+  {
+    title: "One power, and the play",
+    lines: [
+      "There is only one power.",
+      "And then there is the play.",
+      "And I'm afraid the strings you dangle from your fingers",
+      "Have distracted you from the ones your corpse dangles from"
+    ]
+  },
+  {
+    title: "Confession",
+    lines: [
+      "I loved a woman, and when she betrayed me, I tore out her heart and ate it"
+    ]
+  },
+  {
+    title: "The Adversary Alone",
+    lines: [
+      "I can picture the Adversary in his office looking at his books wondering alone if humans ever existed at all while he renders a perfect engine full of them"
+    ]
+  },
+  {
+    title: "Lost to be Separated",
+    lines: [
+      "The dark blade and the black blade are examples of material of the black tower. Tar is a curse, something you have to pay for later",
+      "The Black Tower is the pinnacle of output through deception",
+      "Separation",
+      "",
+      "Why are humans lost? Because they had to get lost to be separated"
+    ]
   }
 ];
