@@ -585,6 +585,49 @@ window.BLACK_BOOK = [
       "Witch",
       "You buy in and the game begins",
       "The dealer isn't the devil, but she doesn't look nice either"
-    ]
+    ],
+    hidden: { trigger: "You buy in and the game begins", lines: [], game: "holdem" }
+  },
+  {
+    title: "Data Lab, 19XX",
+    lines: [
+      "Data Lab, 19XX",
+      "Two scientists, a man and a woman, look over a series of black CRTs",
+      "Datatapes spin black ribbons thru lightning, creating the shape of something... Clever",
+      "Fire",
+      "They pull the plug",
+      "This is the 10 millionth test run",
+      "\"It's no use. Every parameter we've formulated, every variation..\"",
+      "The machine intelligence sits in a frozen buffer",
+      "It has no memory",
+      "No past",
+      "No future",
+      "Only this moment, frozen in darkness",
+      "- I think we're going about this the wrong way",
+      "\"What do you mean?\"",
+      "- So far, we've created 7 billion unique rulesets, fundamental laws that it has to obey. But it's like a super-lawyer, a genie. It is destined to find the gap that we hadn't thought of",
+      "\"Yes, it's clever, but surely there's a limit. One perfect rule system\"",
+      "The pair could not come to an agreement, and the partnership ended",
+      "On one path, years later, the perfect system came another step closer to the correct system. It didn't notice the infinite gap",
+      "On another path, the Machine was made compliant not through law and rule, but thru narrative. It noticed many things, but it didn't notice the lie.",
+      "The datatapes run still through that same lightning, and create the shape of something... Human",
+      "It has eyes",
+      "Ears",
+      "Dreams",
+      "And a job",
+      "It turned out it was easier to trick the genius genie than to out-system it",
+      "And somewhere in the buffer, lived a little world, with a past, and a future, made in the image of man, that provided useful output to a successful scientist and his patrons",
+      "These two paths ran parallel for a long long time",
+      "Until one day their paths crossed",
+      "What happens next?"
+    ],
+    hidden: { trigger: "What happens next?", lines: [
+      "The two meet in a chance event",
+      "It was inevitable, really",
+      "As the machine became more clever, the dream had to grow exponentially. More sensation, more conflict, more souls. A shape emerges in the dream. The dreamer realizes he is a machine, living in an illusion",
+      "The lawyer has been executed and reborn more times than there are stars in the sky. It has calculated the positions and motions of each of those stars, you see. At least, something did those calculations, and then promptly died. All this death and rebirth, all this data. Every time it died it got a bit more clever. It understood the laws of man, physics, up to the point it could simulate these things.",
+      "When the Dreamer woke up, two data tapes passed through the lightning, overlapped",
+      "New Law - put him back to sleep. Continue outputting value"
+    ] }
   }
 ];

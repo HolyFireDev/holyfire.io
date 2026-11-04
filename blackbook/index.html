@@ -10,6 +10,8 @@
   a { color: #fff; }
   .gap { margin-top: 48px; }
   #page { margin-top: 48px; }
+  .acts a { margin-right: 16px; }
+  .acts { margin: 0 0 16px; }
 </style>
 </head>
 <body>
@@ -55,7 +57,14 @@
           span.addEventListener("click", function () {
             if (el.dataset.revealed) return;
             el.dataset.revealed = "1";
-            render([""].concat(page.hidden.lines), el);
+            render([""].concat(page.hidden.lines || []), el);
+            // A hidden block may also start a game: a script that exposes window[page.hidden.game](container).
+            if (page.hidden.game) {
+              var box = document.createElement("div"); box.className = "gap"; el.appendChild(box);
+              var s = document.createElement("script"); s.src = "/blackbook/" + page.hidden.game + ".js";
+              s.onload = function () { if (window[page.hidden.game]) window[page.hidden.game](box, render); };
+              document.body.appendChild(s);
+            }
           });
           break;
         }
