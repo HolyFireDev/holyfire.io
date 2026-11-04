@@ -284,7 +284,8 @@ window.BLACK_BOOK = [
       "\"I want you to turn back. Go find her. Keep my covenant. There will be peace.\"",
       "I failed. I know it in my heart. But I cannot speak.",
       "\"You are not a failure. You are my son. And I am so very proud of you. It's not your fault.\"",
-      "I awake on the bank of the pond, a new nail in my hands."
+      "I awake on the bank of the pond, a new nail in my hands.",
+      "Perhaps it was just a dream."
     ]
   }
 ];
