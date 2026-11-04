@@ -515,5 +515,37 @@ window.BLACK_BOOK = [
       "He’s pulled in through hell’s door.",
       "The soldier sits at the head of the desk and “improves” things"
     ]
+  },
+  {
+    title: "7 days before the revolution: the angel in the office",
+    lines: [
+      "Interior, the Adversary's office",
+      "7 days before the revolution",
+      "A white light appears through the window of the door to his office, the text on the glass casting a sharp shadow, painting \"The Adversary\" across the back wall.",
+      "- what? what is this...",
+      "The door opens gracefully, and an angel walks into the office. He stands across from the Adversary, still in his seat.",
+      "\"I've come to free them. Your day is done.\"",
+      "- Fool. You think your Father will let you destroy me? I am entropy. I am the void.",
+      "\"And I am the Lightbringer\"",
+      "Outside, the Tar changed again. Inside, the angel fell into a black pit forever."
+    ]
+  },
+  {
+    title: "Interior: The Black Tower, floor -99",
+    lines: [
+      "Interior - The Black Tower, floor -99",
+      "Direct your attention to the observation room overlooking the lab floor",
+      "A grey man in a grey suit, grey smoke pouring from his lungs.",
+      "On the floor of the lab, scientists and technicians go through their hourly checks, daring not to look up at the grey man.",
+      "They walk down rows of vats, containing within human brains - yes, really!",
+      "You see, it turns out this is the best computer nature ever invented",
+      "In one row are the cold thinking machines",
+      "And another, the new Acme Thinker",
+      "The vats are identical",
+      "What's inside them looks the same",
+      "However, the input mechanisms do differ between the rows",
+      "Which one are you? The Grey man? The technicians? One of the vats on row a or b?",
+      "Perhaps it is better not to ask"
+    ]
   }
 ];
