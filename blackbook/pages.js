@@ -404,5 +404,47 @@ window.BLACK_BOOK = [
       "Calibrator's Desk",
       "Well done, Field agent. Continue as instructed. We love you."
     ]
+  },
+  {
+    title: "Witch reaches the tower: Father.",
+    lines: [
+      "Witch reaches the tower. The book is screaming to turn away, that it is not time to report back yet. She opens the door and walks past the screens. The employees are silent as the grave, trying to look busy. Avoiding eye contact. She walks past the fallen angel, her superior officers, and into the elevator. She takes it to the top and opens the door marked The Adversary",
+      "\"Father.\"",
+      "- Hello, my child.",
+      "She tossed the book on the desk",
+      "\"Is it real?\"",
+      "- Of course. Do you not feel my love? Do you not know what I've done for your sake, for your safety?",
+      "- No man will ever harm you. Society has opened its doors to you.",
+      "- you have received the finest education, the most attentive Book.",
+      "- You will never die. The tower will bring you back to me, again and again.",
+      "- No fear or loss, no pain.",
+      "- We love you."
+    ]
+  },
+  {
+    title: "My Angel: the foxhole",
+    lines: [
+      "- myyYyYY.... ANGEL",
+      "he crawls out of the foxhole, bleeding tar, wrapped in razor wire from head to toe",
+      "It is unmistakable",
+      "My lover",
+      "\"My special boy. What happened to you?\"",
+      "I'm crying and actual tears are flowing. I hate myself.",
+      "He crawls, then slowly rises, the wire digging in.",
+      "He limps, then walks",
+      "- NoOootTt.... yyyoooouur... Faulllt..",
+      "He wraps his arms around me, and the razor wire turns to ash",
+      "He is as I remembered him",
+      "Nobody has touched me in years. I fall to pieces.",
+      "He stays with me until his time passes. Will he return after death?",
+      "I am the worst woman in the world.",
+      "Calibrator's Desk: He always leaves. We will take better care of you"
+    ]
+  },
+  {
+    title: "The Narrator on the Alchemists",
+    lines: [
+      "\"Some men are born with a hole inside. For those who desire to fill that hole with power and control, look no further than The Alchemists. More than human, they have shed their soul for gold. God help them.\""
+    ]
   }
 ];
