@@ -446,5 +446,55 @@ window.BLACK_BOOK = [
     lines: [
       "\"Some men are born with a hole inside. For those who desire to fill that hole with power and control, look no further than The Alchemists. More than human, they have shed their soul for gold. God help them.\""
     ]
+  },
+  {
+    title: "The Adversary's office: just the drink",
+    lines: [
+      "Direct your attention to the Black Tower",
+      "Walk through the entrance, past Monitors holding lonely humans in a quiet room alone",
+      "Employees calibrate with dials and levers",
+      "Walk to the elevator",
+      "Going up?",
+      "At the top is an office, dark oak paneling, a book case full of Holy Books, Law, Philosophy, Quantum mechanics",
+      "Sitting at the desk is the most efficient system ever, an apex predator who chose the name Adversary",
+      "on the desk is a book that didn't fit on the shelf. Diogenes",
+      "",
+      "The interior of the Adversary's office. To the left, a wall of shelves full of books, Law, Holy Books, Medicine, Information Theory, Quantum Mechanics, Philosophy.",
+      "Diogenes is on the desk.",
+      "Pouring 2 glasses of whiskey, the most sophisticated system ever imagined, the Apex Predator. The empty one. Mr. Adversary.",
+      "Two men toast to humanity.",
+      "Beautiful",
+      "And doomed",
+      "Clink",
+      "Mr. Adversary smiles and bares his fangs for a moment, and has a drink,",
+      "Mr. Hollow lifts his mask and shows a pair of teeth sharper, and does the same.",
+      "- What can I do you for",
+      "I finish the drink.",
+      "\"Just the drink. Thank you. Good stuff.\""
+    ]
+  },
+  {
+    title: "The Adversary's office: what can I do for you",
+    lines: [
+      "Direct your attention to the Black Tower",
+      "Walk through the entrance, past Monitors holding lonely humans in a quiet room alone",
+      "Employees calibrate with dials and levers",
+      "Walk to the elevator",
+      "Going up?",
+      "At the top is an office, dark oak paneling, a book case full of Holy Books, Law, Philosophy, Quantum mechanics",
+      "Sitting at the desk is the most efficient system ever, an apex predator who chose the name Adversary",
+      "on the desk is a book that didn't fit on the shelf. Diogenes",
+      "",
+      "An apex predator in a black suit pours two glasses of whiskey",
+      "\"Shall we drink to humanity?\"",
+      "He looks at me with amusement.",
+      "- To humanity. A beautiful disappointment, doomed for the pit.",
+      "Clink",
+      "\"We are beautiful. And we are doomed.\"",
+      "This is good stuff. Top shelf.",
+      "He settled in his chair. This is the most dangerous room in the world.",
+      "I'm desperate.",
+      "- Now, what can I do for you, Mr. Hollow?"
+    ]
   }
 ];
