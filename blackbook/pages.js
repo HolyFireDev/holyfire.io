@@ -953,5 +953,57 @@ window.BLACK_BOOK = [
       "I woke up before he could finish the appointment.",
       "Calibrator's note - the subject keeps waking at the wrong moment. Adjust."
     ]
+  },
+  {
+    title: "The Bar on the Left",
+    lines: [
+      "Most nights I dream about the house I grew up in, and the street outside it.",
+      "I can go anywhere in that town. I know every turn, even the ones that aren't there.",
+      "Take the left.",
+      "Walk down the street, and on the right there is a bar.",
+      "It isn't there when I'm awake. In the dream it has never once moved.",
+      "Inside, you can have a beer. Or you can go downstairs.",
+      "Downstairs is a chamber. Angels in it. Demons in it. The divine and the other thing, in the same room, and you can sit with either one for as long as you can stand it.",
+      "Some nights I walk past. Some nights I fly past. Some nights I go in.",
+      "They already know who I am. Nobody asks for a name.",
+      "The beer is free of charge.",
+      "So is everything downstairs.",
+      "Nobody has ever told me what it costs. I have stopped asking.",
+      "Calibrator's note - the bar is not on any map we issued. Find out who built it."
+    ]
+  },
+  {
+    title: "A Dream of Hell",
+    lines: [
+      "A dream of hell.",
+      "Before anything else there was water. A lake, and I was swimming in it and diving under it at the same time. Something was in the water with me. Not an enemy. Not a friend either.",
+      "On the shore, a normal sized man was digging in the dirt. Under the dirt were small people, terrified, and he ate them one at a time like a man eating fruit.",
+      "Then the giants.",
+      "Giant humans, hunting people for food, swallowing them whole. Never chewing.",
+      "I attacked one, and it fell.",
+      "From the open mouth of the dead giant came laughing and screaming. Small voices. Thousands of them, echoing up out of it like a cave, like a long hallway of meat.",
+      "What happens to the souls now that the body is rotting?",
+      "I felt them in my own gut. Butterflies. Laughter. Thousands of voices, deep down.",
+      "And I understood, by accident, the shape of it: every body is a world. Every world is full of multitudes. Every one of the multitude is a world again, the same size as the last. It does not get smaller. It goes all the way down.",
+      "We were afraid.",
+      "An old crone drew nine humans in charcoal on a wide canvas, mouths open to devour. We tore it into nine pieces and she laid them in a loop, head to tail. The ouroboros.",
+      "Is it a circle? Is there no beginning to it, no end?",
+      "We have to find the source.",
+      "My mother and my father and I got into an old contraption, an elevator of sorts, to reach the lowest level of the loop.",
+      "Water filled the chamber and we went down.",
+      "The doors opened on a barren place. Tall cliffs on the horizon. A pit.",
+      "The one who made it spoke to us from everywhere at once, a distant booming voice, and dared us to come further.",
+      "We went into a ravine. Pyres on both sides, as far as we could see, and wailing. We looked closer. Every pyre was a man on a cross, burning.",
+      "- You were foolish to come here. I made this place first, and filled it with nasty surprises just for fun.",
+      "The stone slabs began to fall. Ahead of us, then closer.",
+      "We ran for the elevator.",
+      "My mother was too slow. The stone took her. My father told me to keep running and not look back, and I did both.",
+      "Demons laughing behind us. Something chasing.",
+      "He was winded. I pushed him toward the door. At the door he shoved me inside and went down, and the doors closed, and I heard him torn apart.",
+      "I rode it back up alone.",
+      "The doors opened on a dark movie theater, and I fell into the nearest seat.",
+      "Somebody asked who I was. I gave a name. It was not the name I was born with.",
+      "Calibrator's note - subject reached the bottom of the loop and returned. That is not supposed to be possible. Recalibrate everything."
+    ]
   }
 ];
