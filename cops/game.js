@@ -21,6 +21,29 @@
   var img = {};
   ["frame.webp", "bg.png", "cop1.png", "cop2.png"].forEach(function (f) { var i = new Image(); i.src = f; i.onload = function () { render(performance.now()); }; img[f.split(".")[0]] = i; });
 
+  // the skeleton, drawn here once in the Old School manner: flat grey facets, blocky skull, hunched, big square feet
+  img.skel = (function () {
+    var c = document.createElement("canvas"); c.width = 110; c.height = 200; var g = c.getContext("2d");
+    var LT = "#c2c2b6", MD = "#9a9a8f", DK = "#74746b", SH = "#55554e", EDGE = "#2c2c28";
+    function P(col) { g.beginPath(); g.moveTo(arguments[1], arguments[2]); for (var k = 3; k < arguments.length; k += 2) g.lineTo(arguments[k], arguments[k + 1]); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = EDGE; g.lineWidth = 1.1; g.lineJoin = "round"; g.stroke(); }
+    // far arm and far leg first, so the body overlaps them
+    P(DK, 74, 55, 81, 59, 85, 90, 79, 92); P(SH, 79, 92, 85, 90, 87, 117, 81, 118); P(DK, 79, 117, 90, 117, 91, 129, 81, 130);
+    P(DK, 58, 124, 66, 122, 70, 156, 63, 158); P(SH, 62, 155, 72, 153, 73, 162, 63, 164); P(DK, 64, 163, 71, 161, 72, 186, 66, 188); P(MD, 63, 185, 86, 187, 89, 197, 61, 196);
+    // pelvis, spine, ribs
+    P(MD, 37, 108, 68, 107, 73, 120, 54, 129, 33, 120); P(SH, 49, 50, 55, 50, 56, 110, 50, 110);
+    for (var k = 0; k < 4; k++) P(k % 2 ? MD : LT, 31 + k * 1.6, 61 + k * 11, 75 - k * 1.6, 59 + k * 11, 74 - k * 1.6, 66 + k * 11, 32 + k * 1.6, 68 + k * 11);
+    P(LT, 27, 52, 77, 49, 81, 58, 25, 61);                                   // shoulders
+    // near leg
+    P(LT, 40, 122, 48, 124, 45, 158, 37, 156); P(MD, 35, 154, 47, 156, 46, 165, 34, 163); P(LT, 36, 163, 44, 165, 41, 188, 33, 186); P(LT, 20, 185, 43, 186, 45, 197, 16, 196);
+    // near arm
+    P(LT, 26, 56, 34, 58, 29, 90, 22, 88); P(MD, 22, 88, 29, 90, 25, 116, 18, 114); P(LT, 15, 113, 27, 116, 25, 129, 13, 125);
+    // neck, skull, jaw
+    P(DK, 48, 43, 56, 43, 55, 52, 49, 52);
+    P(LT, 37, 7, 57, 3, 69, 13, 67, 33, 53, 42, 38, 37, 33, 21); P(MD, 43, 36, 60, 35, 58, 46, 45, 47);
+    P(EDGE, 42, 18, 50, 16, 51, 24, 44, 26); P(EDGE, 55, 15, 63, 16, 62, 24, 55, 23); P(EDGE, 53, 26, 50, 33, 56, 33);
+    c.complete = true; return c;
+  })();
+
   // ---------- tile grid ----------
   function walkable(i, j) { var r = GD.rows[j - GD.j0]; return !!r && r.charAt(i - GD.i0) === "1"; }
   function scr(i, j) { return { x: GD.O[0] + i * GD.U[0] + j * GD.V[0], y: GD.O[1] + i * GD.U[1] + j * GD.V[1] }; }
@@ -67,7 +90,8 @@
   var h2 = scr(10, 2);
   var LOOK = {
     cop1: { img: "cop1", nativeFace: -1, ax: 469 - META.cop1.x, ay: 404 - META.cop1.y, sh: META.cop1.h },
-    cop2: { img: "cop2", nativeFace: 1, ax: 742 - META.cop2.x, ay: 512 - META.cop2.y, sh: META.cop2.h }
+    cop2: { img: "cop2", nativeFace: 1, ax: 742 - META.cop2.x, ay: 512 - META.cop2.y, sh: META.cop2.h },
+    skel: { img: "skel", nativeFace: 1, ax: 50, ay: 192, sh: 196 }
   };
   // slot 0 is the officer mid-stride, slot 1 the one at the bar, exactly as in the frame; the rest fill the patio
   var SPAWNS = [[0, 0], [10, 2], [-6, -4], [4, -6], [-10, 2], [2, 6], [-3, 8], [6, 8], [-12, -2], [-8, 6], [-2, -8], [8, -4], [-14, 4], [0, 10], [5, 4], [-6, 2], [-5, 10], [-9, -6], [3, -3], [-13, 0], [7, 3], [-1, 5], [-7, 9], [1, -6]];
@@ -85,7 +109,12 @@
   var npc = baseEnt({ id: "npc", name: "Officer", level: 126, spec: 100, cd: 0, food: 3, gone: false });
   placeAt(you, 0); placeAt(npc, 1);
   var others = {};   // other players, by their id
-  function ents() { var a = [you]; if (!npc.gone) a.push(npc); for (var k in others) a.push(others[k]); return a; }
+  // skeletons: yours are simulated here; other people's are mirrored from their owner
+  var mySkels = [], rskel = {}, skelN = 0, lastFoe = null, lastFoeT = -1e9, SKEL_MAX = 3;
+  function ents() { var a = [you], k; if (!npc.gone) a.push(npc); for (k in others) a.push(others[k]); mySkels.forEach(function (s) { a.push(s); }); for (k in rskel) a.push(rskel[k]); return a; }
+  function mkSkel(owner, key) { var e = baseEnt({ skel: true, owner: owner, key: key, uid: key, name: "Skeleton", level: 22 }); applyLook(e, "skel"); e.max = e.hp = 30; e.off = { x: 0, y: 0 }; e.offGoal = { x: 0, y: 0 }; e.face = 1; e.life = 200; e.cd = 2; e.tile = { i: 0, j: 0 }; return e; }
+  function taken(e, i, j) { if (e.owner !== you) return false; if (you.tile.i === i && you.tile.j === j) return true; return mySkels.some(function (k) { return k !== e && !k.dead && k.tile.i === i && k.tile.j === j; }); }
+  function exists(t) { if (!t) return false; if (t === you) return true; if (t === npc) return !npc.gone; if (t.skel) return t.owner === you ? mySkels.indexOf(t) >= 0 : !!rskel[t.uid]; return !!others[t.uid]; }
   var kills = 0, deaths = 0, quest = 0, ground = [], gidN = 0, dest = null, cross = null;
 
   var ITEMS = {
@@ -98,11 +127,12 @@
     cuffs: { name: "Handcuffs", act: "Use", ex: "Standard issue.", msg: "He's not under arrest. Yet." },
     radio: { name: "Police radio", act: "Use", ex: "It crackles.", msg: "Static. Then: \"...be advised, news helicopter overhead.\"" },
     ticket: { name: "Ticket book", act: "Read", ex: "One page left.", msg: "The last ticket reads: Loitering near a pool." },
-    bones: { name: "Bones", act: "Bury", ex: "Bones are for burying." },
+    bones: { name: "Bones", act: "Bury", ex: "Bury them, or raise them: Magic tab, Raise Skeleton." },
     cap: { name: "Patrol cap", ex: "Keeps the sun off." }, badge: { name: "Badge", ex: "Shiny." }, shirt: { name: "Uniform shirt", ex: "Navy. Pressed." },
     trousers: { name: "Uniform trousers", ex: "Navy. Also pressed." }, boots: { name: "Duty boots", ex: "Polished this morning." }
   };
   var inv = ["dds", "acb", "coffee", "coffee", "cuffs", "radio", "ticket", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut"];
+  inv.push("bones", "bones");
   while (inv.length < 28) inv.push(null);
   var WEAPON = {
     whip: { name: "Abyssal whip", acc: 0.75, max: 30, styles: ["Flick", "Lash", "Deflect"], spec: false },
@@ -127,6 +157,7 @@
     hit: function () { tone(140, 0.12, "sawtooth", 0.06, 60); }, miss: function () { tone(300, 0.06, "triangle", 0.03, 200); },
     spec: function () { tone(880, 0.09, "square", 0.05, 1500); setTimeout(function () { tone(990, 0.12, "square", 0.05, 1700); }, 130); },
     bolt: function () { tone(420, 0.05, "square", 0.03, 180); },
+    rattle: function () { [900, 640, 1100, 760].forEach(function (f, k) { setTimeout(function () { tone(f, 0.035, "square", 0.03); }, k * 55); }); },
     eye: function () { tone(1500, 0.22, "sawtooth", 0.03, 2700); setTimeout(function () { tone(2100, 0.2, "sawtooth", 0.025, 1300); }, 90); },
     eat: function () { tone(220, 0.08, "triangle", 0.05, 160); }, die: function () { tone(400, 0.7, "sawtooth", 0.05, 60); }, click: function () { tone(700, 0.03, "square", 0.02); }
   };
@@ -241,7 +272,7 @@
     e.dead = true; e.deadAt = performance.now(); e.target = null; e.path = []; if (by.target === e) by.target = null; snd.die();
     if (e === you) {
       deaths++; you.respawn = 6; msg("Oh dear, you are dead!", "red"); you.specOn = false; you.prayers.melee = you.prayers.piety = false; cancelTrade(true);
-      if (by === npc) say(npc, "Suspect is down."); else send({ t: "die", by: by.uid });
+      if (by === npc) say(npc, "Suspect is down."); else send({ t: "die", by: by.owner ? by.owner.uid : by.uid });
       addGround("bones", you.tile.i, you.tile.j); sendState();
     } else {
       kills++; npc.respawn = 12; msg("You have defeated the Officer.", "");
@@ -261,8 +292,13 @@
     e.steps = []; e.from = scr(e.tile.i, e.tile.j); e.stepT = tickStart;
     if (e.dead) return false;
     var t = e.target;
-    if (t && (t.dead || (t.remote && !others[t.uid]))) { e.target = t = null; }
-    if (t) { if (!canHit(e, e.tile.i, e.tile.j, t.tile)) e.path = findPath(e.tile, function (i, j) { return canHit(e, i, j, t.tile); }); else e.path = []; }
+    if (t && (t.dead || !exists(t))) { e.target = t = null; }
+    if (t) {
+      if (!canHit(e, e.tile.i, e.tile.j, t.tile) || (e.skel && taken(e, e.tile.i, e.tile.j))) {
+        e.path = e.skel ? findPath(e.tile, function (i, j) { return canHit(e, i, j, t.tile) && !taken(e, i, j); }) : [];   // skeletons each take their own side
+        if (!e.path.length && !canHit(e, e.tile.i, e.tile.j, t.tile)) e.path = findPath(e.tile, function (i, j) { return canHit(e, i, j, t.tile); });
+      } else e.path = [];
+    }
     var n = e.run ? 2 : 1, moved = false;
     while (n-- > 0 && e.path.length) {
       var nx = e.path.shift(), a = scr(e.tile.i, e.tile.j), b = scr(nx.i, nx.j);
@@ -295,10 +331,45 @@
     if (!you.dead && you.target && !you.target.dead && canHit(you, you.tile.i, you.tile.j, you.target.tile) && you.cd <= 0) attackYou();
     if (!npc.gone && !npc.dead && npc.target && !npc.target.dead && inReach(npc.tile.i, npc.tile.j, npc.target.tile) && npc.cd <= 0) attackNpc();
     if (you.pendingTake) tryTake();
+    skelTick();
     var now = performance.now(); for (var k in others) if (now - others[k].seen > 6000) dropOther(k);
     if (online && !isHost && now - lastHost > 7000) lostHost();                      // the host went quiet: someone has to take over the room
     if (isHost) for (var q in conns) if (now - conns[q].seen > 9000) { var gone = conns[q]; delete conns[q]; try { gone.c.close(); } catch (e) {} var lv = { t: "leave", id: "host", who: gone.uid }; for (var q2 in conns) { try { conns[q2].c.send(lv); } catch (e) {} } handle(lv); }
     sendState(); refresh();
+  }
+
+  // ---------- skeletons ----------
+  function raise() {
+    if (you.dead) return;
+    var slot = inv.indexOf("bones"); if (slot < 0) { msg("You need bones to raise a skeleton.", ""); return; }
+    if (mySkels.filter(function (k) { return !k.dead; }).length >= SKEL_MAX) { msg("You can't control any more skeletons.", ""); return; }
+    var spot = null, best = 1e9;
+    for (var di = -2; di <= 2; di++) for (var dj = -2; dj <= 2; dj++) { var i = you.tile.i + di, j = you.tile.j + dj; if ((di || dj) && walkable(i, j) && !mySkels.some(function (k) { return !k.dead && k.tile.i === i && k.tile.j === j; })) { var d = Math.abs(di) + Math.abs(dj) + Math.random(); if (d < best) { best = d; spot = { i: i, j: j }; } } }
+    if (!spot) return;
+    inv[slot] = null; var sk = mkSkel(you, uid + ":s" + (++skelN)); sk.tile = spot; sk.from = scr(spot.i, spot.j); mySkels.push(sk);
+    msg("You raise a skeleton from the bones.", ""); snd.rattle(); sendState(); refresh();
+  }
+  function dismiss(sk) { if (!sk.dead) { sk.dead = true; sk.deadAt = performance.now(); msg("The skeleton falls apart.", ""); sendState(); } }
+  function skelHit(sk, t) {
+    faceTo(sk, t); lunge(sk, t); sk.cd = 4; sk.fx = { t: performance.now(), kind: "skel" }; var d = Math.random() < 0.6 ? rnd(8) : 0;
+    if (t.remote) { splat(t, d); t.hp = Math.max(0, t.hp - d); if (d) snd.hit(); else snd.miss(); send({ t: "hit", a: sk.key, to: t.uid, d: [d], k: "skel" }); }
+    else { hurt(t, d, sk); if (t === npc && !npc.dead && !npc.target) npc.target = you; }
+  }
+  function skelTick() {
+    var now = performance.now(), foe = you.target && exists(you.target) && !you.target.dead && you.target.owner !== you ? you.target : (lastFoe && exists(lastFoe) && !lastFoe.dead && now - lastFoeT < 9000 ? lastFoe : null);
+    for (var k = mySkels.length - 1; k >= 0; k--) {
+      var sk = mySkels[k];
+      if (sk.dead) { sk.steps = []; if (now - sk.deadAt > 1300) mySkels.splice(k, 1); continue; }
+      if (--sk.life <= 0 || you.dead) { sk.dead = true; sk.deadAt = now; continue; }
+      if (sk.cd > 0) sk.cd--;
+      sk.target = foe; sk.run = false;
+      if (!foe) {   // nothing to fight: stay close to the one who raised you
+        var d = Math.max(Math.abs(sk.tile.i - you.tile.i), Math.abs(sk.tile.j - you.tile.j));
+        if (d > 3 || taken(sk, sk.tile.i, sk.tile.j)) { sk.run = d > 6; sk.path = findPath(sk.tile, function (i, j) { var q = Math.max(Math.abs(i - you.tile.i), Math.abs(j - you.tile.j)); return q >= 1 && q <= 2 && !taken(sk, i, j); }); } else sk.path = [];
+      }
+      stepEnt(sk);
+      if (foe && inReach(sk.tile.i, sk.tile.j, foe.tile) && sk.cd <= 0) skelHit(sk, foe);
+    }
   }
 
   // ---------- things you can do ----------
@@ -398,7 +469,7 @@
   }
   function sendState() {
     if (!online) return;
-    send({ t: "st", n: you.name, s: you.slot, i: you.tile.i, j: you.tile.j, hp: Math.max(0, you.hp), f: you.face, w: you.weapon, pm: you.prayers.melee ? 1 : 0, d: you.dead ? 1 : 0, ox: Math.round(you.offGoal.x * 10) / 10, oy: Math.round(you.offGoal.y * 10) / 10 });
+    send({ t: "st", n: you.name, s: you.slot, i: you.tile.i, j: you.tile.j, hp: Math.max(0, you.hp), f: you.face, w: you.weapon, pm: you.prayers.melee ? 1 : 0, d: you.dead ? 1 : 0, ox: Math.round(you.offGoal.x * 10) / 10, oy: Math.round(you.offGoal.y * 10) / 10, sk: mySkels.map(function (k) { return [k.key, k.tile.i, k.tile.j, k.hp, k.face, k.dead ? 1 : 0]; }) });
   }
   function count() { return 1 + Object.keys(others).length; }
   function syncNpc() {
@@ -414,6 +485,7 @@
   function localName() { try { return localStorage.getItem("patio-name") || ""; } catch (e) { return ""; } }
   function dropOther(k, quiet) {
     var e = others[k]; if (!e) return; delete others[k];
+    for (var rk in rskel) if (rskel[rk].owner === e) { if (you.target === rskel[rk]) you.target = null; delete rskel[rk]; }
     if (you.target === e) you.target = null; if (trade && trade.uid === k) { trade = null; drawTrade(); msg("Other player left. Trade cancelled.", ""); }
     if (!quiet) msg(esc(e.name) + " has left the patio.", ""); syncNpc(); refresh();
   }
@@ -425,23 +497,38 @@
     }
     return e;
   }
+  function moveRemote(e, i, j, now) {
+    if (i === e.tile.i && j === e.tile.j) return;
+    var cur = entPos(e, now), nx = scr(i, j), far = Math.abs(i - e.tile.i) + Math.abs(j - e.tile.j) > 5;
+    e.from = far ? nx : { x: cur.x - e.off.x, y: cur.y - e.off.y }; e.steps = far ? [] : [nx]; e.stepT = now; e.tile = { i: i, j: j };
+  }
   function handle(m) {
     if (!m || m.id === uid) return;
     var now = performance.now(), e, t;
     if (m.t === "st") {
       e = otherFor(m); e.seen = now; e.name = m.n || e.name; checkAfton(m.id, e.name);
       if (m.s !== e.slot) { e.slot = m.s; applyLook(e, m.s % 2 ? "cop2" : "cop1"); }
-      if (m.i !== e.tile.i || m.j !== e.tile.j) {
-        var cur = entPos(e, now), nx = scr(m.i, m.j), far = Math.abs(m.i - e.tile.i) + Math.abs(m.j - e.tile.j) > 5;
-        e.from = far ? nx : { x: cur.x - e.off.x, y: cur.y - e.off.y }; e.steps = far ? [] : [nx]; e.stepT = now; e.tile = { i: m.i, j: m.j };
-      }
+      moveRemote(e, m.i, m.j, now);
+      var keep = {};
+      (m.sk || []).slice(0, 4).forEach(function (a) {
+        var key = String(a[0]); if (key.indexOf(m.id + ":") !== 0) return; keep[key] = 1;
+        var sk = rskel[key]; if (!sk) { sk = rskel[key] = mkSkel(e, key); sk.remote = true; sk.tile = { i: a[1], j: a[2] }; sk.from = scr(a[1], a[2]); }
+        moveRemote(sk, a[1], a[2], now); sk.hp = a[3]; sk.face = a[4]; if (a[5] && !sk.dead) { sk.dead = true; sk.deadAt = now; sk.steps = []; }
+      });
+      for (var rk in rskel) if (rskel[rk].owner === e && !keep[rk]) { if (you.target === rskel[rk]) you.target = null; delete rskel[rk]; }
       e.face = m.f; e.weapon = m.w; e.prayers.melee = !!m.pm; e.offGoal = { x: m.ox || 0, y: m.oy || 0 }; e.hp = m.hp;
       if (m.d && !e.dead) { e.dead = true; e.deadAt = now; } else if (!m.d && e.dead) { e.dead = false; e.steps = []; e.splats = []; e.lastCombat = -1e9; }
     } else if (m.t === "chat") { e = others[m.id]; if (e) say(e, m.x); msg("<b>" + esc(m.n) + ":</b> <span>" + esc(m.x) + "</span>", "pub", "public"); }
     else if (m.t === "hit") {
-      e = others[m.id]; t = m.to === uid ? you : others[m.to]; if (!e || !t) return;
+      e = others[m.id]; if (!e) return; if (m.a) e = String(m.a).indexOf(m.id + ":") === 0 ? rskel[m.a] : null;
+      t = m.to === uid ? you : mySkels.filter(function (k) { return k.key === m.to; })[0] || others[m.to] || rskel[m.to]; if (!e || !t) return;
       var shot = m.k === "acb" || m.k === "acbspec"; faceTo(e, t); if (!shot) lunge(e, t); e.fx = { t: now, kind: m.k }; e.target = t; e.lastCombat = now; if (m.k === "dds") snd.spec(); else if (m.k === "acbspec") snd.eye(); else if (shot) snd.bolt();
-      m.d.forEach(function (d) { if (t === you) { if (!you.dead) hurt(you, d, e); } else { splat(t, d); t.hp = Math.max(0, t.hp - d); } });
+      m.d.forEach(function (d) {
+        if (t === you) { if (!you.dead) hurt(you, d, e); }
+        else if (t.owner === you) { if (!t.dead) { d = Math.min(d, t.hp); t.hp -= d; splat(t, d); if (t.hp <= 0) { t.dead = true; t.deadAt = now; addGround("bones", t.tile.i, t.tile.j); } } }   // one of your skeletons
+        else { splat(t, d); t.hp = Math.max(0, t.hp - d); }
+      });
+      if ((t === you || t.owner === you) && !you.dead) { lastFoe = e; lastFoeT = now; }
       if (t === you && !you.dead && you.autoRet && !you.target && !you.path.length && !trade) you.target = e;
     } else if (m.t === "die") { e = others[m.id]; if (e) { if (!e.dead) { e.dead = true; e.deadAt = now; } if (you.target === e) you.target = null; if (m.by === uid) { kills++; msg("You have defeated " + esc(e.name) + ".", ""); if (quest < 2) { quest = 2; msg("Congratulations! Quest complete: Patio Showdown.", "blue"); } } } }
     else if (m.t === "gadd") { if (!ground.some(function (g) { return g.gid === m.g.gid; })) addGround(m.g.id, m.g.i, m.g.j, m.g.gid); }
@@ -524,7 +611,13 @@
   function under(x, y) {
     var now = performance.now(), ops = [], hit = false;
     var list = ents().filter(function (e) { return e !== you && !e.dead && over(e, x, y, now); }).sort(function (a, b) { return entPos(b, now).y - entPos(a, now).y; });
+    var mine = [];
     list.forEach(function (e) {
+      if (e.skel) {
+        if (e.owner === you) { mine.push({ h: 'Dismiss <span class="y">Skeleton</span>', f: function () { dismiss(e); } }); mine.push({ h: 'Examine <span class="y">Skeleton</span>', f: function () { msg("Yours. It doesn't complain about the hours.", ""); } }); return; }
+        var sn = '<span class="y">Skeleton</span> <span class="g">(level-22)</span>'; hit = true;
+        ops.push({ h: "Attack " + sn, f: function () { attack(e); }, red: 1 }); ops.push({ h: "Examine " + sn, f: function () { msg("It answers to " + esc(e.owner.name) + ".", ""); } }); return;
+      }
       var nm = '<span class="y">' + esc(e.name) + '</span> <span class="y">(level-126)</span>'; hit = true;
       ops.push({ h: "Attack " + nm, f: function () { attack(e); }, red: 1 });
       if (e.remote) ops.push({ h: "Trade with " + nm, f: function () { tradeWith(e); } });
@@ -533,6 +626,7 @@
     ground.forEach(function (g) { var q = scr(g.i, g.j); if (Math.abs(x - q.x) < 16 && Math.abs(y - q.y) < 12) { hit = true; ops.push({ h: 'Take <span class="o">' + ITEMS[g.id].name + "</span>", f: function () { take(g); }, red: 1 }); ops.push({ h: 'Examine <span class="o">' + ITEMS[g.id].name + "</span>", f: function () { msg(ITEMS[g.id].ex, ""); } }); } });
     var walk = { h: "Walk here", f: function () { walkTo(x, y); } };
     if (hit) ops.splice(1, 0, walk); else ops.unshift(walk);
+    ops = ops.concat(mine);
     if (!you.dead && over(you, x, y, now)) ops.push({ h: 'Rename <span class="y">' + esc(you.name) + "</span>", f: askName });
     for (var k = 0; k < EXAMINE.length; k++) if (EXAMINE[k].hit(x, y)) { (function (e) { ops.push({ h: 'Examine <span class="c">' + e.n + "</span>", f: function () { msg(e.t, ""); } }); })(EXAMINE[k]); break; }
     return ops;
@@ -605,6 +699,7 @@
     melee: S('<circle cx="12" cy="12" r="10" fill="#f4f0d8" stroke="#8a7a1a"/><path d="M7 17L16 6l2-.5-.5 2L9 19z" fill="#888" stroke="#222"/><path d="M6 15l4 4" stroke="#6b4a1a" stroke-width="2"/>'),
     piety: S('<circle cx="12" cy="12" r="10" fill="#f4f0d8" stroke="#8a7a1a"/><path d="M12 4v16M6 9h12" stroke="#c9a21a" stroke-width="3"/>'),
     dim: S('<circle cx="12" cy="12" r="9" fill="#8a8470" stroke="#3a3628"/>'),
+    skull: S('<path d="M12 3c-5 0-8 3.500-8 8 0 3 1.500 4.500 3 5.500V20h10v-3.500c1.500-1 3-2.500 3-5.500 0-4.500-3-8-8-8z" fill="#ece7d2" stroke="#17140f"/><circle cx="8.500" cy="11" r="2.200" fill="#17140f"/><circle cx="15.500" cy="11" r="2.200" fill="#17140f"/><path d="M12 13l-1.200 2.500h2.400zM9.500 17.500v2.500M12 17.500v2.500M14.500 17.500v2.500" stroke="#17140f" fill="#17140f"/>'),
     home: S('<path d="M3 12l9-8 9 8v9h-6v-6H9v6H3z" fill="#7ad" stroke="#124"/>'),
     rune: S('<circle cx="12" cy="12" r="8" fill="#6a6a8a" stroke="#22223a"/><path d="M9 8l6 8M15 8l-6 8" stroke="#22223a"/>')
   };
@@ -636,7 +731,7 @@
       var cells = []; for (var k = 0; k < 29; k++) cells.push(k === 16 ? '<div data-a="pray" data-v="melee" title="Protect from Melee" class="' + (you.prayers.melee ? "sel" : "") + '">' + IC.melee + "</div>" : k === 26 ? '<div data-a="pray" data-v="piety" title="Piety" class="' + (you.prayers.piety ? "sel" : "") + '">' + IC.piety + "</div>" : '<div class="off">' + IC.dim + "</div>");
       h = '<div class="pray">' + cells.join("") + '</div><div class="foot">Prayer: ' + Math.ceil(you.pray) + " / 99</div>";
     } else if (tab === "magic") {
-      var m = ['<div data-a="tele" title="Home Teleport">' + IC.home + "</div>"]; for (var q = 0; q < 34; q++) m.push('<div class="off">' + IC.rune + "</div>");
+      var m = ['<div data-a="tele" title="Home Teleport">' + IC.home + "</div>", '<div data-a="raise" title="Raise Skeleton (uses 1 Bones)">' + IC.skull + "</div>"]; for (var q = 0; q < 33; q++) m.push('<div class="off">' + IC.rune + "</div>");
       h = '<div class="mage">' + m.join("") + "</div>";
     }
     $("panel").innerHTML = h;
@@ -645,7 +740,7 @@
     var d = ev.target.closest("[data-a]"); if (!d) return; var a = d.dataset.a, v = d.dataset.v; closeCtx();
     if (a === "item") {
       var id = inv[+v]; if (!id) return;
-      if (ev.button === 2 && !trade) { var p = local(ev), it = ITEMS[id], nm = '<span class="o">' + it.name + "</span>"; openCtx(p.x, p.y, [{ h: it.act + " " + nm, f: function () { useItem(+v); } }, { h: "Drop " + nm, f: function () { dropItem(+v); } }, { h: "Examine " + nm, f: function () { msg(it.ex, ""); } }]); $("ctx")._x = -99; $("ctx")._y = -99; }
+      if (ev.button === 2 && !trade) { var p = local(ev), it = ITEMS[id], nm = '<span class="o">' + it.name + "</span>"; openCtx(p.x, p.y, [{ h: it.act + " " + nm, f: function () { useItem(+v); } }].concat(id === "bones" ? [{ h: "Raise " + nm, f: raise }] : []).concat([{ h: "Drop " + nm, f: function () { dropItem(+v); } }, { h: "Examine " + nm, f: function () { msg(it.ex, ""); } }])); $("ctx")._x = -99; $("ctx")._y = -99; }
       else useItem(+v);
       return;
     }
@@ -654,6 +749,7 @@
     else if (a === "spec") { toggleSpec(); return; }
     else if (a === "pray") { togglePrayer(v); return; }
     else if (a === "tele") { homeTeleport(); return; }
+    else if (a === "raise") { raise(); return; }
     else if (a === "eq") { if (v === "weapon") unequip(); else if (EQ[v][2]) msg("You can't take that off. This is live television.", ""); return; }
     snd.click(); refresh();
   });
@@ -693,7 +789,7 @@
     }
     if (e.fx) { var f = (now - e.fx.t) / 300; if (f >= 1) e.fx = null; else { var t = e.target, q = (t && t.scr) || p; cx.save(); cx.globalAlpha = 1 - f; cx.lineCap = "round"; if (e.fx.kind === "dds") { cx.strokeStyle = "#ff2a2a"; cx.lineWidth = 4; for (var k = 0; k < 2; k++) { cx.beginPath(); cx.moveTo(q.x - 26 + k * 16, q.y - 150 + f * 20); cx.lineTo(q.x + 6 + k * 16, q.y - 90 + f * 20); cx.stroke(); } } else { cx.strokeStyle = e.fx.kind === "whip" ? "#e8d0a0" : "#fff"; cx.lineWidth = 3; cx.beginPath(); cx.arc(q.x, q.y - 110, 34, -2.4 + f * 2, -1.2 + f * 2); cx.stroke(); } cx.restore(); } }
     if (!e.dead && now - e.lastCombat < 6000) { cx.fillStyle = "#c00000"; cx.fillRect(p.x - 20, top - 10, 40, 6); cx.fillStyle = "#00c000"; cx.fillRect(p.x - 20, top - 10, 40 * Math.max(0, e.hp) / e.max, 6); cx.strokeStyle = "#000"; cx.lineWidth = 1; cx.strokeRect(p.x - 20.5, top - 10.5, 41, 7); }
-    if (!e.dead) { cx.font = "bold 11px Arial"; cx.textAlign = "center"; cx.textBaseline = "alphabetic"; cx.fillStyle = "#000"; cx.fillText(e.name, p.x + 1, top - 13); cx.fillStyle = e === you ? "#ffffff" : e.remote ? "#00ffff" : "#ffff00"; cx.fillText(e.name, p.x, top - 14); }
+    if (!e.dead && !e.skel) { cx.font = "bold 11px Arial"; cx.textAlign = "center"; cx.textBaseline = "alphabetic"; cx.fillStyle = "#000"; cx.fillText(e.name, p.x + 1, top - 13); cx.fillStyle = e === you ? "#ffffff" : e.remote ? "#00ffff" : "#ffff00"; cx.fillText(e.name, p.x, top - 14); }
     if (e.prayers.melee && !e.dead) { cx.save(); cx.translate(p.x, top - 52); cx.fillStyle = "#f4f0d8"; cx.strokeStyle = "#000"; cx.beginPath(); cx.arc(0, 0, 10, 0, 6.3); cx.fill(); cx.stroke(); cx.strokeStyle = "#555"; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(-5, 6); cx.lineTo(5, -6); cx.stroke(); cx.restore(); }
     e.splats = e.splats.filter(function (s) { return now - s.t < 900; });
     e.splats.forEach(function (s, k) {
@@ -719,7 +815,7 @@
     if (img.bg.complete) c.drawImage(img.bg, p.x - 76 / MM, p.y - 76 / MM, 152 / MM, 152 / MM, 0, 0, 152, 152);
     function dot(x, y, col) { c.fillStyle = "#000"; c.fillRect(76 + (x - p.x) * MM - 2, 76 + (y - p.y) * MM - 2, 5, 5); c.fillStyle = col; c.fillRect(76 + (x - p.x) * MM - 1.5, 76 + (y - p.y) * MM - 1.5, 4, 4); }
     ground.forEach(function (g) { var q = scr(g.i, g.j); dot(q.x, q.y, "#ff2020"); });
-    ents().forEach(function (e) { if (e === you || e.dead) return; var n = entPos(e, now); dot(n.x, n.y, e.remote ? "#ffffff" : "#ffff00"); });
+    ents().forEach(function (e) { if (e === you || e.dead) return; var n = entPos(e, now); dot(n.x, n.y, e.skel ? "#b9b39a" : e.remote ? "#ffffff" : "#ffff00"); });
     if (dest) { var d = scr(dest.i, dest.j), fx = 76 + (d.x - p.x) * MM, fy = 76 + (d.y - p.y) * MM; c.strokeStyle = "#3a2a10"; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx, fy - 9); c.stroke(); c.fillStyle = "#ff2020"; c.fillRect(fx, fy - 9, 6, 4); }
     dot(p.x, p.y, "#ffffff"); c.restore();
   }
@@ -749,7 +845,7 @@
   $("clip").addEventListener("mousedown", start);
   window.__cops = {
     you: you, npc: npc, inv: inv, ground: ground, others: others, start: start, tick: tick, render: function () { render(performance.now()); }, attack: attack, walkTo: walkTo, useItem: useItem, toggleSpec: toggleSpec,
-    tradeWith: tradeWith, tradeAccept: tradeAccept, chat: chatSend, screamer: screamer,
+    tradeWith: tradeWith, tradeAccept: tradeAccept, chat: chatSend, screamer: screamer, raise: raise, skels: mySkels, rskel: rskel,
     state: function () { return { tick: tickN, online: online, host: isHost, uid: uid, slot: you.slot, name: you.name, you: [you.tile.i, you.tile.j, you.hp, you.spec, you.weapon, you.dead], npc: npc.gone ? "gone" : [npc.tile.i, npc.tile.j, npc.hp, npc.food, npc.dead, !!npc.target], others: Object.keys(others).map(function (k) { var e = others[k]; return [e.name, e.slot, e.tile.i, e.tile.j, e.hp, e.dead]; }), kills: kills, deaths: deaths, ground: ground.length, trade: trade && { stage: trade.stage, mine: trade.mine.length, theirs: trade.theirs.length, myOk: trade.myOk, theirOk: trade.theirOk }, inv: inv.filter(Boolean).length }; }
   };
 })();
