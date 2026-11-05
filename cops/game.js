@@ -19,30 +19,7 @@
   addEventListener("resize", fit); fit();
 
   var img = {};
-  ["frame.webp", "bg.png", "cop1.png", "cop2.png"].forEach(function (f) { var i = new Image(); i.src = f; i.onload = function () { render(performance.now()); }; img[f.split(".")[0]] = i; });
-
-  // the skeleton, drawn here once in the Old School manner: flat grey facets, blocky skull, hunched, big square feet
-  img.skel = (function () {
-    var c = document.createElement("canvas"); c.width = 110; c.height = 200; var g = c.getContext("2d");
-    var LT = "#c2c2b6", MD = "#9a9a8f", DK = "#74746b", SH = "#55554e", EDGE = "#2c2c28";
-    function P(col) { g.beginPath(); g.moveTo(arguments[1], arguments[2]); for (var k = 3; k < arguments.length; k += 2) g.lineTo(arguments[k], arguments[k + 1]); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = EDGE; g.lineWidth = 1.1; g.lineJoin = "round"; g.stroke(); }
-    // far arm and far leg first, so the body overlaps them
-    P(DK, 74, 55, 81, 59, 85, 90, 79, 92); P(SH, 79, 92, 85, 90, 87, 117, 81, 118); P(DK, 79, 117, 90, 117, 91, 129, 81, 130);
-    P(DK, 58, 124, 66, 122, 70, 156, 63, 158); P(SH, 62, 155, 72, 153, 73, 162, 63, 164); P(DK, 64, 163, 71, 161, 72, 186, 66, 188); P(MD, 63, 185, 86, 187, 89, 197, 61, 196);
-    // pelvis, spine, ribs
-    P(MD, 37, 108, 68, 107, 73, 120, 54, 129, 33, 120); P(SH, 49, 50, 55, 50, 56, 110, 50, 110);
-    for (var k = 0; k < 4; k++) P(k % 2 ? MD : LT, 31 + k * 1.6, 61 + k * 11, 75 - k * 1.6, 59 + k * 11, 74 - k * 1.6, 66 + k * 11, 32 + k * 1.6, 68 + k * 11);
-    P(LT, 27, 52, 77, 49, 81, 58, 25, 61);                                   // shoulders
-    // near leg
-    P(LT, 40, 122, 48, 124, 45, 158, 37, 156); P(MD, 35, 154, 47, 156, 46, 165, 34, 163); P(LT, 36, 163, 44, 165, 41, 188, 33, 186); P(LT, 20, 185, 43, 186, 45, 197, 16, 196);
-    // near arm
-    P(LT, 26, 56, 34, 58, 29, 90, 22, 88); P(MD, 22, 88, 29, 90, 25, 116, 18, 114); P(LT, 15, 113, 27, 116, 25, 129, 13, 125);
-    // neck, skull, jaw
-    P(DK, 48, 43, 56, 43, 55, 52, 49, 52);
-    P(LT, 37, 7, 57, 3, 69, 13, 67, 33, 53, 42, 38, 37, 33, 21); P(MD, 43, 36, 60, 35, 58, 46, 45, 47);
-    P(EDGE, 42, 18, 50, 16, 51, 24, 44, 26); P(EDGE, 55, 15, 63, 16, 62, 24, 55, 23); P(EDGE, 53, 26, 50, 33, 56, 33);
-    c.complete = true; return c;
-  })();
+  ["frame.webp", "bg.png", "cop1.png", "cop2.png", "skel.png"].forEach(function (f) { var i = new Image(); i.src = f; i.onload = function () { render(performance.now()); }; img[f.split(".")[0]] = i; });
 
   // ---------- tile grid ----------
   function walkable(i, j) { var r = GD.rows[j - GD.j0]; return !!r && r.charAt(i - GD.i0) === "1"; }
@@ -91,7 +68,7 @@
   var LOOK = {
     cop1: { img: "cop1", nativeFace: -1, ax: 469 - META.cop1.x, ay: 404 - META.cop1.y, sh: META.cop1.h },
     cop2: { img: "cop2", nativeFace: 1, ax: 742 - META.cop2.x, ay: 512 - META.cop2.y, sh: META.cop2.h },
-    skel: { img: "skel", nativeFace: 1, ax: 50, ay: 192, sh: 196 }
+    skel: { img: "skel", nativeFace: 1, ax: 45, ay: 195, sh: 200 }
   };
   // slot 0 is the officer mid-stride, slot 1 the one at the bar, exactly as in the frame; the rest fill the patio
   var SPAWNS = [[0, 0], [10, 2], [-6, -4], [4, -6], [-10, 2], [2, 6], [-3, 8], [6, 8], [-12, -2], [-8, 6], [-2, -8], [8, -4], [-14, 4], [0, 10], [5, 4], [-6, 2], [-5, 10], [-9, -6], [3, -3], [-13, 0], [7, 3], [-1, 5], [-7, 9], [1, -6]];
