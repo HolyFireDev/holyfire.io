@@ -4,7 +4,9 @@
 (function () {
   "use strict";
   var GD = window.COPS_GRID, META = window.COPS_META;
-  var W = 1280, H = 720, TICK = 600, MAXP = 24, ROOM = "holyfire-patio-room-1";
+  // everyone lands in room 1 unless the address says otherwise: /cops/?room=friday makes a private patio
+  var roomArg = (/[?&]room=([A-Za-z0-9_-]{1,24})/.exec(location.search) || [])[1];
+  var W = 1280, H = 720, TICK = 600, MAXP = 24, ROOM = "holyfire-patio-room-" + (roomArg || "1");
   var $ = function (id) { return document.getElementById(id); };
   var stage = $("stage"), cv = $("world"), cx = cv.getContext("2d"), ui = $("ui");
   var scale = 1, started = false, tickN = 0, tickStart = 0;
@@ -56,6 +58,10 @@
   // melee reach: three tiles apart in a straight line, so two sprites stand at arm's length instead of inside each other
   var REACH = 3;
   function inReach(ai, aj, b) { return (ai === b.i && Math.abs(aj - b.j) === REACH) || (aj === b.j && Math.abs(ai - b.i) === REACH); }
+  function canHit(e, ai, aj, b) {   // from tile (ai, aj), can officer e hit something standing on tile b?
+    var w = WEAPON[e.weapon]; if (!w || !w.ranged) return inReach(ai, aj, b);
+    var d = Math.max(Math.abs(ai - b.i), Math.abs(aj - b.j)); return d >= 2 && d <= (e.style === 2 ? 10 : 8);
+  }
 
   // ---------- officers ----------
   var h2 = scr(10, 2);
@@ -85,6 +91,8 @@
   var ITEMS = {
     whip: { name: "Abyssal whip", act: "Wield", ex: "A weapon from the Abyss. Department issue, apparently." },
     dds: { name: "Dragon dagger(p++)", act: "Wield", ex: "A powerful dagger, coated in something the lab would like a word about." },
+    acb: { name: "Armadyl crossbow", act: "Wield", ex: "Built for Armadyl's forces. Logged as evidence, then signed back out." },
+    bolts: { name: "Dragon bolts", ex: "Sharp. There always seem to be more." },
     donut: { name: "Donut", act: "Eat", ex: "It heals 20. It was on the bar." },
     coffee: { name: "Coffee", act: "Drink", ex: "Black. Restores run energy and some special attack." },
     cuffs: { name: "Handcuffs", act: "Use", ex: "Standard issue.", msg: "He's not under arrest. Yet." },
@@ -94,11 +102,13 @@
     cap: { name: "Patrol cap", ex: "Keeps the sun off." }, badge: { name: "Badge", ex: "Shiny." }, shirt: { name: "Uniform shirt", ex: "Navy. Pressed." },
     trousers: { name: "Uniform trousers", ex: "Navy. Also pressed." }, boots: { name: "Duty boots", ex: "Polished this morning." }
   };
-  var inv = ["dds", "coffee", "coffee", "cuffs", "radio", "ticket", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut"];
+  var inv = ["dds", "acb", "coffee", "coffee", "cuffs", "radio", "ticket", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut", "donut"];
   while (inv.length < 28) inv.push(null);
   var WEAPON = {
     whip: { name: "Abyssal whip", acc: 0.75, max: 30, styles: ["Flick", "Lash", "Deflect"], spec: false },
-    dds: { name: "Dragon dagger(p++)", acc: 0.70, max: 26, styles: ["Stab", "Lunge", "Slash", "Block"], spec: true },
+    dds: { name: "Dragon dagger(p++)", acc: 0.70, max: 26, styles: ["Stab", "Lunge", "Slash", "Block"], spec: true, cost: 25 },
+    // ranged: 8 tiles (10 on Longrange), 6 ticks (5 on Rapid); Armadyl Eye costs 50% and doubles accuracy for one shot
+    acb: { name: "Armadyl crossbow", acc: 0.62, max: 34, styles: ["Accurate", "Rapid", "Longrange"], spec: true, cost: 50, ranged: true },
     none: { name: "Unarmed", acc: 0.60, max: 9, styles: ["Punch", "Kick", "Block"], spec: false }
   };
 
@@ -116,6 +126,8 @@
   var snd = {
     hit: function () { tone(140, 0.12, "sawtooth", 0.06, 60); }, miss: function () { tone(300, 0.06, "triangle", 0.03, 200); },
     spec: function () { tone(880, 0.09, "square", 0.05, 1500); setTimeout(function () { tone(990, 0.12, "square", 0.05, 1700); }, 130); },
+    bolt: function () { tone(420, 0.05, "square", 0.03, 180); },
+    eye: function () { tone(1500, 0.22, "sawtooth", 0.03, 2700); setTimeout(function () { tone(2100, 0.2, "sawtooth", 0.025, 1300); }, 90); },
     eat: function () { tone(220, 0.08, "triangle", 0.05, 160); }, die: function () { tone(400, 0.7, "sawtooth", 0.05, 60); }, click: function () { tone(700, 0.03, "square", 0.02); }
   };
 
@@ -197,16 +209,18 @@
     return dmg;
   }
   function attackYou() {
-    var w = WEAPON[you.weapon], piety = you.prayers.piety, t = you.target, rolls = [], kind = you.weapon; faceTo(you, t); lunge(you, t); you.cd = 4;
+    var w = WEAPON[you.weapon], piety = you.prayers.piety && !w.ranged, t = you.target, rolls = [], kind = you.weapon; faceTo(you, t);
+    if (w.ranged) { you.cd = you.style === 1 ? 5 : 6; snd.bolt(); } else { lunge(you, t); you.cd = 4; }
     if (quest === 0) quest = 1;
-    if (you.specOn && w.spec && you.spec >= 25) {
-      you.spec -= 25; you.specOn = false; snd.spec(); kind = "dds";
-      for (var k = 0; k < 2; k++) rolls.push(Math.random() < (piety ? 0.93 : 0.88) ? 4 + rnd((piety ? 38 : 32) - 4) : 0);
-    } else { you.specOn = false; rolls.push(Math.random() < w.acc + (piety ? 0.07 : 0) ? rnd(Math.round(w.max * (piety ? 1.2 : 1))) : 0); }
+    if (you.specOn && w.spec && you.spec >= w.cost) {
+      you.spec -= w.cost; you.specOn = false;
+      if (w.ranged) { kind = "acbspec"; snd.eye(); rolls.push(Math.random() < Math.min(0.98, (w.acc + (you.style === 0 ? 0.05 : 0)) * 2) ? 1 + rnd(w.max - 1) : 0); }
+      else { snd.spec(); kind = "dds"; for (var k = 0; k < 2; k++) rolls.push(Math.random() < (piety ? 0.93 : 0.88) ? 4 + rnd((piety ? 38 : 32) - 4) : 0); }
+    } else { you.specOn = false; rolls.push(Math.random() < w.acc + (piety ? 0.07 : 0) + (w.ranged && you.style === 0 ? 0.05 : 0) ? rnd(Math.round(w.max * (piety ? 1.2 : 1))) : 0); }
     you.fx = { t: performance.now(), kind: kind };
     if (t.remote) {
       // another player: they keep their own hitpoints, so tell them what landed
-      if (t.prayers.melee) rolls = rolls.map(function (d) { return Math.floor(d * 0.6); });
+      if (t.prayers.melee && !w.ranged) rolls = rolls.map(function (d) { return Math.floor(d * 0.6); });
       rolls.forEach(function (d) { splat(t, d); t.hp = Math.max(0, t.hp - d); xpDrop(d); if (d) snd.hit(); else snd.miss(); });
       you.lastCombat = performance.now(); send({ t: "hit", to: t.uid, d: rolls, k: kind });
     } else {
@@ -248,7 +262,7 @@
     if (e.dead) return false;
     var t = e.target;
     if (t && (t.dead || (t.remote && !others[t.uid]))) { e.target = t = null; }
-    if (t) { if (!inReach(e.tile.i, e.tile.j, t.tile)) e.path = findPath(e.tile, function (i, j) { return inReach(i, j, t.tile); }); else e.path = []; }
+    if (t) { if (!canHit(e, e.tile.i, e.tile.j, t.tile)) e.path = findPath(e.tile, function (i, j) { return canHit(e, i, j, t.tile); }); else e.path = []; }
     var n = e.run ? 2 : 1, moved = false;
     while (n-- > 0 && e.path.length) {
       var nx = e.path.shift(), a = scr(e.tile.i, e.tile.j), b = scr(nx.i, nx.j);
@@ -278,7 +292,7 @@
     if (you.run && moved) { you.runE -= 1.6; if (you.runE <= 0) { you.runE = 0; you.run = false; } } else you.runE = Math.min(100, you.runE + 0.5);
     if (dest && !you.path.length) dest = null;
 
-    if (!you.dead && you.target && !you.target.dead && inReach(you.tile.i, you.tile.j, you.target.tile) && you.cd <= 0) attackYou();
+    if (!you.dead && you.target && !you.target.dead && canHit(you, you.tile.i, you.tile.j, you.target.tile) && you.cd <= 0) attackYou();
     if (!npc.gone && !npc.dead && npc.target && !npc.target.dead && inReach(npc.tile.i, npc.tile.j, npc.target.tile) && npc.cd <= 0) attackNpc();
     if (you.pendingTake) tryTake();
     var now = performance.now(); for (var k in others) if (now - others[k].seen > 6000) dropOther(k);
@@ -308,7 +322,7 @@
     if (id === "donut") { if (you.hp >= you.max) msg("You're not hungry. You eat it anyway.", ""); you.hp = Math.min(you.max, you.hp + 20); you.cd = Math.max(you.cd, 3); inv[slot] = null; msg("You eat the donut.", ""); snd.eat(); }
     else if (id === "coffee") { you.runE = 100; you.spec = Math.min(100, you.spec + 25); inv[slot] = null; msg("You drink the coffee. You feel a rush of energy.", ""); snd.eat(); }
     else if (id === "bones") { inv[slot] = null; msg("You dig a hole in the lawn. You bury the bones.", ""); xpDrop(1); }
-    else if (id === "whip" || id === "dds") { inv[slot] = you.weapon === "none" ? null : you.weapon; you.weapon = id; you.specOn = false; you.style = 0; you.cd = Math.max(you.cd, 1); snd.click(); }
+    else if (WEAPON[id]) { inv[slot] = you.weapon === "none" ? null : you.weapon; you.weapon = id; you.specOn = false; you.style = 0; you.cd = Math.max(you.cd, 1); snd.click(); }
     else if (it.msg) msg(it.msg, "");
     refresh();
   }
@@ -316,7 +330,7 @@
   function unequip() { if (you.weapon === "none") return; var s = inv.indexOf(null); if (s < 0) { msg("You don't have enough inventory space.", ""); return; } inv[s] = you.weapon; you.weapon = "none"; you.specOn = false; you.style = 0; refresh(); }
   function toggleSpec() {
     if (!WEAPON[you.weapon].spec) return;
-    if (!you.specOn && you.spec < 25) { msg("You don't have enough special attack energy left.", ""); return; }
+    if (!you.specOn && you.spec < WEAPON[you.weapon].cost) { msg("You don't have enough special attack energy left.", ""); return; }
     you.specOn = !you.specOn; snd.click(); refresh();
   }
   function togglePrayer(p) {
@@ -426,7 +440,7 @@
     } else if (m.t === "chat") { e = others[m.id]; if (e) say(e, m.x); msg("<b>" + esc(m.n) + ":</b> <span>" + esc(m.x) + "</span>", "pub", "public"); }
     else if (m.t === "hit") {
       e = others[m.id]; t = m.to === uid ? you : others[m.to]; if (!e || !t) return;
-      faceTo(e, t); lunge(e, t); e.fx = { t: now, kind: m.k }; e.target = t; e.lastCombat = now; if (m.k === "dds") snd.spec();
+      var shot = m.k === "acb" || m.k === "acbspec"; faceTo(e, t); if (!shot) lunge(e, t); e.fx = { t: now, kind: m.k }; e.target = t; e.lastCombat = now; if (m.k === "dds") snd.spec(); else if (m.k === "acbspec") snd.eye(); else if (shot) snd.bolt();
       m.d.forEach(function (d) { if (t === you) { if (!you.dead) hurt(you, d, e); } else { splat(t, d); t.hp = Math.max(0, t.hp - d); } });
       if (t === you && !you.dead && you.autoRet && !you.target && !you.path.length && !trade) you.target = e;
     } else if (m.t === "die") { e = others[m.id]; if (e) { if (!e.dead) { e.dead = true; e.deadAt = now; } if (you.target === e) you.target = null; if (m.by === uid) { kills++; msg("You have defeated " + esc(e.name) + ".", ""); if (quest < 2) { quest = 2; msg("Congratulations! Quest complete: Patio Showdown.", "blue"); } } } }
@@ -575,6 +589,8 @@
     logout: S('<rect x="6" y="3" width="12" height="18" fill="#7a5a34" stroke="#2a1a0a"/><circle cx="15" cy="12" r="1.3" fill="#ffd23f"/>'),
     whip: S('<path d="M5 20c0-9 5-5 7-9s-3-6 6-8" fill="none" stroke="#7a2a12" stroke-width="2.6" stroke-linecap="round"/><path d="M4 22l2-4" stroke="#caa" stroke-width="3" stroke-linecap="round"/>'),
     dds: S('<path d="M7 17L17 3l3-1-1 4L9 19z" fill="#c8242a" stroke="#4a0a0c"/><path d="M5 21l3-1-2-3z" fill="#6b4a1a"/><path d="M6 15l5 4" stroke="#caa24a" stroke-width="2"/><circle cx="17.5" cy="5.5" r="1.6" fill="#4f4"/>'),
+    acb: S('<path d="M4 6c7-4 13-1 16 6" fill="none" stroke="#7a8fb8" stroke-width="2.6" stroke-linecap="round"/><path d="M4 6l16 6" stroke="#dfe6f4" stroke-width="1"/><path d="M12 4L8 21" stroke="#5a3a1a" stroke-width="3.2" stroke-linecap="round"/><path d="M11 9l5 3" stroke="#c8d4f0" stroke-width="2"/><circle cx="11.5" cy="7.5" r="1.6" fill="#ffd23f"/>'),
+    bolts: S('<path d="M5 19L17 7M8 21L20 9" stroke="#a03030" stroke-width="2.2" stroke-linecap="round"/><path d="M17 7l3-3-1 4zM20 9l3-3-1 4z" fill="#e8e8e8"/><path d="M5 19l-2 2M8 21l-2 2" stroke="#ffd23f" stroke-width="2"/>'),
     donut: S('<circle cx="12" cy="12" r="8.5" fill="#d99a5a" stroke="#6a4420"/><path d="M4.5 11a7.5 7.5 0 0 1 15 0c-1.5 2-2.5-.5-4 1s-3-1-4.5 0-3-1.5-4 0-1.5 1-2.5-1z" fill="#ff7ab8"/><circle cx="12" cy="12" r="2.8" fill="#3e3529"/>'),
     coffee: S('<path d="M6 8h10v9a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z" fill="#f2f2f2" stroke="#555"/><path d="M16 10h2a2 2 0 0 1 0 5h-2" fill="none" stroke="#555" stroke-width="1.6"/><rect x="7" y="9" width="8" height="2" fill="#3a2410"/><path d="M9 6c0-2 2-2 2-4M13 6c0-2 2-2 2-4" stroke="#ccc" fill="none"/>'),
     cuffs: S('<circle cx="8" cy="14" r="4.5" fill="none" stroke="#c0c0c8" stroke-width="2.2"/><circle cx="16" cy="14" r="4.5" fill="none" stroke="#c0c0c8" stroke-width="2.2"/><path d="M10 9l2-3 2 3" stroke="#c0c0c8" stroke-width="2" fill="none"/>'),
@@ -615,7 +631,7 @@
     } else if (tab === "inv") {
       h = '<div class="inv">' + inv.map(function (id, k) { return '<div data-a="item" data-v="' + k + '" class="' + (trade && trade.mine.indexOf(k) >= 0 ? "offered" : "") + '" title="' + (id ? ITEMS[id].name : "") + '">' + (id ? IC[id] : "") + "</div>"; }).join("") + "</div>";
     } else if (tab === "equip") {
-      h = '<div class="eq">' + Object.keys(EQ).map(function (s) { var e = EQ[s], id = e[2] === "W" ? (you.weapon === "none" ? null : you.weapon) : e[2]; return '<div data-a="eq" data-v="' + s + '" style="left:' + e[0] + "px;top:" + e[1] + 'px" title="' + (id ? ITEMS[id].name : "") + '">' + (id ? IC[id] : "") + "</div>"; }).join("") + "</div>";
+      h = '<div class="eq">' + Object.keys(EQ).map(function (s) { var e = EQ[s], id = s === "ammo" ? (you.weapon === "acb" ? "bolts" : null) : e[2] === "W" ? (you.weapon === "none" ? null : you.weapon) : e[2]; return '<div data-a="eq" data-v="' + s + '" style="left:' + e[0] + "px;top:" + e[1] + 'px" title="' + (id ? ITEMS[id].name : "") + '">' + (id ? IC[id] : "") + "</div>"; }).join("") + "</div>";
     } else if (tab === "pray") {
       var cells = []; for (var k = 0; k < 29; k++) cells.push(k === 16 ? '<div data-a="pray" data-v="melee" title="Protect from Melee" class="' + (you.prayers.melee ? "sel" : "") + '">' + IC.melee + "</div>" : k === 26 ? '<div data-a="pray" data-v="piety" title="Piety" class="' + (you.prayers.piety ? "sel" : "") + '">' + IC.piety + "</div>" : '<div class="off">' + IC.dim + "</div>");
       h = '<div class="pray">' + cells.join("") + '</div><div class="foot">Prayer: ' + Math.ceil(you.pray) + " / 99</div>";
@@ -666,6 +682,15 @@
   }
   function drawOver(e, now) {
     var p = e.scr; if (!p) return; var top = p.y - e.sh + 6;
+    if (e.fx && (e.fx.kind === "acb" || e.fx.kind === "acbspec")) {
+      var bf = (now - e.fx.t) / 320, bt = e.target, bq = bt && bt.scr;
+      if (bf >= 1 || !bq) e.fx = null; else {
+        var eye = e.fx.kind === "acbspec", x0 = p.x + e.face * 18, y0 = p.y - e.sh * 0.62, x1 = bq.x, y1 = bq.y - bt.sh * 0.55, bx = x0 + (x1 - x0) * bf, by = y0 + (y1 - y0) * bf - Math.sin(Math.PI * bf) * 14, ang = Math.atan2(y1 - y0, x1 - x0);
+        cx.save(); cx.lineCap = "round";
+        if (eye) { cx.strokeStyle = "rgba(140,220,255,.55)"; cx.lineWidth = 7; cx.shadowColor = "#9fe8ff"; cx.shadowBlur = 16; cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(bx, by); cx.stroke(); cx.fillStyle = "#eaffff"; cx.beginPath(); cx.arc(bx, by, 6, 0, 6.3); cx.fill(); cx.shadowBlur = 0; }
+        cx.translate(bx, by); cx.rotate(ang); cx.strokeStyle = eye ? "#ffffff" : "#b8242a"; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(-14, 0); cx.lineTo(6, 0); cx.stroke(); cx.fillStyle = eye ? "#9fe8ff" : "#d8d8d8"; cx.beginPath(); cx.moveTo(10, 0); cx.lineTo(3, -4); cx.lineTo(3, 4); cx.closePath(); cx.fill(); cx.restore();
+      }
+    }
     if (e.fx) { var f = (now - e.fx.t) / 300; if (f >= 1) e.fx = null; else { var t = e.target, q = (t && t.scr) || p; cx.save(); cx.globalAlpha = 1 - f; cx.lineCap = "round"; if (e.fx.kind === "dds") { cx.strokeStyle = "#ff2a2a"; cx.lineWidth = 4; for (var k = 0; k < 2; k++) { cx.beginPath(); cx.moveTo(q.x - 26 + k * 16, q.y - 150 + f * 20); cx.lineTo(q.x + 6 + k * 16, q.y - 90 + f * 20); cx.stroke(); } } else { cx.strokeStyle = e.fx.kind === "whip" ? "#e8d0a0" : "#fff"; cx.lineWidth = 3; cx.beginPath(); cx.arc(q.x, q.y - 110, 34, -2.4 + f * 2, -1.2 + f * 2); cx.stroke(); } cx.restore(); } }
     if (!e.dead && now - e.lastCombat < 6000) { cx.fillStyle = "#c00000"; cx.fillRect(p.x - 20, top - 10, 40, 6); cx.fillStyle = "#00c000"; cx.fillRect(p.x - 20, top - 10, 40 * Math.max(0, e.hp) / e.max, 6); cx.strokeStyle = "#000"; cx.lineWidth = 1; cx.strokeRect(p.x - 20.5, top - 10.5, 41, 7); }
     if (!e.dead) { cx.font = "bold 11px Arial"; cx.textAlign = "center"; cx.textBaseline = "alphabetic"; cx.fillStyle = "#000"; cx.fillText(e.name, p.x + 1, top - 13); cx.fillStyle = e === you ? "#ffffff" : e.remote ? "#00ffff" : "#ffff00"; cx.fillText(e.name, p.x, top - 14); }
