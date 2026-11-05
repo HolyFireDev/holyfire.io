@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>patio</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="world" width="1280" height="720"></canvas>
+
+  <!-- the clip, paused on its first frame -->
+  <div id="clip">
+    <div id="playbtn"></div>
+    <div id="clipbar"><span id="clipplay"></span><span id="cliptime">0:00 / 0:14</span><span id="cliptrack"><span></span></span></div>
+  </div>
+
+  <canvas id="scream" width="1280" height="720" hidden></canvas>
+
+  <div id="ui" hidden>
+    <div id="hover"></div>
+    <div id="xpdrops"></div>
+
+    <div id="mapwrap">
+      <canvas id="minimap" width="152" height="152"></canvas>
+      <div id="compass">N</div>
+      <div class="orb off" id="orb-xp" title="XP drops"><i>XP</i></div>
+      <div class="orb" id="orb-hp" title="Hitpoints"><b>99</b><i class="ic hp"></i></div>
+      <div class="orb" id="orb-pray" title="Quick-prayers"><b>99</b><i class="ic pray"></i></div>
+      <div class="orb" id="orb-run" title="Toggle Run"><b>100</b><i class="ic run"></i></div>
+      <div class="orb" id="orb-spec" title="Special Attack"><b>100</b><i class="ic spec"></i></div>
+      <div class="orb off" id="orb-map" title="World map"><i class="ic globe"></i></div>
+    </div>
+
+    <div id="chat">
+      <div id="chatlog"></div>
+      <div id="chatin"><span class="nm">Officer:</span> <span id="typed"></span><span class="star">*</span></div>
+      <div id="chattabs">
+        <span class="on" data-f="all">All</span><span data-f="game">Game</span><span data-f="public">Public</span>
+        <span class="off">Private</span><span class="off">Channel</span><span class="off">Clan</span><span class="off">Trade</span><span class="off">Report</span>
+      </div>
+    </div>
+
+    <div id="side">
+      <div class="tabs" id="tabs-top"></div>
+      <div id="panel"></div>
+      <div class="tabs" id="tabs-bot"></div>
+    </div>
+
+    <div id="trade" hidden>
+      <div class="tt" id="trade-title"></div>
+      <div class="cols">
+        <div><h4>Your Offer</h4><div class="tg" id="trade-mine"></div></div>
+        <div><h4 id="trade-their-h">Their Offer</h4><div class="tg" id="trade-theirs"></div></div>
+      </div>
+      <div id="trade-status"></div>
+      <div class="tb"><div class="btn ok" id="trade-ok">Accept</div><div class="btn no" id="trade-no">Decline</div></div>
+    </div>
+
+    <div id="ctx" hidden></div>
+  </div>
+</div>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
