@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; connect-src https://api.anthropic.com https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Console</title>
+<style>
+  body { margin: 16px; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 16px; max-width: 640px; }
+  p { margin: 0 0 16px; }
+  a { color: #fff; }
+  .note { color: #999; }
+  .gap { margin-top: 48px; }
+  input, select, textarea, button { background: #000; color: #fff; border: 1px solid #555; font: inherit; padding: 6px 8px; }
+  input, textarea { width: 100%; box-sizing: border-box; }
+  textarea { resize: vertical; }
+  button { cursor: pointer; }
+  button:disabled { color: #555; cursor: default; }
+  button.link { border: none; padding: 0; color: #999; text-decoration: underline; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  details { margin: 0 0 16px; }
+  summary { color: #999; cursor: pointer; margin-bottom: 8px; }
+  .msg { margin: 0 0 24px; }
+  .who { color: #999; margin: 0 0 4px; }
+  .text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .think { white-space: pre-wrap; color: #777; font-size: 14px; border-left: 1px solid #333; padding-left: 8px; margin: 0 0 8px; }
+  .dim .text { color: #999; }
+  #log { margin-top: 32px; }
+</style>
+</head>
+<body>
+  <p><a href="/">Holy Fire</a> / console</p>
+
+  <section id="login">
+    <p class="gap">The typewriter is locked.</p>
+    <form id="login-form">
+      <p><label>Login<br><input id="user" name="username" autocomplete="username" required></label></p>
+      <p><label>Password<br><input id="pass" type="password" name="password" autocomplete="current-password" required></label></p>
+      <p class="row"><button type="submit" id="unlock" disabled>Unlock</button> <span id="login-msg" class="note">Loading.</span></p>
+    </form>
+  </section>
+
+  <section id="keybox" hidden>
+    <p class="gap">Paste your API key.</p>
+    <p class="note">It is encrypted with your password and kept only in this browser. It is sent nowhere except to Anthropic.</p>
+    <form id="key-form">
+      <p><input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." required></p>
+      <p><input id="ws" autocomplete="off" spellcheck="false" placeholder="Workspace ID, only for an organization-scoped key"></p>
+      <p class="row"><button type="submit">Save key</button> <span id="key-msg" class="note"></span></p>
+    </form>
+  </section>
+
+  <section id="console" hidden>
+    <p class="gap row">
+      <select id="model" aria-label="Model">
+        <option value="claude-opus-5-5" selected>Opus 5.5</option>
+        <option value="claude-sonnet-5-5">Sonnet 5.5</option>
+        <option value="claude-haiku-5-5">Haiku 5.5</option>
+        <option value="claude-fable-5-1">Fable 5.1</option>
+      </select>
+      <select id="effort" aria-label="Effort">
+        <option value="low">low effort</option>
+        <option value="medium" selected>medium effort</option>
+        <option value="high">high effort</option>
+        <option value="xhigh">xhigh effort</option>
+        <option value="max">max effort</option>
+      </select>
+      <label class="note"><input type="checkbox" id="showthink" style="width:auto"> show thinking</label>
+    </p>
+    <details>
+      <summary>System prompt</summary>
+      <textarea id="system" rows="4" spellcheck="false"></textarea>
+    </details>
+    <div id="log"></div>
+    <p><textarea id="input" rows="4" placeholder="Type. Ctrl+Enter sends."></textarea></p>
+    <p class="row">
+      <button id="send">Send</button>
+      <button id="stop" disabled>Stop</button>
+      <button id="new">New page</button>
+      <span id="status" class="note"></span>
+    </p>
+    <p class="note" id="spend"></p>
+    <p class="note"><button id="lock" class="link">Lock</button> &middot; <button id="forget" class="link">Forget key</button></p>
+  </section>
+
+<script type="module">
+import Anthropic from "https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@1.6.0/+esm";
+
+// The login is checked against a salted PBKDF2 hash, never stored as plain text.
+const SALT = "f0da0761235f167aa321a977399d9913";
+const ITER = 310000;
+const HASH = "3a5cf404b82d6044d37c315dfdfd34d73501c9d715bbd5326b22d637ae0a53be";
+
+const KEY_SLOT = "hf_console_key";
+const WS_SLOT = "hf_console_ws";
+const SPENT_SLOT = "hf_console_spent";
+
+// Dollars per million tokens: input, output, cache read, cache write (5 minutes).
+const PRICES = {
+  "claude-fable-5-1": [10, 50, 0.25, 12.5],
+  "claude-opus-5-5": [4, 20, 0.20, 5],
+  "claude-opus-5": [5, 25, 0.50, 6.25],
+  "claude-opus-4-8": [5, 25, 0.50, 6.25],
+  "claude-sonnet-5-5": [2, 10, 0.20, 2.5],
+  "claude-sonnet-5": [2, 10, 0.20, 2.5],
+  "claude-haiku-5-5": [0.10, 0.50, 0.01, 0.125],
+};
+const NAMES = {
+  "claude-fable-5-1": "Fable 5.1", "claude-opus-5-5": "Opus 5.5", "claude-opus-5": "Opus 5",
+  "claude-opus-4-8": "Opus 4.8", "claude-sonnet-5-5": "Sonnet 5.5", "claude-sonnet-5": "Sonnet 5",
+  "claude-haiku-5-5": "Haiku 5.5",
+};
+
+const $ = (id) => document.getElementById(id);
+const enc = new TextEncoder();
+const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+const unhex = (s) => new Uint8Array(s.match(/../g).map((h) => parseInt(h, 16)));
+const b64 = (u8) => btoa(String.fromCharCode(...u8));
+const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const getItem = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const setItem = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
+const removeItem = (k) => { try { localStorage.removeItem(k); } catch { /* storage blocked */ } };
+
+async function pbkdf2Bits(secret, salt) {
+  const base = await crypto.subtle.importKey("raw", enc.encode(secret), "PBKDF2", false, ["deriveBits"]);
+  return crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: ITER }, base, 256);
+}
+async function aesKey(password, salt) {
+  const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt, iterations: ITER },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function sealKey(apiKey, password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await aesKey(password, salt), enc.encode(apiKey));
+  return JSON.stringify({ s: b64(salt), iv: b64(iv), ct: b64(new Uint8Array(ct)) });
+}
+async function openKey(sealed, password) {
+  const o = JSON.parse(sealed);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(o.iv) }, await aesKey(password, unb64(o.s)), unb64(o.ct));
+  return new TextDecoder().decode(pt);
+}
+
+let password = null;
+let apiKey = null;
+let client = null;
+let history = [];
+let busy = null;
+let visitSpent = 0;
+
+function show(id) {
+  for (const s of ["login", "keybox", "console"]) $(s).hidden = s !== id;
+}
+const setStatus = (t) => { $("status").textContent = t; };
+const nameOf = (model) => NAMES[model] || model;
+const isAbort = (e) => e && (e.name === "APIUserAbortError" ||
+  (typeof Anthropic.APIUserAbortError === "function" && e instanceof Anthropic.APIUserAbortError));
+
+function costOf(model, u) {
+  const p = PRICES[model];
+  if (!p || !u) return null;
+  return ((u.input_tokens || 0) * p[0] + (u.output_tokens || 0) * p[1] +
+    (u.cache_read_input_tokens || 0) * p[2] + (u.cache_creation_input_tokens || 0) * p[3]) / 1e6;
+}
+function renderSpend() {
+  const total = parseFloat(getItem(SPENT_SLOT) || "0") || 0;
+  $("spend").textContent = `This visit: $${visitSpent.toFixed(4)}. This browser, all visits: $${total.toFixed(2)}. ` +
+    `Estimated from token counts; the Billing page in the Claude Console has the real figure.`;
+}
+
+function ready() {
+  const ws = getItem(WS_SLOT);
+  client = new Anthropic({
+    apiKey,
+    dangerouslyAllowBrowser: true,
+    maxRetries: 2,
+    defaultHeaders: ws ? { "anthropic-workspace-id": ws } : {},
+  });
+  show("console");
+  renderSpend();
+  $("input").focus();
+}
+
+function addEntry(who) {
+  const div = document.createElement("div");
+  div.className = "msg";
+  const label = document.createElement("p");
+  label.className = "who";
+  label.textContent = who;
+  const think = document.createElement("p");
+  think.className = "think";
+  think.hidden = true;
+  const text = document.createElement("p");
+  text.className = "text";
+  div.append(label, think, text);
+  $("log").append(div);
+  div.scrollIntoView({ block: "end" });
+  return { div, label, think, text };
+}
+
+// What goes back into the history after a reply. Blocks before a mid-reply
+// fallback that the next model cannot use are left out, and the fallback
+// marker itself is dropped; everything else is echoed unchanged.
+function echoable(content) {
+  const lastFallback = content.map((b) => b.type).lastIndexOf("fallback");
+  return content.filter((b, i) => {
+    if (b.type === "fallback") return false;
+    if (i < lastFallback && ["thinking", "redacted_thinking", "tool_use", "server_tool_use"].includes(b.type)) return false;
+    return true;
+  });
+}
+
+function describe(err) {
+  if (err && typeof err.status === "number") {
+    const detail = (err.error && err.error.error && err.error.error.message) || err.message || "";
+    if (err.status === 401) return "The API rejected the key. Use Forget key and paste it again.";
+    if (err.status === 400 && /workspace/i.test(detail)) return "This key needs a workspace ID. Use Forget key and paste it again with the ID.";
+    if (err.status === 429) return "Rate limited. Wait a moment and send again.";
+    if (err.status === 529) return "The API is overloaded. Wait a moment and send again.";
+    return `API error ${err.status}: ${detail}`;
+  }
+  return "Could not reach the API: " + ((err && err.message) || String(err));
+}
+
+function setBusy(on, text) {
+  $("send").disabled = on;
+  $("new").disabled = on;
+  $("stop").disabled = !on;
+  setStatus(text || "");
+}
+
+async function send() {
+  const text = $("input").value.trim();
+  if (!text || busy || !client) return;
+  const model = $("model").value;
+  const effort = $("effort").value;
+  const showThink = $("showthink").checked;
+  const system = $("system").value.trim();
+
+  history.push({ role: "user", content: text });
+  addEntry("You").text.textContent = text;
+  $("input").value = "";
+  const out = addEntry(nameOf(model));
+
+  const params = {
+    model,
+    max_tokens: 64000,
+    messages: history.slice(),
+    thinking: { type: "adaptive", display: showThink ? "summarized" : "omitted" },
+    output_config: { effort },
+    cache_control: { type: "ephemeral" },
+  };
+  if (system) params.system = system;
+
+  // Haiku has no server-side fallback; the others retry a declined request
+  // on the model Anthropic recommends for that kind of refusal.
+  const stream = model === "claude-haiku-5-5"
+    ? client.messages.stream(params)
+    : client.beta.messages.stream({ ...params, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" });
+  busy = stream;
+  setBusy(true, "Thinking.");
+
+  try {
+    for await (const ev of stream) {
+      if (ev.type === "content_block_start" && ev.content_block && ev.content_block.type === "fallback") {
+        const fb = ev.content_block;
+        setStatus(`${nameOf(fb.from && fb.from.model)} declined; ${nameOf(fb.to && fb.to.model)} continued.`);
+      } else if (ev.type === "content_block_delta" && ev.delta) {
+        if (ev.delta.type === "text_delta") {
+          out.text.textContent += ev.delta.text;
+          if ($("status").textContent === "Thinking.") setStatus("Writing.");
+        } else if (ev.delta.type === "thinking_delta" && ev.delta.thinking) {
+          out.think.hidden = false;
+          out.think.textContent += ev.delta.thinking;
+        }
+      }
+    }
+    const msg = await stream.finalMessage();
+    if (msg.model && msg.model !== model) out.label.textContent = `${nameOf(msg.model)}, answering for ${nameOf(model)}`;
+    const cost = costOf(msg.model || model, msg.usage);
+    if (cost != null) {
+      visitSpent += cost;
+      setItem(SPENT_SLOT, String((parseFloat(getItem(SPENT_SLOT) || "0") || 0) + cost));
+    }
+    if (msg.stop_reason === "refusal") {
+      history.pop();
+      if (!$("input").value) $("input").value = text;
+      out.div.classList.add("dim");
+      const cat = msg.stop_details && msg.stop_details.category ? `: ${msg.stop_details.category}` : "";
+      out.text.textContent += `${out.text.textContent ? "\n\n" : ""}[Declined${cat}. Your message is back in the box.]`;
+      setStatus("");
+    } else {
+      history.push({ role: "assistant", content: echoable(msg.content) });
+      if (msg.stop_reason === "max_tokens") out.text.textContent += "\n\n[Stopped at the length limit.]";
+      setStatus(cost != null ? `$${cost.toFixed(4)} for that reply.` : "");
+    }
+  } catch (err) {
+    history.pop();
+    if (!$("input").value) $("input").value = text;
+    out.div.classList.add("dim");
+    const why = isAbort(err) ? "Stopped" : describe(err).replace(/\.$/, "");
+    out.text.textContent += `${out.text.textContent ? "\n\n" : ""}[${why}. Your message is back in the box.]`;
+    setStatus("");
+  } finally {
+    busy = null;
+    setBusy(false, $("status").textContent);
+    renderSpend();
+  }
+}
+
+$("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("login-msg").textContent = "Checking.";
+  const user = $("user").value.trim().toLowerCase();
+  const pass = $("pass").value;
+  const bits = await pbkdf2Bits(`${user}:${pass}`, unhex(SALT));
+  if (hex(bits) !== HASH) {
+    $("login-msg").textContent = "Wrong login or password.";
+    return;
+  }
+  password = pass;
+  $("pass").value = "";
+  $("login-msg").textContent = "";
+  const sealed = getItem(KEY_SLOT);
+  if (sealed) {
+    try {
+      apiKey = await openKey(sealed, password);
+      ready();
+      return;
+    } catch {
+      $("key-msg").textContent = "The saved key could not be opened. Paste it again.";
+    }
+  }
+  show("keybox");
+  $("key").focus();
+});
+
+$("key-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const k = $("key").value.trim();
+  if (!k.startsWith("sk-ant-")) {
+    $("key-msg").textContent = "That does not look like an Anthropic API key.";
+    return;
+  }
+  apiKey = k;
+  $("key").value = "";
+  const ws = $("ws").value.trim();
+  if (ws) setItem(WS_SLOT, ws); else removeItem(WS_SLOT);
+  const saved = setItem(KEY_SLOT, await sealKey(apiKey, password));
+  ready();
+  if (!saved) setStatus("This browser would not save the key. It lasts until you close the tab.");
+});
+
+$("send").addEventListener("click", send);
+$("input").addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); send(); }
+});
+$("stop").addEventListener("click", () => { if (busy) busy.abort(); });
+$("new").addEventListener("click", () => {
+  if (busy) return;
+  history = [];
+  $("log").replaceChildren();
+  setStatus("New page.");
+  $("input").focus();
+});
+$("lock").addEventListener("click", () => {
+  if (busy) busy.abort();
+  password = null; apiKey = null; client = null; history = [];
+  $("log").replaceChildren();
+  setStatus("");
+  show("login");
+  $("user").focus();
+});
+$("forget").addEventListener("click", () => {
+  if (busy) busy.abort();
+  removeItem(KEY_SLOT); removeItem(WS_SLOT);
+  apiKey = null; client = null;
+  $("key-msg").textContent = "Key forgotten.";
+  show("keybox");
+});
+
+if (!window.crypto || !crypto.subtle) {
+  $("login-msg").textContent = "This page needs a secure https connection.";
+} else {
+  $("unlock").disabled = false;
+  $("login-msg").textContent = "";
+}
+</script>
+</body>
+</html>
