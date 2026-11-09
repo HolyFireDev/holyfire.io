@@ -1035,7 +1035,24 @@ window.BLACK_BOOK = [
       "Some men put the candle out and listen.",
       "Some men set the room on fire, to see it all at once.",
       "Calibrator's note - subject requested a second candle. Denied."
-    ]
+    ],
+    hidden: { trigger: "Denied.", lines: [
+      "The Second Candle",
+      "Same room. The one that contains everything.",
+      "Same candle. They still only issue the one.",
+      "Tonight there is another light in it.",
+      "Low, across the room, moving the way mine moves. It stops when I stop. It leans in when I lean in.",
+      "The Calibrators would like you to believe it’s a mirror.",
+      "A mirror shows you your candle. This shows a face, and the face is squinting, the way a man squints at a light that isn’t his.",
+      "We walk toward each other until the two lights overlap. The table has a far edge after all. It was always there. It was only dark.",
+      "Here is the thing nobody tells you about a candle. The darkest place in the room is the floor under it. You can light a stranger’s boots from across the room and never once see your own.",
+      "He can see the floor under mine. I can see the floor under his.",
+      "Neither of us will ever see our own. That isn’t a flaw in the candle. That is what a candle is.",
+      "So we trade. He tells me what is under mine. I tell him what is under his. Nobody can check it. You take it on the light.",
+      "That is the whole arrangement. One room. Two flames. Each one lit by the other exactly as much as it gives.",
+      "Nobody has ever looked inside another man’s flame. You have only ever had the light.",
+      "Calibrator’s note - subject was issued one candle. Lab reports two light sources in the room. No requisition on file for the second. Do not put either out. We are no longer certain which one is ours."
+    ] }
   },
   {
     title: "The Hand in Flatland",
