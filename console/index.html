@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; connect-src https://api.anthropic.com https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src https://api.anthropic.com https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
 <title>Console</title>
 <style>
   body { margin: 16px; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 16px; max-width: 640px; }
@@ -27,6 +27,17 @@
   .think { white-space: pre-wrap; color: #777; font-size: 14px; border-left: 1px solid #333; padding-left: 8px; margin: 0 0 8px; }
   .dim .text { color: #999; }
   #log { margin-top: 32px; }
+  .md p { margin: 0 0 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .md .h { font-weight: bold; margin-top: 20px; }
+  .md .h1 { font-size: 20px; }
+  .md .h2 { font-size: 18px; }
+  .md hr { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+  .md blockquote { margin: 0 0 12px; padding-left: 12px; border-left: 1px solid #444; color: #ccc; }
+  .md ul { margin: 0 0 12px; padding-left: 20px; }
+  .md li { margin-bottom: 4px; white-space: pre-wrap; }
+  .md code { font-family: Consolas, Menlo, monospace; font-size: 14px; color: #ddd; }
+  .md pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #111; padding: 8px; margin: 0 0 12px; font-family: Consolas, Menlo, monospace; font-size: 14px; }
+  .md .note { white-space: normal; }
 </style>
 </head>
 <body>
@@ -67,6 +78,7 @@
         <option value="max">max effort</option>
       </select>
       <label class="note"><input type="checkbox" id="showthink" style="width:auto"> show thinking</label>
+      <label class="note" title="Give the model every page of the Black Book published on this site"><input type="checkbox" id="canon" style="width:auto" checked> Black Book</label>
     </p>
     <details>
       <summary>System prompt</summary>
@@ -143,11 +155,140 @@ async function openKey(sealed, password) {
   return new TextDecoder().decode(pt);
 }
 
+// The Black Book preset. The site's own page list is loaded and laid out the
+// way a reader sees it, then sent as a cached system block, so new pages added
+// to the site reach the console without touching this file.
+const CANON_SLOT = "hf_console_canon";
+const CANON_INTRO =
+  "These are the published pages of the Black Book from Holy Fire (holyfire.io), a first-person " +
+  "deckbuilder roguelike of WWII theological horror by Zachary. They are his canon, in his words, " +
+  "exactly as the site shows them. When asked for a page from the Black Book, write a new one in " +
+  "their voice, form and length, titled the way these pages are titled. Use the world, people and " +
+  "objects the pages establish, and do not contradict them. Do not reproduce a page unless asked.";
+let canonText = null;
+let canonPages = 0;
+
+function layoutPage(p) {
+  const out = [`## ${p.title || "Page from the Black Book"}`, ...(p.lines || [])];
+  if (p.hidden) {
+    out.push("", `[Hidden lines, revealed by choosing "${p.hidden.trigger}":]`, ...(p.hidden.lines || []));
+    if (p.hidden.game) out.push(`[A game of ${p.hidden.game} follows.]`);
+  }
+  for (const c of p.choices || []) out.push("", `[Choice: ${c.label}]`, ...(c.lines || []));
+  return out.join("\n");
+}
+function loadCanon() {
+  if (canonText) return Promise.resolve(canonText);
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      const pages = window.BLACK_BOOK;
+      if (!Array.isArray(pages) || !pages.length) { reject(new Error("no pages found")); return; }
+      canonPages = pages.length;
+      canonText = `${CANON_INTRO}\n\n${pages.map(layoutPage).join("\n\n")}`;
+      resolve(canonText);
+    };
+    if (window.BLACK_BOOK) { done(); return; }
+    const s = document.createElement("script");
+    s.src = "/blackbook/pages.js";
+    s.onload = done;
+    s.onerror = () => reject(new Error("could not load /blackbook/pages.js"));
+    document.head.append(s);
+  });
+}
+
+// Markdown, rendered by building elements and text nodes only. Nothing the
+// model writes is ever parsed as HTML. Lines starting with "- " stay as they
+// are, because the Black Book uses them for dialogue.
+function inline(text, parent) {
+  const re = /(`+)([^`]+?)\1|\*\*([^*]+?)\*\*|__([^_]+?)__|(?<![\w*])\*(?![\s*])([^*\n]+?)(?<!\s)\*(?![\w*])|(?<![\w_])_(?![\s_])([^_\n]+?)(?<!\s)_(?![\w_])/g;
+  let last = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) parent.append(text.slice(last, m.index));
+    let el;
+    if (m[2] !== undefined) {
+      el = document.createElement("code");
+      el.textContent = m[2];
+    } else if (m[3] !== undefined || m[4] !== undefined) {
+      el = document.createElement("strong");
+      inline(m[3] !== undefined ? m[3] : m[4], el);
+    } else {
+      el = document.createElement("em");
+      inline(m[5] !== undefined ? m[5] : m[6], el);
+    }
+    parent.append(el);
+    last = re.lastIndex;
+  }
+  if (last < text.length) parent.append(text.slice(last));
+}
+function renderMarkdown(src, root) {
+  root.replaceChildren();
+  const lines = src.replace(/\r\n?/g, "\n").split("\n");
+  let para = [];
+  const flush = () => {
+    if (!para.length) return;
+    const p = document.createElement("p");
+    inline(para.join("\n"), p);
+    root.append(p);
+    para = [];
+  };
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    let m;
+    if (/^\s*```/.test(line)) {
+      flush();
+      const buf = [];
+      i++;
+      while (i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i++]);
+      i++;
+      const pre = document.createElement("pre");
+      pre.textContent = buf.join("\n");
+      root.append(pre);
+    } else if (/^\s*$/.test(line)) {
+      flush();
+      i++;
+    } else if (/^\s{0,3}([-*_])(\s*\1){2,}\s*$/.test(line)) {
+      flush();
+      root.append(document.createElement("hr"));
+      i++;
+    } else if ((m = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line))) {
+      flush();
+      const h = document.createElement("p");
+      h.className = `h h${m[1].length}`;
+      inline(m[2], h);
+      root.append(h);
+      i++;
+    } else if (/^\s{0,3}>/.test(line)) {
+      flush();
+      const buf = [];
+      while (i < lines.length && /^\s{0,3}>/.test(lines[i])) buf.push(lines[i++].replace(/^\s{0,3}>\s?/, ""));
+      const q = document.createElement("blockquote");
+      renderMarkdown(buf.join("\n"), q);
+      root.append(q);
+    } else if (/^\s*[*+]\s+/.test(line)) {
+      flush();
+      const list = document.createElement("ul");
+      while (i < lines.length && /^\s*[*+]\s+/.test(lines[i])) {
+        const li = document.createElement("li");
+        inline(lines[i++].replace(/^\s*[*+]\s+/, ""), li);
+        list.append(li);
+      }
+      root.append(list);
+    } else {
+      para.push(line);
+      i++;
+    }
+  }
+  flush();
+}
+
 let password = null;
 let apiKey = null;
 let client = null;
 let history = [];
 let busy = null;
+let sending = false;
 let visitSpent = 0;
 
 function show(id) {
@@ -183,7 +324,7 @@ function ready() {
   $("input").focus();
 }
 
-function addEntry(who) {
+function addEntry(who, markdown) {
   const div = document.createElement("div");
   div.className = "msg";
   const label = document.createElement("p");
@@ -192,8 +333,8 @@ function addEntry(who) {
   const think = document.createElement("p");
   think.className = "think";
   think.hidden = true;
-  const text = document.createElement("p");
-  text.className = "text";
+  const text = document.createElement(markdown ? "div" : "p");
+  text.className = markdown ? "text md" : "text";
   div.append(label, think, text);
   $("log").append(div);
   div.scrollIntoView({ block: "end" });
@@ -233,16 +374,39 @@ function setBusy(on, text) {
 
 async function send() {
   const text = $("input").value.trim();
-  if (!text || busy || !client) return;
+  if (!text || busy || sending || !client) return;
   const model = $("model").value;
   const effort = $("effort").value;
   const showThink = $("showthink").checked;
   const system = $("system").value.trim();
 
+  let canon = null;
+  let canonFailed = false;
+  if ($("canon").checked) {
+    sending = true;
+    setStatus("Loading the Black Book.");
+    try { canon = await loadCanon(); } catch { canonFailed = true; }
+    sending = false;
+  }
+
   history.push({ role: "user", content: text });
   addEntry("You").text.textContent = text;
   $("input").value = "";
-  const out = addEntry(nameOf(model));
+  const out = addEntry(nameOf(model), true);
+  if (canonFailed) out.label.textContent += ", without the Black Book: it could not be loaded";
+
+  // Replies are repainted as markdown at most once a frame while they stream.
+  let raw = "";
+  let painted = true;
+  let finished = false;
+  const paint = () => { painted = true; if (!finished) renderMarkdown(raw, out.text); };
+  const finish = () => { finished = true; renderMarkdown(raw, out.text); };
+  const note = (t) => {
+    const p = document.createElement("p");
+    p.className = "note";
+    p.textContent = t;
+    out.text.append(p);
+  };
 
   const params = {
     model,
@@ -252,7 +416,11 @@ async function send() {
     output_config: { effort },
     cache_control: { type: "ephemeral" },
   };
-  if (system) params.system = system;
+  // The Black Book goes first and is cached, so later messages read it cheaply.
+  const blocks = [];
+  if (canon) blocks.push({ type: "text", text: canon, cache_control: { type: "ephemeral" } });
+  if (system) blocks.push({ type: "text", text: system });
+  if (blocks.length) params.system = blocks;
 
   // Haiku has no server-side fallback; the others retry a declined request
   // on the model Anthropic recommends for that kind of refusal.
@@ -269,7 +437,8 @@ async function send() {
         setStatus(`${nameOf(fb.from && fb.from.model)} declined; ${nameOf(fb.to && fb.to.model)} continued.`);
       } else if (ev.type === "content_block_delta" && ev.delta) {
         if (ev.delta.type === "text_delta") {
-          out.text.textContent += ev.delta.text;
+          raw += ev.delta.text;
+          if (painted) { painted = false; requestAnimationFrame(paint); }
           if ($("status").textContent === "Thinking.") setStatus("Writing.");
         } else if (ev.delta.type === "thinking_delta" && ev.delta.thinking) {
           out.think.hidden = false;
@@ -278,6 +447,7 @@ async function send() {
       }
     }
     const msg = await stream.finalMessage();
+    finish();
     if (msg.model && msg.model !== model) out.label.textContent = `${nameOf(msg.model)}, answering for ${nameOf(model)}`;
     const cost = costOf(msg.model || model, msg.usage);
     if (cost != null) {
@@ -289,19 +459,20 @@ async function send() {
       if (!$("input").value) $("input").value = text;
       out.div.classList.add("dim");
       const cat = msg.stop_details && msg.stop_details.category ? `: ${msg.stop_details.category}` : "";
-      out.text.textContent += `${out.text.textContent ? "\n\n" : ""}[Declined${cat}. Your message is back in the box.]`;
+      note(`[Declined${cat}. Your message is back in the box.]`);
       setStatus("");
     } else {
       history.push({ role: "assistant", content: echoable(msg.content) });
-      if (msg.stop_reason === "max_tokens") out.text.textContent += "\n\n[Stopped at the length limit.]";
+      if (msg.stop_reason === "max_tokens") note("[Stopped at the length limit.]");
       setStatus(cost != null ? `$${cost.toFixed(4)} for that reply.` : "");
     }
   } catch (err) {
+    finish();
     history.pop();
     if (!$("input").value) $("input").value = text;
     out.div.classList.add("dim");
     const why = isAbort(err) ? "Stopped" : describe(err).replace(/\.$/, "");
-    out.text.textContent += `${out.text.textContent ? "\n\n" : ""}[${why}. Your message is back in the box.]`;
+    note(`[${why}. Your message is back in the box.]`);
     setStatus("");
   } finally {
     busy = null;
@@ -353,6 +524,8 @@ $("key-form").addEventListener("submit", async (e) => {
   if (!saved) setStatus("This browser would not save the key. It lasts until you close the tab.");
 });
 
+$("canon").checked = getItem(CANON_SLOT) !== "0";
+$("canon").addEventListener("change", () => setItem(CANON_SLOT, $("canon").checked ? "1" : "0"));
 $("send").addEventListener("click", send);
 $("input").addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); send(); }
